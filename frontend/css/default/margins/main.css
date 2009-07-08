@@ -1,0 +1,50 @@
+/********************************************************************************/
+/* Margins CSS.									*/
+/********************************************************************************/
+
+/********************************************************************************/
+/* Navigation CSS. 								*/
+/********************************************************************************/
+
+#navigation
+	{
+	position: relative;
+	float: left;
+	width: 11em;		/* Set LC width */
+	padding: 0 3em 0 1em;	/* Set LC padding */
+	right: 15em;		/* = LC fullwidth + CC padding */
+	margin-left: -100%;
+	}
+
+.floatbox
+	{
+	margin: 0 0 2em;
+	border: 1px solid #333;
+	}
+
+.floatbox_header
+	{
+	padding: 0.2em;
+	text-align: center;
+	color: #fff;
+	background: #5b8ba6;
+	}
+
+.floatbox_body
+	{
+	padding: 0.5em;
+	}
+
+.floatbox input[type="text"],
+.floatbox input[type="password"],
+.floatbox input[type="submit"]
+	{
+	width: 100%;
+	margin-bottom: 0.5em;
+	}
+
+.floatbox input[type="submit"]
+	{
+	margin-top: 0.5em;
+	}
+

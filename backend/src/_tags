@@ -1,0 +1,8 @@
+true: pkg_threads, pkg_lwt, pkg_ocsigen, pkg_ocsigen.parsecommandline, pkg_ocsigen.server, pkg_ocsigen.ext.ocsipersist-sqlite, pkg_ocsigen.ext.eliom, pkg_ocsigen.ext.staticmod, pkg_pgocaml, pkg_json-wheel, pkg_litiom, pkg_lambdoc
+
+<data>: include
+<handlers>: include
+<main>: include
+<services>: include
+<utils>: include
+

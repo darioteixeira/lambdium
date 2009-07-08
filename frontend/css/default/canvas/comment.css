@@ -1,0 +1,118 @@
+/********************************************************************************/
+/* Comment CSS. 								*/
+/********************************************************************************/
+
+.comment_preview
+	{
+	border: 1px dotted #000;
+	margin: 2em 1em 1em;
+	padding: 1em;
+	background: #fff;
+	}
+
+.comment_full
+	{
+	margin-bottom: 1em;
+	}
+
+.comment_meta
+	{
+	padding: 0.25em;
+	min-height: 2.5em;
+	background: #e4f7f1;
+	}
+
+.comment_author
+	{
+	float: left;
+	}
+
+.comment_author:before
+	{
+	content: 'by ';
+	}
+
+.own_element .comment_author:after
+	{
+	content: '(You!)';
+	color: red;
+	}
+
+.comment_timestamp
+	{
+	float: left;
+	margin-left: 0.5em;
+	}
+
+.comment_timestamp:before
+	{
+	content: 'on ';
+	}
+
+.comment_body
+	{
+	clear: left;
+	margin: 0.5em 0 1.5em;
+	text-align: justify;
+	}
+
+
+/********************************************************************************/
+/* Formatting on comment body tags.						*/
+/********************************************************************************/
+
+.comment_body p
+	{
+	margin: 0.5em 0;
+	}
+
+.comment_body h1
+	{
+	font-weight: bold;
+	}
+
+.comment_body ul,
+.comment_body ol
+	{
+	margin: 1em 0;
+	}
+
+.comment_body li
+	{
+	list-style-position: inside;
+	display: list-item;
+	}
+
+.comment_body ul > li
+	{
+	list-style-type: disc;
+	}
+
+.comment_body ol > li
+	{
+	list-style-type: decimal;
+	}
+
+.comment_body li > *
+	{
+	display: inline;
+	}
+
+.comment_body pre
+	{
+	margin: 1em 0;
+	padding: 1em;
+	border: 1px dotted #666;
+	background: #ffe;
+	font-family: monospace;
+	}
+
+.comment_body blockquote
+	{
+	margin: 1em 0;
+	padding: 1em;
+	border: 1px dotted #666;
+	background: #eff;
+	font-style: italic;
+	}
+

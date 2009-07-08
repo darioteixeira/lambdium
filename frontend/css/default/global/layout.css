@@ -1,0 +1,27 @@
+/********************************************************************************/
+/* Layout CSS.									*/
+/********************************************************************************/
+
+
+/********************************************************************************/
+/* Layout.									*/
+/********************************************************************************/
+
+body
+	{
+	font-family: "Arial", sans-serif;
+	font-size: 0.875em;	/* This translates to 14px, assuming a default size of 16px. */
+	line-height: 125%;
+	color: #333;
+	background: #fff;
+	}
+
+#root
+	{
+	margin: 0 auto 1em auto;
+	padding-left: 15em;	/* LC fullwidth */
+	padding-right: 15em;	/* RC fullwidth + CC padding */
+	min-width: 35em;	/* LC fullwidth + CC padding + extra */
+	max-width: 50em;
+	}
+
