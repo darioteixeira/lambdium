@@ -51,17 +51,16 @@ let output_fresh sp comment =
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-let form_for_fresh sid ?title ?body (enter_sid, (enter_title, enter_body)) =
-	let value_title = match title with Some title -> Some (pcdata title) | None -> None
-	and value_body = match body with Some body -> Some (pcdata body) | None -> None
-	in Lwt.return
-		(fieldset ~a:[a_class ["form_fields"]]
+let form_for_fresh ~sid ~title ~body_src (enter_sid, (enter_title, enter_body)) =
+	Lwt.return
+		(fieldset
 			[
 			legend [pcdata "Enter comment:"];
+
 			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:sid Story.Id.to_string;
 			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter title:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ?value:value_title ~rows:1 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~value:(pcdata title) ~rows:1 ~cols:80 ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter body:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ?value:value_body ~rows:10 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ~value:(pcdata body_src) ~rows:10 ~cols:80 ();
 			])
 

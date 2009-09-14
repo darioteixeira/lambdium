@@ -29,7 +29,7 @@ let rec step1_handler ?(errors = []) sp () (sid, (title, body_src)) =
 		Forms.Previewable.make_form
 			~service: step2_service
 			~sp
-			~content: (Comment_io.form_for_fresh sid ~title ~body:body_src) >>= fun form ->
+			~content: (Comment_io.form_for_fresh ~sid ~title ~body_src) >>= fun form ->
 		Lwt.return (errors @ [Comment_io.output_fresh sp comment; form])
 	in Page.login_enforced_handler
 		~sp

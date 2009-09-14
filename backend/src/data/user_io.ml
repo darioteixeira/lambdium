@@ -73,7 +73,7 @@ let form_for_fresh ?user (enter_nick, (enter_fullname, (enter_password, (enter_p
 		| None	 -> (None, None, None) in
 	Database.get_timezones () >>= fun timezones ->
 	Lwt.return
-		(fieldset ~a:[a_class ["form_fields"]]
+		(fieldset
 			[
 			legend [pcdata "Information about new user:"];
 
@@ -97,7 +97,7 @@ let form_for_fresh ?user (enter_nick, (enter_fullname, (enter_password, (enter_p
 
 let form_for_changed_credentials (enter_old_password, (enter_new_password, enter_new_password2)) =
 	Lwt.return
-		(fieldset ~a:[a_class ["form_fields"]]
+		(fieldset
 			[
 			legend [pcdata "Enter current password for verification, and then the new password:"];
 
@@ -113,7 +113,7 @@ let form_for_changed_credentials (enter_old_password, (enter_new_password, enter
 let form_for_changed_settings ~user (enter_fullname, enter_timezone) =
 	Database.get_timezones () >>= fun timezones ->
 	Lwt.return
-		(fieldset ~a:[a_class ["form_fields"]]
+		(fieldset
 			[
 			legend [pcdata "Edit account information:"];
 

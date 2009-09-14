@@ -91,9 +91,10 @@ let output_fresh login sp story =
 
 let form_for_fresh (enter_title, (enter_intro, enter_body)) =
 	Lwt.return
-		(fieldset ~a:[a_class ["form_fields"]]
+		(fieldset
 			[
 			legend [pcdata "Story contents:"];
+
 			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter story title:"];
 			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~rows:1 ~cols:80 ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_intro"] [pcdata "Enter story introduction:"];

@@ -32,9 +32,9 @@ val output_fresh:
 (********************************************************************************)
 
 val form_for_fresh:
-	Story.Id.t ->
-	?title:string ->
-	?body:string ->
+	sid:Story.Id.t ->
+	title:string ->
+	body_src: string ->
 	[< Story.Id.t Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name) ->
