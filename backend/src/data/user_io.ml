@@ -19,7 +19,7 @@ open Common
 let output_handle sp user =
 	li ~a:[a_class ["user_handle"]]
 		[
-		Eliom_predefmod.Xhtml.a !!Visible.show_user sp [pcdata user#nick] user#uid
+		Eliom_predefmod.Xhtml.a !!Services.show_user sp [pcdata user#nick] user#uid
 		]
 
 

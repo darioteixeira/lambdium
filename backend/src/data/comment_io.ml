@@ -18,7 +18,7 @@ open Common
 let output_metadata maybe_login sp comment =
 	div ~a:[a_class ("comment_meta" :: (Login.own_element comment#author maybe_login))]
 		[
-		h1 ~a:[a_class ["comment_author"]] [Eliom_predefmod.Xhtml.a !!Visible.show_user sp [pcdata comment#author#nick] comment#author#uid];
+		h1 ~a:[a_class ["comment_author"]] [Eliom_predefmod.Xhtml.a !!Services.show_user sp [pcdata comment#author#nick] comment#author#uid];
 		h1 ~a:[a_class ["comment_title"]] [pcdata comment#title];
 		h1 ~a:[a_class ["comment_timestamp"]] [pcdata comment#timestamp];
 		]
@@ -27,7 +27,7 @@ let output_metadata maybe_login sp comment =
 let output_handle sp comment =
 	li ~a:[a_class ["comment_handle"]]
 		[
-		Eliom_predefmod.Xhtml.a !!Visible.show_comment sp [pcdata comment#title] comment#cid
+		Eliom_predefmod.Xhtml.a !!Services.show_comment sp [pcdata comment#title] comment#cid
 		]
 
 

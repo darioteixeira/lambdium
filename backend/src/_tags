@@ -3,6 +3,5 @@ true: pkg_threads, pkg_lwt, pkg_ocsigen, pkg_ocsigen.parsecommandline, pkg_ocsig
 <data>: include
 <handlers>: include
 <main>: include
-<services>: include
 <utils>: include
 

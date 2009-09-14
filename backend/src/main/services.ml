@@ -1,59 +1,23 @@
 (********************************************************************************)
-(*	Visible.ml
+(*	Services.ml
 	Copyright (c) 2009 Dario Teixeira (dario.teixeira@yahoo.com)
 	This software is distributed under the terms of the GNU GPL version 2.
 	See LICENSE file for full license text.
 *)
 (********************************************************************************)
 
-(**	Declaration of the visible services offered by the server.  These are
-	public services that the user may directly type into the address bar
-	or bookmark.
-*)
-
 open Eliom_parameters
 open Common
 
 
 (********************************************************************************)
-(*	{1 Public functions and values}						*)
+(*	{1 Visible services}							*)
 (********************************************************************************)
 
-(********************************************************************************)
-(*	{2 Service parameters}							*)
-(********************************************************************************)
-
-let comment_param =
-	Story.Id.param "sid" **
-	Eliom_parameters.string "title" **
-	Eliom_parameters.string "body"
-
-let story_param =
-	Eliom_parameters.string "title" **
-	Eliom_parameters.string "intro" **
-	Eliom_parameters.string "body"
-
-let user_param =
-	Eliom_parameters.string "nick" **
-	Eliom_parameters.string "fullname" **
-	Eliom_parameters.string "password" **
-	Eliom_parameters.string "password2"**
-	Timezone.param "timezone"
-
-let edit_user_credentials_param =
-	Eliom_parameters.string "old_password" **
-	Eliom_parameters.string "new_password" **
-	Eliom_parameters.string "new_password2"
-
-let edit_user_settings_param =
-	Eliom_parameters.string "fullname" **
-	Timezone.param "timezone"
-
-
-
-(********************************************************************************)
-(*	{2 Services}								*)
-(********************************************************************************)
+(**	Declaration of the visible services offered by the server.  These are
+	public services that the user may directly type into the address bar
+	or bookmark.
+*)
 
 let view_stories =
 	lazy (Eliom_services.new_service
@@ -114,7 +78,7 @@ let add_comment_fallback =
 let add_comment =
 	lazy (Eliom_services.new_post_service
 		~fallback: !!add_comment_fallback
-		~post_params: comment_param
+		~post_params: Params.add_comment
 		())
 
 
@@ -129,5 +93,51 @@ let edit_user_credentials =
 	lazy (Eliom_services.new_service
 		~path: ["edit_user_credentials"]
 		~get_params: Eliom_parameters.unit
+		())
+
+
+(********************************************************************************)
+(**	{1 Actions}								*)
+(********************************************************************************)
+
+(**	Declaration of non-attached coservices (actions).
+*)
+
+let login =
+	lazy (Eliom_services.new_post_coservice'
+		~post_params:  (Eliom_parameters.string "nick" **
+				Eliom_parameters.string "password" **
+				Eliom_parameters.bool "remember")
+		())
+
+
+let logout =
+	lazy (Eliom_services.new_post_coservice'
+		~post_params: (Eliom_parameters.bool "global")
+		())
+
+
+(********************************************************************************)
+(**	{1 Ajax services}							*)
+(********************************************************************************)
+
+(**	Declaration of various services offered by the server, and meant to be
+	used only by the Javascript frontend via XmlHttpRequest.  Note however
+	that there is no way to enforce this restriction.
+*)
+
+let preview_comment_fallback =
+	lazy (Eliom_services.new_service
+		~path: ["preview_comment"]
+		~get_params: Eliom_parameters.unit
+		())
+
+
+let preview_comment =
+	lazy (Eliom_services.new_post_service
+		~fallback: !!preview_comment_fallback
+		~post_params:  (Story.Id.param "sid" **
+				Eliom_parameters.string "title" **
+				Eliom_parameters.string "body")
 		())
 

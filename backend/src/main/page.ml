@@ -50,11 +50,11 @@ let output_main_menu _ sp =
 	let contents =
 		[
 		ul ~a:[a_class ["menu"]]
-			(li [Eliom_predefmod.Xhtml.a !!Visible.view_stories sp [pcdata "View all stories"] ()])
+			(li [Eliom_predefmod.Xhtml.a !!Services.view_stories sp [pcdata "View all stories"] ()])
 			[
-			li [Eliom_predefmod.Xhtml.a !!Visible.view_users sp [pcdata "View all users"] ()];
-			li [Eliom_predefmod.Xhtml.a !!Visible.add_story sp [pcdata "Submit new story"] ()];
-			li [Eliom_predefmod.Xhtml.a !!Visible.add_user sp [pcdata "Create new account"] ()]
+			li [Eliom_predefmod.Xhtml.a !!Services.view_users sp [pcdata "View all users"] ()];
+			li [Eliom_predefmod.Xhtml.a !!Services.add_story sp [pcdata "Submit new story"] ()];
+			li [Eliom_predefmod.Xhtml.a !!Services.add_user sp [pcdata "Create new account"] ()]
 			]
 		]
 	in Lwt.return ("main_menu", "Main Menu", contents)
@@ -65,13 +65,13 @@ let output_user_menu maybe_login sp =
 		let personal_fragment login =
 			[
 			p ~a:[a_class ["success_msg"]] [pcdata ("Hello " ^ (Login.nick login) ^ "!")];
-			ul	(li [Eliom_predefmod.Xhtml.a !!Visible.edit_user_settings sp [pcdata "Account settings"] ()])
-				[li [Eliom_predefmod.Xhtml.a !!Visible.edit_user_credentials sp [pcdata "Change password"] ()]];
-			Eliom_predefmod.Xhtml.post_form !!Actions.logout sp logout_form ()
+			ul	(li [Eliom_predefmod.Xhtml.a !!Services.edit_user_settings sp [pcdata "Account settings"] ()])
+				[li [Eliom_predefmod.Xhtml.a !!Services.edit_user_credentials sp [pcdata "Change password"] ()]];
+			Eliom_predefmod.Xhtml.post_form !!Services.logout sp logout_form ()
 			]
 		and public_fragment () =
 			[
-			Eliom_predefmod.Xhtml.post_form !!Actions.login sp login_form ();
+			Eliom_predefmod.Xhtml.post_form !!Services.login sp login_form ();
 			]
 		in match maybe_login with
 			| Some login	-> personal_fragment login

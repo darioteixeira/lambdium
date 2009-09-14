@@ -19,7 +19,7 @@ let output_metadata maybe_login sp story =
 	div ~a:[a_class ("story_meta" :: (Login.own_element story#author maybe_login))]
 		[
 		h1 ~a:[a_class ["story_title"]] [pcdata story#title];
-		h1 ~a:[a_class ["story_author"]] [Eliom_predefmod.Xhtml.a !!Visible.show_user sp [pcdata story#author#nick] story#author#uid];
+		h1 ~a:[a_class ["story_author"]] [Eliom_predefmod.Xhtml.a !!Services.show_user sp [pcdata story#author#nick] story#author#uid];
 		h1 ~a:[a_class ["story_timestamp"]] [pcdata story#timestamp];
 		]
 
@@ -27,11 +27,11 @@ let output_metadata maybe_login sp story =
 let output_gateway sp story =
 	let comments_msg = match story#num_comments with 0l -> "no" | x -> Story.Id.to_string x in
 	let gateway_msg = "Read entire story (" ^ comments_msg ^ " comments)"
-	in p ~a:[a_class ["story_gateway"]] [Eliom_predefmod.Xhtml.a !!Visible.show_story sp [pcdata gateway_msg] story#sid]
+	in p ~a:[a_class ["story_gateway"]] [Eliom_predefmod.Xhtml.a !!Services.show_story sp [pcdata gateway_msg] story#sid]
 
 
 let output_handle sp story =
-	li ~a:[a_class ["story_handle"]] [Eliom_predefmod.Xhtml.a !!Visible.show_story sp [pcdata story#title] story#sid]
+	li ~a:[a_class ["story_handle"]] [Eliom_predefmod.Xhtml.a !!Services.show_story sp [pcdata story#title] story#sid]
 
 
 let output_full maybe_login sp story comments =
@@ -53,7 +53,7 @@ let output_full maybe_login sp story comments =
 		[
 		div ~a:[a_class ["story_add_comment"]]
 			[
-			Eliom_predefmod.Xhtml.post_form ~a:[a_class ["previewable"]] ~service:!!Visible.add_comment ~sp create_form ()
+			Eliom_predefmod.Xhtml.post_form ~a:[a_class ["previewable"]] ~service:!!Services.add_comment ~sp create_form ()
 			]
 		]
 

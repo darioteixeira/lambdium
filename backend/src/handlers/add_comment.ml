@@ -23,8 +23,8 @@ let rec step1_handler ?(errors = []) sp () (sid, (title, body_src)) =
 		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
-			~fallback: !!Visible.add_comment_fallback
-			~post_params: (Forms.Previewable.param ** Visible.comment_param)
+			~fallback: !!Services.add_comment_fallback
+			~post_params: (Forms.Previewable.param ** Params.add_comment)
 			(step2_handler comment) in
 		Forms.Previewable.make_form
 			~service: step2_service

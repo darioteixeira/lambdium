@@ -20,8 +20,8 @@ let rec step1_handler sp () () =
 	let output_core login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
-			~fallback: !!Visible.add_story
-			~post_params: Visible.story_param
+			~fallback: !!Services.add_story
+			~post_params: Params.add_story
 			step2_handler in
 		Forms.Monatomic.make_form
 			~service: step2_service
@@ -44,8 +44,8 @@ and step2_handler ?(errors = []) sp () (title, (intro_src, body_src)) =
 		let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
 		let step3_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
-			~fallback: !!Visible.add_story
-			~post_params: (Forms.Previewable.param ** Visible.story_param)
+			~fallback: !!Services.add_story
+			~post_params: (Forms.Previewable.param ** Params.add_story)
 			(step3_handler story) in
 		Forms.Previewable.make_form
 			~service: step3_service

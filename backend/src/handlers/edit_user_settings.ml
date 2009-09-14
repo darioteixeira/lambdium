@@ -20,8 +20,8 @@ let rec step1_handler ?user ?(errors = []) sp () () =
 	let output_core login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
-			~fallback: !!Visible.edit_user_settings
-			~post_params: Visible.edit_user_settings_param
+			~fallback: !!Services.edit_user_settings
+			~post_params: Params.edit_user_settings
 			(step2_handler login) in
 		(match user with
 			| Some u -> Lwt.return u

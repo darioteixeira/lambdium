@@ -20,8 +20,8 @@ let rec step1_handler ?user ?(errors = []) sp () () =
 	let output_core maybe_login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
-			~fallback: !!Visible.add_user
-			~post_params: Visible.user_param
+			~fallback: !!Services.add_user
+			~post_params: Params.add_user
 			step2_handler in
 		Forms.Monatomic.make_form
 			~service: step2_service

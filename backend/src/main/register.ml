@@ -23,31 +23,31 @@ open Common
 (**	Register user visible public services.
 *)
 let register_visible () =
-	Eliom_predefmod.Xhtml.register !!Visible.view_stories		View_stories.handler;
-	Eliom_predefmod.Xhtml.register !!Visible.view_users		View_users.handler;
-	Eliom_predefmod.Xhtml.register !!Visible.show_story		Show_story.handler;
-	Eliom_predefmod.Xhtml.register !!Visible.show_user		Show_user.handler;
-	Eliom_predefmod.Xhtml.register !!Visible.show_comment		Show_comment.handler;
-	Eliom_predefmod.Xhtml.register !!Visible.add_user 		Add_user.step1_handler;
-	Eliom_predefmod.Xhtml.register !!Visible.add_story		Add_story.step1_handler;
-	Eliom_predefmod.Xhtml.register !!Visible.add_comment_fallback	Add_comment.fallback_handler;
-	Eliom_predefmod.Xhtml.register !!Visible.add_comment		Add_comment.step1_handler;
-	Eliom_predefmod.Xhtml.register !!Visible.edit_user_settings	Edit_user_settings.step1_handler;
-	Eliom_predefmod.Xhtml.register !!Visible.edit_user_credentials	Edit_user_credentials.step1_handler
+	Eliom_predefmod.Xhtml.register !!Services.view_stories		View_stories.handler;
+	Eliom_predefmod.Xhtml.register !!Services.view_users		View_users.handler;
+	Eliom_predefmod.Xhtml.register !!Services.show_story		Show_story.handler;
+	Eliom_predefmod.Xhtml.register !!Services.show_user		Show_user.handler;
+	Eliom_predefmod.Xhtml.register !!Services.show_comment		Show_comment.handler;
+	Eliom_predefmod.Xhtml.register !!Services.add_user 		Add_user.step1_handler;
+	Eliom_predefmod.Xhtml.register !!Services.add_story		Add_story.step1_handler;
+	Eliom_predefmod.Xhtml.register !!Services.add_comment_fallback	Add_comment.fallback_handler;
+	Eliom_predefmod.Xhtml.register !!Services.add_comment		Add_comment.step1_handler;
+	Eliom_predefmod.Xhtml.register !!Services.edit_user_settings	Edit_user_settings.step1_handler;
+	Eliom_predefmod.Xhtml.register !!Services.edit_user_credentials	Edit_user_credentials.step1_handler
 
 
 (**	Register non-attached coservices (actions).
 *)
 let register_actions () =
-	Eliom_predefmod.Actions.register !!Actions.login		Session.login_handler;
-	Eliom_predefmod.Actions.register !!Actions.logout		Session.logout_handler
+	Eliom_predefmod.Actions.register !!Services.login	Session.login_handler;
+	Eliom_predefmod.Actions.register !!Services.logout	Session.logout_handler
 
 
 (**	Register services visible only to the Ajax API via XmlHttpRequest.
 *)
 let register_ajaxapi () =
-	Eliom_predefmod.Xhtml.register !!Ajax.preview_comment_fallback	Preview_comment.fallback_handler;
-	Eliom_predefmod.Text.register !!Ajax.preview_comment		Preview_comment.handler
+	Eliom_predefmod.Xhtml.register !!Services.preview_comment_fallback	Preview_comment.fallback_handler;
+	Eliom_predefmod.Text.register !!Services.preview_comment		Preview_comment.handler
 
 
 (**	Register miscelaneous pseudo-services.
