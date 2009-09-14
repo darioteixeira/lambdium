@@ -1,5 +1,5 @@
 (********************************************************************************)
-(*	Comment_output.ml
+(*	Comment_io.ml
 	Copyright (c) 2009 Dario Teixeira (dario.teixeira@yahoo.com)
 	This software is distributed under the terms of the GNU GPL version 2.
 	See LICENSE file for full license text.
@@ -7,11 +7,12 @@
 (********************************************************************************)
 
 open XHTML.M
+open Eliom_parameters
 open Common
 
 
 (********************************************************************************)
-(**	{2 Private functions}							*)
+(**	{1 Output-related functions}						*)
 (********************************************************************************)
 
 let output_metadata maybe_login sp comment =
@@ -22,10 +23,6 @@ let output_metadata maybe_login sp comment =
 		h1 ~a:[a_class ["comment_timestamp"]] [pcdata comment#timestamp];
 		]
 
-
-(********************************************************************************)
-(**	{2 Public functions}							*)
-(********************************************************************************)
 
 let output_handle sp comment =
 	li ~a:[a_class ["comment_handle"]]
@@ -48,4 +45,23 @@ let output_fresh sp comment =
 		output_metadata None sp comment;
 		comment#body_out
 		]
+
+
+(********************************************************************************)
+(**	{1 Input-related functions}						*)
+(********************************************************************************)
+
+let form_for_fresh sid ?title ?body (enter_sid, (enter_title, enter_body)) =
+	let value_title = match title with Some title -> Some (pcdata title) | None -> None
+	and value_body = match body with Some body -> Some (pcdata body) | None -> None
+	in Lwt.return
+		(fieldset ~a:[a_class ["form_fields"]]
+			[
+			legend [pcdata "Enter comment:"];
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:sid Story.Id.to_string;
+			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter title:"];
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ?value:value_title ~rows:1 ~cols:80 ();
+			label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter body:"];
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ?value:value_body ~rows:10 ~cols:80 ();
+			])
 

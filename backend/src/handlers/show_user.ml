@@ -7,35 +7,38 @@
 (********************************************************************************)
 
 open Lwt
+open XHTML.M
 
 
 (********************************************************************************)
-(**	{2 Private helper functions}						*)
+(**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let output_canvas uid maybe_login sp =
+let output_core uid maybe_login sp =
 	Lwt.catch
 		(fun () ->
 			Database.get_user uid >>= fun user ->
-			let stories_thread =  Database.get_user_stories uid
+			let stories_thread = Database.get_user_stories uid
 			and comments_thread = Database.get_user_comments uid
 			and timezone_thread = Database.get_timezone user#timezone#tid in
 			stories_thread >>= fun stories ->
 			comments_thread >>= fun comments ->
 			timezone_thread >>= fun timezone ->
-			Canvas.custom [User_output.output_full sp user timezone stories comments])
+			Lwt.return [User_io.output_full sp user timezone stories comments])
 		(function
-			| Database.Cannot_get_user	-> Canvas.failure "Cannot find specified user!"
+			| Database.Cannot_get_user	-> Lwt.return [p [pcdata "Cannot find specified user!"]]
 			| exc				-> Lwt.fail exc)
 
 
 (********************************************************************************)
-(**	{2 Public functions}							*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 let handler sp uid () =
-	Page.standard_handler
+	Page.login_agnostic_handler
 		~sp
 		~page_title: "Show User"
-		~canvas_maker: (output_canvas uid)
+		~output_core: (output_core uid)
+		()
+
 

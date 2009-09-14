@@ -9,66 +9,57 @@
 open Lwt
 open XHTML.M
 open Eliom_parameters
-open Litiom_wizard
 open Common
 
 
 (********************************************************************************)
-(**	{2 Step 2 of the wizard}						*)
+(**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let step2 =
-	let carrier ~carry_in:comment sp _ _ =
-		Database.add_comment comment >>= fun () ->
-		Lwt.return (`Proceed ()) in
-	let normal_content ~carry_in ~carry_out sp _ _ =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 2")) [])
-			(body [p [pcdata "Comment has been added"]]))
-	in Steps.make_last
-		~fallback: Visible.add_comment_fallback
-		~carrier
-		~normal_content
-		~post_params: Eliom_parameters.unit
-		()
-
-
-(********************************************************************************)
-(**	{2 Step 1 of the wizard}						*)
-(********************************************************************************)
-
-let step1_handler =
-	let carrier ~carry_in sp () (sid, (title, body_src)) =
-		Session.get_login sp >>= fun login ->
+let rec step1_handler ?(errors = []) sp () (sid, (title, body_src)) =
+	let output_core login sp =
 		Document.parse_composition body_src >>= fun (body_doc, body_out) ->
 		let author = Login.to_user login in
-		let comment = Comment.make_fresh sid author title body_src body_doc body_out
-		in Lwt.return (`Proceed comment) in
-	let normal_content ~carry_in ~carry_out:comment ~form sp _ _ =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 1")) [])
-			(body	[
-				h1 [pcdata "Comment preview:"];
-				Comment_output.output_fresh sp comment;
-				form
-				]))
-	in Steps.make_first_handler
-		~carrier
-		~form_maker: Forms.empty
-		~normal_content
-		~next: step2
+		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
+		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
+			~sp
+			~fallback: !!Visible.add_comment_fallback
+			~post_params: (Forms.Previewable.param ** Visible.comment_param)
+			(step2_handler comment) in
+		Forms.Previewable.make_form
+			~service: step2_service
+			~sp
+			~content: (Comment_io.form_for_fresh sid ~title ~body:body_src) >>= fun form ->
+		Lwt.return (errors @ [Comment_io.output_fresh sp comment; form])
+	in Page.login_enforced_handler
+		~sp
+		~page_title: "Add Comment - Step 1/2"
+		~output_core
 		()
 
 
+and step2_handler comment sp () (action, (sid, (title, body))) =
+	match action with
+		| `Preview ->
+			step1_handler sp () (sid, (title, body))
+		| `Cancel ->
+			let output_core login sp = Lwt.return [p [pcdata "You have cancelled!"]]
+			in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
+		| `Finish ->
+			Lwt.catch
+				(fun () ->
+					Database.add_comment comment >>= fun () ->
+					let output_core login sp = Lwt.return [p [pcdata "Comment has been added!"]]
+					in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ())
+				(function
+					| Database.Cannot_get_comment -> step1_handler ~errors:[p [pcdata "Error!"]] sp () (sid, (title, body))
+					| exc -> Lwt.fail exc)
+
+
 (********************************************************************************)
-(**	{2 Wizard fallback (if no POST parameters are given)}			*)
+(**	{1 Fallback}								*)
 (********************************************************************************)
 
-let step1_fallback_handler sp () () =
-        Lwt.return
-                (html
-                (head (title (pcdata "Wizard fallback")) [])
-                (body [p [pcdata "This is the fallback"]]))
+let fallback_handler sp () () =
+	Page.fallback_handler ~sp ~page_title: "Add Comment"
 

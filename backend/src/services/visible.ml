@@ -14,6 +14,47 @@
 open Eliom_parameters
 open Common
 
+
+(********************************************************************************)
+(*	{1 Public functions and values}						*)
+(********************************************************************************)
+
+(********************************************************************************)
+(*	{2 Service parameters}							*)
+(********************************************************************************)
+
+let comment_param =
+	Story.Id.param "sid" **
+	Eliom_parameters.string "title" **
+	Eliom_parameters.string "body"
+
+let story_param =
+	Eliom_parameters.string "title" **
+	Eliom_parameters.string "intro" **
+	Eliom_parameters.string "body"
+
+let user_param =
+	Eliom_parameters.string "nick" **
+	Eliom_parameters.string "fullname" **
+	Eliom_parameters.string "password" **
+	Eliom_parameters.string "password2"**
+	Timezone.param "timezone"
+
+let edit_user_credentials_param =
+	Eliom_parameters.string "old_password" **
+	Eliom_parameters.string "new_password" **
+	Eliom_parameters.string "new_password2"
+
+let edit_user_settings_param =
+	Eliom_parameters.string "fullname" **
+	Timezone.param "timezone"
+
+
+
+(********************************************************************************)
+(*	{2 Services}								*)
+(********************************************************************************)
+
 let view_stories =
 	lazy (Eliom_services.new_service
 		~path: [""]
@@ -73,9 +114,7 @@ let add_comment_fallback =
 let add_comment =
 	lazy (Eliom_services.new_post_service
 		~fallback: !!add_comment_fallback
-		~post_params:  (Story.Id.param "sid" **
-				Eliom_parameters.string "title" **
-				Eliom_parameters.string "body")
+		~post_params: comment_param
 		())
 
 

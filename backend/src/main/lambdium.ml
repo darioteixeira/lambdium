@@ -6,7 +6,11 @@
 *)
 (********************************************************************************)
 
+let init () =
+	Config.parse_config ();
+	Register.register ()
+
 let () =
-	Eliom_services.register_eliom_module "lambdium" Register.register;
+	Eliom_services.register_eliom_module "lambdium" init;
 	Ocsigen_server.start_server ()
 

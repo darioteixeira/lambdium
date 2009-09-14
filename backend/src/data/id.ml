@@ -7,8 +7,8 @@
 (********************************************************************************)
 
 (**	The type that all ID modules should satisfy.  Basically, besides the
-	type t, they should have functions for converting t to/from strings,
-	and to produce a valid Eliom_parameters.user_type for use as parameter
+	type [t] they should have functions for converting [t] to/from strings
+	and to produce a valid [Eliom_parameters.user_type] for use as parameter
 	to services.
 *)
 module type ID =

@@ -11,28 +11,28 @@ open XHTML.M
 
 
 (********************************************************************************)
-(**	{2 Private helper functions}						*)
+(**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let output_canvas maybe_login sp =
+let output_core maybe_login sp =
 	Database.get_users () >>= fun users ->
 	match users with
 		| hd :: tl ->
-			Canvas.custom
-				[ul ~a:[a_class ["list_of_users"]]
-					(User_output.output_handle sp hd)
-					(List.map (User_output.output_handle sp) tl)]
+			Lwt.return [ul ~a:[a_class ["list_of_users"]]
+				(User_io.output_handle sp hd)
+				(List.map (User_io.output_handle sp) tl)]
 		| [] ->
-			Canvas.failure "There are no users in the system!"
+			Lwt.return [p [pcdata "There are no users in the system!"]]
 
 
 (********************************************************************************)
-(**	{2 Public functions}							*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 let handler sp () () =
-	Page.standard_handler
+	Page.login_agnostic_handler
 		~sp
 		~page_title: "View users"
-		~canvas_maker: output_canvas
+		~output_core
+		()
 

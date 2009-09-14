@@ -5,10 +5,19 @@
 # See LICENSE file for full license text.
 #
 
+
+#export PGHOST=
+#export PGPORT=
+#export PGUSER=
+#export PGPASSWORD=
+export PGDATABASE=lambdium
+#export UNIX_DOMAIN_SOCKET_DIR=
+
+
 OCAMLBUILD_OPTS=
 SRC_DIR=src
-TARGETS=lambdium.native
-ENV=PGDATABASE=lambdium
+TARGETS=lambdium.native lambdium.byte
+
 
 #
 # Rules
@@ -17,7 +26,7 @@ ENV=PGDATABASE=lambdium
 all: bin
 
 bin:
-	cd $(SRC_DIR) && $(ENV) ocamlbuild $(OCAMLBUILD_OPTS) $(TARGETS)
+	cd $(SRC_DIR) && ocamlbuild $(OCAMLBUILD_OPTS) $(TARGETS)
 
 apidoc: bin
 	cd $(SRC_DIR) && ocamlbuild $(OCAMLBUILD_OPTS) lambdoc.docdir/index.html

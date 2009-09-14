@@ -14,11 +14,12 @@
 *)
 
 open Lwt
+open XHTML.M
 open Eliom_parameters
 
 
 (********************************************************************************)
-(**	{2 Public service}							*)
+(**	{1 Public service}							*)
 (********************************************************************************)
 
 let make_reply ~success fragment_xhtml =
@@ -32,10 +33,6 @@ let make_reply ~success fragment_xhtml =
 	(Json_io.string_of_json json_obj, "application/json")
 
 
-let handler_fallback sp () () =
-	Lwt.return (make_reply ~success:false (Message.failure "Some POST parameters would be really nice..."))
-
-
 let handler sp () (sid, (title, body_src)) =
 	Lwt.catch
 		(fun () ->
@@ -43,10 +40,18 @@ let handler sp () (sid, (title, body_src)) =
 			Document.parse_composition body_src >>= fun (body_doc, body_out) ->
 			let author = Login.to_user login in
 			let comment = Comment.make_fresh sid author title body_src body_doc body_out in
-			let comment_xhtml = Comment_output.output_fresh sp comment
+			let comment_xhtml = Comment_io.output_fresh sp comment
 			in Lwt.return (make_reply ~success:true comment_xhtml))
 		(function
-			| Session.No_login			-> Lwt.return (make_reply ~success:false (Message.identity_failure))
+			| Session.No_login			-> Lwt.return (make_reply ~success:false (pcdata "Not logged in!"))
 			| Document.Invalid_document x		-> Lwt.return (make_reply ~success:false x)
 			| exc					-> Lwt.fail exc)
+
+
+(********************************************************************************)
+(**	{1 Fallback}								*)
+(********************************************************************************)
+
+let fallback_handler sp () () =
+	Page.fallback_handler ~sp ~page_title: "Preview Comment"
 

@@ -9,77 +9,45 @@
 open Lwt
 open XHTML.M
 open Eliom_parameters
-open Litiom_wizard
 open Common
 
 
 (********************************************************************************)
-(**	{2 Exceptions}								*)
+(**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-exception Passwords_mismatch
-
-
-(********************************************************************************)
-(**	{2 Step 2 of the wizard}						*)
-(********************************************************************************)
-
-let step2 =
-	let carrier ~carry_in:login sp () (old_password, (new_password, new_password2)) =
-		if new_password <> new_password2
-		then Lwt.fail Passwords_mismatch
-		else begin
-			let credentials = User.make_changed_credentials (Login.uid login) old_password new_password
-			in Database.edit_user_credentials credentials >>= fun () ->
-			Lwt.return (`Proceed ())
-		end in
-	let normal_content ~carry_in ~carry_out sp _ _ =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 2")) [])
-			(body [p [pcdata "User credentials have been changed"]]))
-	in Steps.make_last
-		~fallback: Visible.edit_user_credentials
-		~carrier
-		~normal_content
-		~post_params:
-			(Eliom_parameters.string "old_password" **
-			 Eliom_parameters.string "new_password" **
-			 Eliom_parameters.string "new_password2")
+let rec step1_handler ?(errors = []) sp () () =
+	let output_core login sp =
+		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
+			~sp
+			~fallback: !!Visible.edit_user_credentials
+			~post_params: Visible.edit_user_credentials_param
+			(step2_handler login) in
+		Forms.Monatomic.make_form
+			~service: step2_service
+			~sp
+			~content: User_io.form_for_changed_credentials
+			~label: "Change password" >>= fun form ->
+		Lwt.return (errors @ [form])
+	in Page.login_enforced_handler
+		~sp
+		~page_title: "Change password - Step 1/2"
+		~output_core
 		()
 
 
-(********************************************************************************)
-(**	{2 Step 1 of the wizard}						*)
-(********************************************************************************)
-
-let step1_handler =
-	let carrier ~carry_in sp () () =
-		Session.get_login sp >>= fun login ->
-		Lwt.return (`Proceed login) in
-	let form_maker ~carry_in ~carry_out (enter_old_password, (enter_new_password, enter_new_password2)) =
-		Lwt.return
-			[
-			fieldset ~a:[a_class ["form_fields"]]
-				[
-				legend [pcdata "Enter current password for verification, and then the new password:"];
-				label ~a:[a_class ["input_label"]; a_for "enter_old_password"] [pcdata "Enter current password:"];
-				Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_old_password"] ~input_type:`Password ~name:enter_old_password ();
-				label ~a:[a_class ["input_label"]; a_for "enter_new_password"] [pcdata "Enter new password:"];
-				Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_new_password"] ~input_type:`Password ~name:enter_new_password ();
-				label ~a:[a_class ["input_label"]; a_for "enter_new_password2"] [pcdata "Confirm new password:"];
-				Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_new_password2"] ~input_type:`Password ~name:enter_new_password2 ();
-				]
-			] in
-	let normal_content ~carry_in ~carry_out ~form sp () () =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 1")) [])
-			(body [form]))
-	in Steps.make_first_handler
-		~carrier
-		~form_maker
-		~normal_content
-		~next: step2
-		()
+and step2_handler login sp () (old_password, (new_password, new_password2)) =
+	if new_password <> new_password2
+	then
+		step1_handler ~errors:[p [pcdata "Passwords do not match!"]] sp () ()
+	else
+		Lwt.catch
+			(fun () ->
+				let output_core login sp = Lwt.return [p [pcdata "Password has been changed!"]] in
+				let credentials = User.make_changed_credentials (Login.uid login) old_password new_password in
+				Database.edit_user_credentials credentials >>= fun () ->
+				Page.login_enforced_handler ~sp ~page_title:"Change password - Step 2/2" ~output_core ())
+			(function
+				| Database.Cannot_edit_user_credentials -> step1_handler ~errors:[p [pcdata "Error!"]] sp () ()
+				| exc -> Lwt.fail exc)
 

@@ -8,6 +8,11 @@
 
 open Lwt
 
+
+(********************************************************************************)
+(**	{1 Type definitions}							*)
+(********************************************************************************)
+
 type timestamp_t = string
 type source_t = string
 type output_t = [ `Div ] XHTML.M.elt
@@ -15,12 +20,20 @@ type manuscript_t = Lambdoc_core.Valid.manuscript_t
 type composition_t = Lambdoc_core.Valid.composition_t
 
 
+(********************************************************************************)
+(**	{1 Exceptions}								*)
+(********************************************************************************)
+
 exception Invalid_document of output_t
 
 
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
 let parse_manuscript src =
 	Lambdoc_proxy.Client.ambivalent_manuscript_from_string `Lambtex src >>= fun doc ->
-	let xhtml = Write_xhtml.Main.write_ambivalent_manuscript doc in
+	let xhtml = Lambdoc_write_xhtml.Main.write_ambivalent_manuscript doc in
 	let out : [> `Div ] XHTML.M.elt = XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml])
 	in match doc with
 		| `Valid doc -> Lwt.return (doc, out)
@@ -29,7 +42,7 @@ let parse_manuscript src =
 
 let parse_composition src =
 	Lambdoc_proxy.Client.ambivalent_composition_from_string `Lambtex src >>= fun doc ->
-	let xhtml = Write_xhtml.Main.write_ambivalent_composition doc in
+	let xhtml = Lambdoc_write_xhtml.Main.write_ambivalent_composition doc in
 	let out : [> `Div ] XHTML.M.elt = XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml])
 	in match doc with
 		| `Valid doc -> Lwt.return (doc, out)
@@ -44,8 +57,8 @@ let string_of_output raw =
 	Xhtmlpretty.xhtml_list_print [raw]
 
 
-let serialise_manuscript = Lambdoc_core.Valid.serialize_manuscript_to_sexp
+let serialise_manuscript = Lambdoc_core.Valid.serialize_manuscript
 
 
-let serialise_composition = Lambdoc_core.Valid.serialize_composition_to_sexp
+let serialise_composition = Lambdoc_core.Valid.serialize_composition
 

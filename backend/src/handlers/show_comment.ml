@@ -10,26 +10,27 @@ open Lwt
 
 
 (********************************************************************************)
-(**	{2 Private functions}							*)
+(**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let output_canvas cid maybe_login sp =
+let output_core cid maybe_login sp =
 	Lwt.catch
 		(fun () ->
 			Database.get_comment maybe_login cid >>= fun comment ->
-			Canvas.custom [Comment_output.output_full maybe_login sp comment])
+			Lwt.return [Comment_io.output_full maybe_login sp comment])
 		(function
-			| Database.Cannot_get_comment	-> Canvas.failure "Cannot find specified comment!"
-			| exc				-> Lwt.fail exc)
+			| Database.Cannot_get_comment -> Lwt.return [Message.error "Cannot find specified comment!"]
+			| exc -> Lwt.fail exc)
 
 
 (********************************************************************************)
-(**	{2 Public functions}							*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 let handler sp cid () =
-	Page.standard_handler
+	Page.login_agnostic_handler
 		~sp
 		~page_title: "Show Comment"
-		~canvas_maker: (output_canvas cid)
+		~output_core: (output_core cid)
+		()
 

@@ -11,6 +11,11 @@
 
 open Eliom_parameters
 
+
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
 let login =
 	lazy (Eliom_services.new_post_coservice'
 		~post_params:  (Eliom_parameters.string "nick" **

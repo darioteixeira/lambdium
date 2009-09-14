@@ -9,69 +9,44 @@
 open Lwt
 open XHTML.M
 open Eliom_parameters
-open Litiom_wizard
 open Common
 
 
 (********************************************************************************)
-(**	{2 Step 2 of the wizard}						*)
+(**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let step2 =
-	let carrier ~carry_in:user sp () (fullname, timezone) =
-		let settings = User.make_changed_settings user#uid fullname timezone
-		in Database.edit_user_settings settings >>= fun () ->
-		Lwt.return (`Proceed ()) in
-	let normal_content ~carry_in ~carry_out sp _ _ =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 2")) [])
-			(body [p [pcdata "User settings have been changed"]]))
-	in Steps.make_last
-		~fallback: Visible.edit_user_settings
-		~carrier
-		~normal_content
-		~post_params: (Eliom_parameters.string "fullname" ** Timezone.param "timezone")
+let rec step1_handler ?user ?(errors = []) sp () () =
+	let output_core login sp =
+		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
+			~sp
+			~fallback: !!Visible.edit_user_settings
+			~post_params: Visible.edit_user_settings_param
+			(step2_handler login) in
+		(match user with
+			| Some u -> Lwt.return u
+			| None   -> Database.get_user (Login.uid login)) >>= fun user ->
+		Forms.Monatomic.make_form
+			~service: step2_service
+			~sp
+			~content: (User_io.form_for_changed_settings ~user)
+			~label: "Change settings" >>= fun form ->
+		Lwt.return (errors @ [form])
+	in Page.login_enforced_handler
+		~sp
+		~page_title: "Edit settings - Step 1/2"
+		~output_core
 		()
 
 
-(********************************************************************************)
-(**	{2 Step 1 of the wizard.}						*)
-(********************************************************************************)
-
-let step1_handler =
-	let carrier ~carry_in sp () () =
-		Session.get_login sp >>= fun login ->
-		Database.get_user (Login.uid login) >>= fun user ->
-		Lwt.return (`Proceed user) in
-	let form_maker ~carry_in ~carry_out:user (enter_fullname, enter_timezone) =
-		let right_tz tz = user#timezone#tid = tz#tid in
-		let option_of_tz tz = Eliom_predefmod.Xhtml.Option ([], Timezone.make_handle tz#tid, Some (Timezone_output.describe tz), right_tz tz) in
-		Database.get_timezones () >>= fun timezones ->
-		Lwt.return
-			[
-			fieldset ~a:[a_class ["form_fields"]]
-				[
-				legend [pcdata "Edit account information:"];
-				label ~a:[a_class ["input_label"]; a_for "enter_fullname"] [pcdata "Enter full name:"];
-				Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_fullname"] ~input_type:`Text ~name:enter_fullname ~value:user#fullname ();
-				label ~a:[a_class ["input_label"]; a_for "enter_timezone"] [pcdata "Choose timezone:"];
-				Eliom_predefmod.Xhtml.user_type_select
-					~name:enter_timezone
-					(Eliom_predefmod.Xhtml.Option ([], Timezone.make_handle Timezone.utc#tid, Some (Timezone_output.describe Timezone.utc), right_tz Timezone.utc))
-					(List.map option_of_tz timezones)
-					Timezone.to_string
-				]
-			] in
-	let normal_content ~carry_in ~carry_out ~form sp () () =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 1")) [])
-			(body [form]))
-	in Steps.make_first_handler
-		~carrier
-		~form_maker
-		~normal_content
-		~next: step2
-		()
+and step2_handler login sp () (fullname, timezone) =
+	Lwt.catch
+		(fun () ->
+			let output_core login sp = Lwt.return [p [pcdata "User settings have been changed"]] in
+			let settings = User.make_changed_settings (Login.uid login) fullname timezone in
+			Database.edit_user_settings settings >>= fun () ->
+			Page.login_enforced_handler ~sp ~page_title:"Edit settings - Step 2/2" ~output_core ())
+		(function
+			| Database.Cannot_edit_user_settings -> step1_handler ~errors:[p [pcdata "Error!"]] sp () ()
+			| exc -> Lwt.fail exc)
 

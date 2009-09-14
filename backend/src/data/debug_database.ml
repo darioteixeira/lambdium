@@ -1,6 +1,15 @@
-(*	Test of the Postgresql API.
-	Invoke with the following command:
-	PGDATABASE="lambdium-light" ocamlfind ocamlc -package pgocaml.syntax -syntax camlp4o -i debug_database.ml
+(********************************************************************************)
+(*	Debug_database.ml
+	Copyright (c) 2009 Dario Teixeira (dario.teixeira@yahoo.com)
+	This software is distributed under the terms of the GNU GPL version 2.
+	See LICENSE file for full license text.
+*)
+(********************************************************************************)
+
+(*	This module is used for testing the Postgresql API, and should not be
+	linked into the main programme.  It has no dependencies beyond PG'OCaml
+	and may be invoked standalone with the following command:
+	PGDATABASE="lambdium" ocamlfind ocamlc -package pgocaml.syntax -syntax camlp4o -i debug_database.ml
 *)
 
 let dbh = PGOCaml.connect ()

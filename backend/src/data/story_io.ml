@@ -1,5 +1,5 @@
 (********************************************************************************)
-(*	Story_output.ml
+(*	Story_io.ml
 	Copyright (c) 2009 Dario Teixeira (dario.teixeira@yahoo.com)
 	This software is distributed under the terms of the GNU GPL version 2.
 	See LICENSE file for full license text.
@@ -7,11 +7,12 @@
 (********************************************************************************)
 
 open XHTML.M
+open Eliom_parameters
 open Common
 
 
 (********************************************************************************)
-(**	{2 Private functions}							*)
+(**	{1 Output-related functions}						*)
 (********************************************************************************)
 
 let output_metadata maybe_login sp story =
@@ -29,16 +30,12 @@ let output_gateway sp story =
 	in p ~a:[a_class ["story_gateway"]] [Eliom_predefmod.Xhtml.a !!Visible.show_story sp [pcdata gateway_msg] story#sid]
 
 
-(********************************************************************************)
-(**	{2 Public functions}							*)
-(********************************************************************************)
-
 let output_handle sp story =
 	li ~a:[a_class ["story_handle"]] [Eliom_predefmod.Xhtml.a !!Visible.show_story sp [pcdata story#title] story#sid]
 
 
 let output_full maybe_login sp story comments =
-	let comments_out = div ~a:[a_class ["story_comments"]] (List.map (Comment_output.output_full maybe_login sp) comments)
+	let comments_out = div ~a:[a_class ["story_comments"]] (List.map (Comment_io.output_full maybe_login sp) comments)
 	and add_comment () =
 		let create_form (enter_sid, (enter_title, enter_body)) =
 			[
@@ -86,4 +83,22 @@ let output_fresh login sp story =
 	and intro_out = (story#intro_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt)
 	and body_out = (story#body_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt)
 	in div ~a:[a_class ["story_full"; "story_preview"]] [metadata; intro_out; body_out]
+
+
+(********************************************************************************)
+(**	{1 Input-related functions}						*)
+(********************************************************************************)
+
+let form_for_fresh (enter_title, (enter_intro, enter_body)) =
+	Lwt.return
+		(fieldset ~a:[a_class ["form_fields"]]
+			[
+			legend [pcdata "Story contents:"];
+			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter story title:"];
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~rows:1 ~cols:80 ();
+			label ~a:[a_class ["textarea_label"]; a_for "enter_intro"] [pcdata "Enter story introduction:"];
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro"] ~name:enter_intro ~rows:5 ~cols:80 ();
+			label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter story body:"];
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ~rows:10 ~cols:80 ()
+			])
 

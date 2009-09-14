@@ -11,28 +11,28 @@ open XHTML.M
 
 
 (********************************************************************************)
-(**	{2 Private helper functions}						*)
+(**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let output_canvas maybe_login sp =
+let output_core maybe_login sp =
 	Database.get_stories maybe_login >>= fun stories ->
 	match stories with
 		| hd :: tl ->
-			Canvas.custom
-				[ul ~a:[a_class ["list_of_stories"]]
-					(Story_output.output_blurb maybe_login sp hd)
-					(List.map (Story_output.output_blurb maybe_login sp) tl)]
+			Lwt.return [ul ~a:[a_class ["list_of_stories"]]
+				(Story_io.output_blurb maybe_login sp hd)
+				(List.map (Story_io.output_blurb maybe_login sp) tl)]
 		| [] ->
-			Canvas.failure "There are no stories in the system!"
+			Lwt.return [p [pcdata "There are no stories in the system!"]]
 
 
 (********************************************************************************)
-(**	{2 Public functions}							*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 let handler sp () () =
-	Page.standard_handler
+	Page.login_agnostic_handler
 		~sp
 		~page_title: "View Stories"
-		~canvas_maker: output_canvas
+		~output_core
+		()
 

@@ -16,9 +16,8 @@
 	They therefore return 'a Lwt.t.
 *)
 
-
 (********************************************************************************)
-(**	{2 Exceptions}								*)
+(**	{1 Exceptions}								*)
 (********************************************************************************)
 
 exception Cannot_get_timezone
@@ -33,16 +32,15 @@ exception Cannot_add_comment
 
 exception Cannot_edit_user_credentials
 exception Cannot_edit_user_settings
-
 exception Cannot_get_nick_availability
 
 
 (********************************************************************************)
-(**	{2 Public functions}							*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 (********************************************************************************)
-(**	{3 Functions returning timezones}					*)
+(**	{2 Functions returning timezones}					*)
 (********************************************************************************)
 
 val get_timezones: unit -> Timezone.full_t list Lwt.t
@@ -50,7 +48,7 @@ val get_timezone: Timezone.Id.t option -> Timezone.full_t Lwt.t
 
 
 (********************************************************************************)
-(**	{3 Functions returning users}						*)
+(**	{2 Functions returning users}						*)
 (********************************************************************************)
 
 val get_users: unit -> User.handle_t list Lwt.t
@@ -59,7 +57,7 @@ val get_login: string -> string -> Login.t Lwt.t
 
 
 (********************************************************************************)
-(**	{3 Functions returning stories}						*)
+(**	{2 Functions returning stories}						*)
 (********************************************************************************)
 
 val get_stories: Login.t option -> Story.blurb_t list Lwt.t
@@ -68,7 +66,7 @@ val get_story: Login.t option -> Story.Id.t -> Story.full_t Lwt.t
 
 
 (********************************************************************************)
-(**	{3 Functions returning comments}					*)
+(**	{2 Functions returning comments}					*)
 (********************************************************************************)
 
 val get_story_comments: Login.t option -> Story.Id.t -> Comment.full_t list Lwt.t
@@ -77,7 +75,7 @@ val get_comment: Login.t option -> Comment.Id.t -> Comment.full_t Lwt.t
 
 
 (********************************************************************************)
-(**	{3 Functions returning mixed content (this AND that)}			*)
+(**	{2 Functions returning mixed content (this AND that)}			*)
 (********************************************************************************)
 
 (**	Note: the reason why these special functions should be used (instead of
@@ -90,7 +88,7 @@ val get_story_with_comments: Login.t option -> Story.Id.t -> (Story.full_t * Com
 
 
 (********************************************************************************)
-(**	{3 Functions that add content to the database}				*)
+(**	{2 Functions that add content to the database}				*)
 (********************************************************************************)
 
 val add_user: User.fresh_t -> unit Lwt.t
@@ -99,7 +97,7 @@ val add_comment: Comment.fresh_t -> unit Lwt.t
 
 
 (********************************************************************************)
-(**	{3 Functions that edit content from the database}			*)
+(**	{2 Functions that edit content from the database}			*)
 (********************************************************************************)
 
 val edit_user_credentials: User.changed_credentials_t -> unit Lwt.t
@@ -107,7 +105,7 @@ val edit_user_settings: User.changed_settings_t -> unit Lwt.t
 
 
 (********************************************************************************)
-(**	{3 Functions that return the availability of a given element}		*)
+(**	{2 Functions that return the availability of a given element}		*)
 (********************************************************************************)
 
 val is_available_nick: string -> bool Lwt.t

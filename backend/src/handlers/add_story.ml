@@ -9,93 +9,70 @@
 open Lwt
 open XHTML.M
 open Eliom_parameters
-open Litiom_wizard
 open Common
 
 
 (********************************************************************************)
-(**	{2 Step 3 of the wizard}						*)
+(**	{1 Wizards steps}							*)
 (********************************************************************************)
 
-let step3 =
-	let carrier ~carry_in:story sp _ _ =
-		Database.add_story story >>= fun () ->
-		Lwt.return (`Proceed ()) in
-	let normal_content ~carry_in ~carry_out sp _ _ =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 3")) [])
-			(body [p [pcdata "Story has been added"]]))
-	in Steps.make_last
-		~fallback: Visible.add_story
-		~carrier
-		~normal_content
-		~post_params: Eliom_parameters.unit
+let rec step1_handler sp () () =
+	let output_core login sp =
+		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
+			~sp
+			~fallback: !!Visible.add_story
+			~post_params: Visible.story_param
+			step2_handler in
+		Forms.Monatomic.make_form
+			~service: step2_service
+			~sp
+			~content: Story_io.form_for_fresh
+			~label: "Preview" >>= fun form ->
+		Lwt.return [form]
+	in Page.login_enforced_handler
+		~sp
+		~page_title: "Add story - Step 1/3"
+		~output_core
 		()
 
 
-(********************************************************************************)
-(**	{2 Step 2 of the wizard}						*)
-(********************************************************************************)
-
-let step2 =
-	let carrier ~carry_in:login sp () (title, (intro_src, body_src)) =
+and step2_handler ?(errors = []) sp () (title, (intro_src, body_src)) =
+	let output_core login sp =
 		Document.parse_composition intro_src >>= fun (intro_doc, intro_out) ->
 		Document.parse_manuscript body_src >>= fun (body_doc, body_out) ->
 		let author = Login.to_user login in
-		let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out
-		in Lwt.return (`Proceed story) in
-	let normal_content ~carry_in:login ~carry_out:story ~form sp _ _ =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 2")) [])
-			(body	[
-				h1 [pcdata "Story preview:"];
-				Story_output.output_fresh login sp story;
-				form
-				]))
-	in Steps.make_intermediate
-		~fallback: Visible.add_story
-		~carrier
-		~form_maker: Forms.empty
-		~normal_content
-		~post_params: (Eliom_parameters.string "title" ** Eliom_parameters.string "intro" ** Eliom_parameters.string "body")
-		~next: step3
+		let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
+		let step3_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
+			~sp
+			~fallback: !!Visible.add_story
+			~post_params: (Forms.Previewable.param ** Visible.story_param)
+			(step3_handler story) in
+		Forms.Previewable.make_form
+			~service: step3_service
+			~sp
+			~content: Story_io.form_for_fresh >>= fun form ->
+		Lwt.return (errors @ [Story_io.output_fresh login sp story; form])
+	in Page.login_enforced_handler
+		~sp
+		~page_title: "Add story - Step 2/3"
+		~output_core
 		()
 
 
-(********************************************************************************)
-(**	{2 Step 1 of the wizard}						*)
-(********************************************************************************)
-
-let step1_handler =
-	let carrier ~carry_in sp () () =
-		Session.get_login sp >>= fun login ->
-		Lwt.return (`Proceed login) in
-	let form_maker ~carry_in ~carry_out (enter_title, (enter_intro, enter_body)) =
-		Lwt.return
-			[
-			fieldset ~a:[a_class ["form_fields"]]
-				[
-				legend [pcdata "Story contents:"];
-
-				label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter story title:"];
-				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~rows:1 ~cols:80 ();
-				label ~a:[a_class ["textarea_label"]; a_for "enter_intro"] [pcdata "Enter story introduction:"];
-				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro"] ~name:enter_intro ~rows:5 ~cols:80 ();
-				label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter story body:"];
-				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ~rows:10 ~cols:80 ()
-				]
-			] in
-	let normal_content ~carry_in ~carry_out ~form sp () () =
-		Lwt.return
-			(html
-			(head (title (pcdata "Wizard step 1")) [])
-			(body [form]))
-	in Steps.make_first_handler
-		~carrier
-		~form_maker
-		~normal_content
-		~next: step2
-		()
+and step3_handler story sp () (action, (title, (intro, body))) =
+	match action with
+		| `Preview ->
+			step2_handler sp () (title, (intro, body))
+		| `Cancel ->
+			let output_core login sp = Lwt.return [p [pcdata "You have cancelled!"]]
+			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 3/3" ~output_core ()
+		| `Finish ->
+			Lwt.catch
+				(fun () ->
+					Database.add_story story >>= fun () ->
+					let output_core login sp = Lwt.return [p [pcdata "Comment has been added!"]]
+					in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ())
+				(function
+					| Database.Cannot_add_story -> step2_handler ~errors:[p [pcdata "Error!"]] sp () (title, (intro, body))
+					| exc -> Lwt.fail exc)
 

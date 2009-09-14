@@ -13,6 +13,10 @@
 open XHTML.M
 
 
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
 let lambdium_light =
 	lazy (Eliom_services.new_external_service
 		~prefix: "http://dario.dse.nl"

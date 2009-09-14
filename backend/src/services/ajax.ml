@@ -15,6 +15,10 @@ open Eliom_parameters
 open Common
 
 
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
 let preview_comment_fallback =
 	lazy (Eliom_services.new_service
 		~path: ["preview_comment"]

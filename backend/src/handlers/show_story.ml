@@ -10,26 +10,27 @@ open Lwt
 
 
 (********************************************************************************)
-(**	{2 Private functions}							*)
+(**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let output_canvas sid maybe_login sp =
+let output_core sid maybe_login sp =
 	Lwt.catch
 		(fun () ->
 			Database.get_story_with_comments maybe_login sid >>= fun (story, comments) ->
-			Canvas.custom [Story_output.output_full maybe_login sp story comments])
+			Lwt.return [Story_io.output_full maybe_login sp story comments])
 		(function
-			| Database.Cannot_get_story	-> Canvas.failure "Cannot find specified story!"
-			| exc				-> Lwt.fail exc)
+			| Database.Cannot_get_story -> Lwt.return [Message.error "Cannot find specified story!"]
+			| exc -> Lwt.fail exc)
 
 
 (********************************************************************************)
-(**	{2 Public functions}							*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 let handler sp sid () =
-	Page.standard_handler
+	Page.login_agnostic_handler
 		~sp	
 		~page_title: "Show Story"
-		~canvas_maker: (output_canvas sid)
+		~output_core: (output_core sid)
+		()
 

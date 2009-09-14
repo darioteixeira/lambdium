@@ -1,8 +1,6 @@
 (********************************************************************************)
-(**	This module is responsible for managing user sessions.
-
-	Copyright (c) 2007-2009 Dario Teixeira (dario.teixeira@yahoo.com)
-
+(*	Session.ml
+	Copyright (c) 2009 Dario Teixeira (dario.teixeira@yahoo.com)
 	This software is distributed under the terms of the GNU GPL version 2.
 	See LICENSE file for full license text.
 *)
@@ -12,7 +10,7 @@ open Lwt
 
 
 (********************************************************************************)
-(**	{2 Exceptions that may be raised by this module}			*)
+(**	{1 Exceptions}								*)
 (********************************************************************************)
 
 exception Invalid_login
@@ -20,14 +18,14 @@ exception No_login
 
 
 (********************************************************************************)
-(**	{2 Private functions}							*)
+(**	{1 Private functions and values}					*)
 (********************************************************************************)
 
 let table = Eliom_sessions.create_persistent_table "login_table"
 
 
 (********************************************************************************)
-(**	{2 Public functions}							*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 (**	Returns the currently logged-in user, if any.
@@ -47,7 +45,7 @@ let get_login sp =
 		| None		-> Lwt.fail No_login
 
 
-(**	Handler for action "login".
+(**	Handler for login action.
 *)
 let login_handler sp () (username, (password, remember)) =
 	Eliom_sessions.close_session ~sp () >>=
@@ -72,7 +70,7 @@ let login_handler sp () (username, (password, remember)) =
 		(function _ -> Lwt.return [Invalid_login])
 
 
-(**	Handler for action "logout".
+(**	Handler for logout action.
 *)
 let logout_handler sp () global =
 	Eliom_sessions.close_session ~close_group:global ~sp () >>= fun () ->
