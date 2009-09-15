@@ -38,5 +38,5 @@ val form_for_fresh:
 	[< Story.Id.t Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name) ->
-	[> `Fieldset ] XHTML.M.elt Lwt.t
+	[> `Fieldset ] XHTML.M.elt list Lwt.t
 

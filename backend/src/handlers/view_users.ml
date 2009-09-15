@@ -8,6 +8,7 @@
 
 open Lwt
 open XHTML.M
+open Page
 
 
 (********************************************************************************)
@@ -18,11 +19,11 @@ let output_core maybe_login sp =
 	Database.get_users () >>= fun users ->
 	match users with
 		| hd :: tl ->
-			Lwt.return [ul ~a:[a_class ["list_of_users"]]
-				(User_io.output_handle sp hd)
-				(List.map (User_io.output_handle sp) tl)]
+			let hd' = User_io.output_handle sp hd
+			and tl' = List.map (User_io.output_handle sp) tl
+			in Lwt.return (Stat_nothing, Some [ul ~a:[a_class ["list_of_users"]] hd' tl'])
 		| [] ->
-			Lwt.return [p [pcdata "There are no users in the system!"]]
+			Lwt.return (Stat_warning [p [pcdata "There are no users in the system!"]], None)
 
 
 (********************************************************************************)

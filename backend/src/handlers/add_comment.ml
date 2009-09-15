@@ -10,13 +10,14 @@ open Lwt
 open XHTML.M
 open Eliom_parameters
 open Common
+open Page
 
 
 (********************************************************************************)
 (**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ?(errors = []) sp () (sid, (title, body_src)) =
+let rec step1_handler ~status sp () (sid, (title, body_src)) =
 	let output_core login sp =
 		Document.parse_composition body_src >>= fun (body_doc, body_out) ->
 		let author = Login.to_user login in
@@ -29,8 +30,9 @@ let rec step1_handler ?(errors = []) sp () (sid, (title, body_src)) =
 		Forms.Previewable.make_form
 			~service: step2_service
 			~sp
-			~content: (Comment_io.form_for_fresh ~sid ~title ~body_src) >>= fun form ->
-		Lwt.return (errors @ [Comment_io.output_fresh sp comment; form])
+			~content: (Comment_io.form_for_fresh ~sid ~title ~body_src)
+			() >>= fun form ->
+		Lwt.return (status, Some [Comment_io.output_fresh sp comment; form])
 	in Page.login_enforced_handler
 		~sp
 		~page_title: "Add Comment - Step 1/2"
@@ -41,25 +43,32 @@ let rec step1_handler ?(errors = []) sp () (sid, (title, body_src)) =
 and step2_handler comment sp () (action, (sid, (title, body))) =
 	match action with
 		| `Preview ->
-			step1_handler sp () (sid, (title, body))
+			step1_handler ~status:Stat_nothing sp () (sid, (title, body))
 		| `Cancel ->
-			let output_core login sp = Lwt.return [p [pcdata "You have cancelled!"]]
+			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
 		| `Finish ->
 			Lwt.catch
 				(fun () ->
 					Database.add_comment comment >>= fun () ->
-					let output_core login sp = Lwt.return [p [pcdata "Comment has been added!"]]
+					let output_core login sp = Lwt.return (Stat_success [p [pcdata "Comment has been added!"]], None)
 					in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ())
 				(function
-					| Database.Cannot_get_comment -> step1_handler ~errors:[p [pcdata "Error!"]] sp () (sid, (title, body))
-					| exc -> Lwt.fail exc)
+					| Database.Cannot_get_comment ->
+						let status = Stat_failure [p [pcdata "Error!"]]
+						in step1_handler ~status sp () (sid, (title, body))
+					| exc ->
+						Lwt.fail exc)
 
 
 (********************************************************************************)
-(**	{1 Fallback}								*)
+(**	{1 Public functions and values}						*)
 (********************************************************************************)
 
 let fallback_handler sp () () =
 	Page.fallback_handler ~sp ~page_title: "Add Comment"
+
+
+let handler sp () (sid, (title, body_src)) =
+	step1_handler ~status:Stat_nothing sp () (sid, (title, body_src))
 

@@ -8,6 +8,7 @@
 
 open Lwt
 open XHTML.M
+open Page
 
 
 (********************************************************************************)
@@ -18,11 +19,12 @@ let output_core maybe_login sp =
 	Database.get_stories maybe_login >>= fun stories ->
 	match stories with
 		| hd :: tl ->
-			Lwt.return [ul ~a:[a_class ["list_of_stories"]]
-				(Story_io.output_blurb maybe_login sp hd)
-				(List.map (Story_io.output_blurb maybe_login sp) tl)]
+			let hd' = Story_io.output_blurb maybe_login sp hd
+			and tl' = List.map (Story_io.output_blurb maybe_login sp) tl
+			in
+			Lwt.return (Stat_nothing, Some [ul ~a:[a_class ["list_of_stories"]] hd' tl'])
 		| [] ->
-			Lwt.return [p [pcdata "There are no stories in the system!"]]
+			Lwt.return (Stat_warning [p [pcdata "There are no stories in the system!"]], None)
 
 
 (********************************************************************************)

@@ -28,12 +28,12 @@ let register_visible () =
 	Eliom_predefmod.Xhtml.register !!Services.show_story		Show_story.handler;
 	Eliom_predefmod.Xhtml.register !!Services.show_user		Show_user.handler;
 	Eliom_predefmod.Xhtml.register !!Services.show_comment		Show_comment.handler;
-	Eliom_predefmod.Xhtml.register !!Services.add_user 		Add_user.step1_handler;
-	Eliom_predefmod.Xhtml.register !!Services.add_story		Add_story.step1_handler;
+	Eliom_predefmod.Xhtml.register !!Services.add_user 		Add_user.handler;
+	Eliom_predefmod.Xhtml.register !!Services.add_story		Add_story.handler;
 	Eliom_predefmod.Xhtml.register !!Services.add_comment_fallback	Add_comment.fallback_handler;
-	Eliom_predefmod.Xhtml.register !!Services.add_comment		Add_comment.step1_handler;
-	Eliom_predefmod.Xhtml.register !!Services.edit_user_settings	Edit_user_settings.step1_handler;
-	Eliom_predefmod.Xhtml.register !!Services.edit_user_credentials	Edit_user_credentials.step1_handler
+	Eliom_predefmod.Xhtml.register !!Services.add_comment		Add_comment.handler;
+	Eliom_predefmod.Xhtml.register !!Services.edit_user_settings	Edit_user_settings.handler;
+	Eliom_predefmod.Xhtml.register !!Services.edit_user_credentials	Edit_user_credentials.handler
 
 
 (**	Register non-attached coservices (actions).

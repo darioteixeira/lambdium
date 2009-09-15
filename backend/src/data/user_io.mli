@@ -35,17 +35,17 @@ val form_for_fresh:
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	[< `One of Timezone.handle_t ] Eliom_parameters.param_name))) ->
-	[> `Fieldset ] XHTML.M.elt Lwt.t
+	[> `Fieldset ] XHTML.M.elt list Lwt.t
 
 val form_for_changed_credentials:
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name) ->
-	[> `Fieldset ] XHTML.M.elt Lwt.t
+	[> `Fieldset ] XHTML.M.elt list Lwt.t
 
 val form_for_changed_settings:
 	user: < fullname: string; timezone: Timezone.handle_t; .. > ->
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	[< `One of Timezone.handle_t ] Eliom_parameters.param_name ->
-	[> `Fieldset ] XHTML.M.elt Lwt.t
+	[> `Fieldset ] XHTML.M.elt list Lwt.t
 

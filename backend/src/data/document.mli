@@ -21,17 +21,20 @@ type composition_t
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Invalid_document of output_t
+exception Invalid_manuscript of output_t
+exception Invalid_composition of output_t
 
 
 (********************************************************************************)
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-val parse_manuscript : string -> (manuscript_t * [> `Div ] XHTML.M.elt) Lwt.t
-val parse_composition : string -> (composition_t * [> `Div ] XHTML.M.elt) Lwt.t
-val output_of_string : string -> output_t
-val string_of_output : output_t -> string
-val serialise_manuscript : manuscript_t -> string
-val serialise_composition : composition_t -> string
+val parse_manuscript: string -> (manuscript_t * [> `Div ] XHTML.M.elt) Lwt.t
+val parse_composition: string -> (composition_t * [> `Div ] XHTML.M.elt) Lwt.t
+
+val output_of_string: string -> output_t
+val string_of_output: output_t -> string
+
+val serialise_manuscript: manuscript_t -> string
+val serialise_composition: composition_t -> string
 

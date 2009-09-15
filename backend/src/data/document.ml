@@ -24,7 +24,8 @@ type composition_t = Lambdoc_core.Valid.composition_t
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Invalid_document of output_t
+exception Invalid_manuscript of output_t
+exception Invalid_composition of output_t
 
 
 (********************************************************************************)
@@ -37,7 +38,7 @@ let parse_manuscript src =
 	let out : [> `Div ] XHTML.M.elt = XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml])
 	in match doc with
 		| `Valid doc -> Lwt.return (doc, out)
-		| `Invalid doc -> Lwt.fail (Invalid_document out)
+		| `Invalid _ -> Lwt.fail (Invalid_manuscript out)
 
 
 let parse_composition src =
@@ -46,7 +47,7 @@ let parse_composition src =
 	let out : [> `Div ] XHTML.M.elt = XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml])
 	in match doc with
 		| `Valid doc -> Lwt.return (doc, out)
-		| `Invalid doc -> Lwt.fail (Invalid_document out)
+		| `Invalid _ -> Lwt.fail (Invalid_composition out)
 
 
 let output_of_string str =

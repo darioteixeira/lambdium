@@ -12,3 +12,7 @@
 
 let (!!) = Lazy.force
 
+let maybe f = function
+	| Some x -> Some (f x)
+	| None	 -> None
+

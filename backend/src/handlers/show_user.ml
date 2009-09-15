@@ -8,6 +8,7 @@
 
 open Lwt
 open XHTML.M
+open Page
 
 
 (********************************************************************************)
@@ -24,9 +25,9 @@ let output_core uid maybe_login sp =
 			stories_thread >>= fun stories ->
 			comments_thread >>= fun comments ->
 			timezone_thread >>= fun timezone ->
-			Lwt.return [User_io.output_full sp user timezone stories comments])
+			Lwt.return (Stat_nothing, Some [User_io.output_full sp user timezone stories comments]))
 		(function
-			| Database.Cannot_get_user	-> Lwt.return [p [pcdata "Cannot find specified user!"]]
+			| Database.Cannot_get_user	-> Lwt.return (Stat_failure [p [pcdata "Cannot find specified user!"]], None)
 			| exc				-> Lwt.fail exc)
 
 

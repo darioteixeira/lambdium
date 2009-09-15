@@ -10,6 +10,16 @@ open Lwt
 open XHTML.M
 open Common
 
+(********************************************************************************)
+(**	{1 Type definitions}							*)
+(********************************************************************************)
+
+type core_status_t =
+	| Stat_success of XHTML.M.block XHTML.M.elt list
+	| Stat_warning of XHTML.M.block XHTML.M.elt list
+	| Stat_failure of XHTML.M.block XHTML.M.elt list
+	| Stat_nothing
+
 
 (********************************************************************************)
 (**	{1 Private functions and values}					*)
@@ -130,11 +140,20 @@ let base_page ~sp ~page_title ~page_body =
 
 
 let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
+	let (maybe_core_status, maybe_core_content) = core in
+	let core_status = match maybe_core_status with
+		| Stat_success x -> [div ~a:[a_id "core_success"] x]
+		| Stat_warning x -> [div ~a:[a_id "core_warning"] x]
+		| Stat_failure x -> [div ~a:[a_id "core_failure"] x]
+		| Stat_nothing   -> []
+	and core_content = match maybe_core_content with
+		| Some e -> [div ~a:[a_id "core_content"] e]
+		| None	 -> [] in
 	let page_body =
-		body ~a:[a_class ["root"]]
+		body ~a:[a_id "regular"]
 			[
 			div ~a:[a_id "header"] header;
-			div ~a:[a_id "core"] core;
+			div ~a:[a_id "core"] (core_status @ core_content);
 			div ~a:[a_id "nav"] (List.map output_floatbox nav);
 			div ~a:[a_id "context"] (List.map output_floatbox context);
 			div ~a:[a_id "footer"] footer;
@@ -143,7 +162,7 @@ let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
 
 
 let failure_page ~sp ~page_title ~msg =
-	let page_body = body ~a:[a_class ["failure"]] [p [pcdata msg]]
+	let page_body = body ~a:[a_id "failure"] [p [pcdata msg]]
 	in base_page ~sp ~page_title ~page_body
 
 
@@ -180,7 +199,7 @@ let login_enforced_handler ~sp ~page_title ~output_core ?output_context () =
 	Session.get_maybe_login sp >>= fun maybe_login ->
 	let output_core = match maybe_login with
 		| Some login -> output_core login
-		| None	     -> fun _ -> Lwt.return [Message.error "You are not logged in!"]
+		| None	     -> fun _ -> Lwt.return (Stat_failure [p [pcdata "You are not logged in!"]], None)
 	in regular_handler ~maybe_login ~sp ~page_title ~output_core ?output_context ()
 
 

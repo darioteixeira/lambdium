@@ -44,7 +44,6 @@ let handler sp () (sid, (title, body_src)) =
 			in Lwt.return (make_reply ~success:true comment_xhtml))
 		(function
 			| Session.No_login			-> Lwt.return (make_reply ~success:false (pcdata "Not logged in!"))
-			| Document.Invalid_document x		-> Lwt.return (make_reply ~success:false x)
 			| exc					-> Lwt.fail exc)
 
 

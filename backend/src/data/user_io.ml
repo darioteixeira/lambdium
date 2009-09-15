@@ -73,7 +73,7 @@ let form_for_fresh ?user (enter_nick, (enter_fullname, (enter_password, (enter_p
 		| None	 -> (None, None, None) in
 	Database.get_timezones () >>= fun timezones ->
 	Lwt.return
-		(fieldset
+		[fieldset
 			[
 			legend [pcdata "Information about new user:"];
 
@@ -92,12 +92,12 @@ let form_for_fresh ?user (enter_nick, (enter_fullname, (enter_password, (enter_p
 				(option_of_tz value_timezone Timezone.utc)
 				(List.map (option_of_tz value_timezone) timezones)
 				Timezone.to_string
-			])
+			]]
 
 
 let form_for_changed_credentials (enter_old_password, (enter_new_password, enter_new_password2)) =
 	Lwt.return
-		(fieldset
+		[fieldset
 			[
 			legend [pcdata "Enter current password for verification, and then the new password:"];
 
@@ -107,13 +107,13 @@ let form_for_changed_credentials (enter_old_password, (enter_new_password, enter
 			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_new_password"] ~input_type:`Password ~name:enter_new_password ();
 			label ~a:[a_class ["input_label"]; a_for "enter_new_password2"] [pcdata "Confirm new password:"];
 			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_new_password2"] ~input_type:`Password ~name:enter_new_password2 ();
-			])
+			]]
 
 
 let form_for_changed_settings ~user (enter_fullname, enter_timezone) =
 	Database.get_timezones () >>= fun timezones ->
 	Lwt.return
-		(fieldset
+		[fieldset
 			[
 			legend [pcdata "Edit account information:"];
 
@@ -126,5 +126,5 @@ let form_for_changed_settings ~user (enter_fullname, enter_timezone) =
 				(option_of_tz (Some user#timezone) Timezone.utc)
 				(List.map (option_of_tz (Some user#timezone)) timezones)
 				Timezone.to_string
-			])
+			]]
 

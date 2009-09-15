@@ -7,6 +7,15 @@
 (********************************************************************************)
 
 (********************************************************************************)
+(**	{1 Exceptions}								*)
+(********************************************************************************)
+
+exception Invalid_intro of Document.output_t
+exception Invalid_body of Document.output_t
+exception Invalid_intro_and_body of Document.output_t * Document.output_t
+
+
+(********************************************************************************)
 (**	{1 Output-related functions}						*)
 (********************************************************************************)
 
@@ -39,9 +48,19 @@ val output_fresh:
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
+val parse: string -> string -> (Document.composition_t * Document.output_t * Document.manuscript_t * Document.output_t * string list) Lwt.t
+
 val form_for_fresh:
+	?title:string ->
+	?intro_src:string ->
+	?body_src:string ->
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name) ->
-	[> `Fieldset ] XHTML.M.elt Lwt.t
+	[> `Fieldset ] XHTML.M.elt list Lwt.t
+
+val form_for_images:
+	aliases:string list ->
+	[< Ocsigen_extensions.file_info Eliom_parameters.setoneradio ] Eliom_parameters.param_name ->
+	[> `Fieldset ] XHTML.M.elt list Lwt.t
 

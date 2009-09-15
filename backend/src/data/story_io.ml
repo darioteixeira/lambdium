@@ -6,9 +6,19 @@
 *)
 (********************************************************************************)
 
+open Lwt
 open XHTML.M
 open Eliom_parameters
 open Common
+
+
+(********************************************************************************)
+(**	{1 Exceptions}								*)
+(********************************************************************************)
+
+exception Invalid_intro of Document.output_t
+exception Invalid_body of Document.output_t
+exception Invalid_intro_and_body of Document.output_t * Document.output_t
 
 
 (********************************************************************************)
@@ -89,17 +99,36 @@ let output_fresh login sp story =
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-let form_for_fresh (enter_title, (enter_intro, enter_body)) =
-	Lwt.return
-		(fieldset
+let parse intro_src body_src =
+	Document.parse_composition intro_src >>= fun (intro_doc, intro_out) ->
+	Document.parse_manuscript body_src >>= fun (body_doc, body_out) ->
+	Lwt.return (intro_doc, intro_out, body_doc, body_out, [])
+
+
+let form_for_fresh ?title ?intro_src ?body_src (enter_title, (enter_intro, enter_body)) =
+	let value_title = maybe pcdata title
+	and value_intro_src = maybe pcdata intro_src
+	and value_body_src = maybe pcdata body_src
+	in Lwt.return
+		[fieldset
 			[
 			legend [pcdata "Story contents:"];
 
 			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter story title:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~rows:1 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ?value:value_title ~rows:1 ~cols:80 ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_intro"] [pcdata "Enter story introduction:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro"] ~name:enter_intro ~rows:5 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro"] ~name:enter_intro ?value:value_intro_src ~rows:5 ~cols:80 ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter story body:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ~rows:10 ~cols:80 ()
-			])
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ?value:value_body_src ~rows:10 ~cols:80 ()
+			]]
+
+
+let form_for_images ~aliases enter_file =
+	let make_input alias =
+		let lbl = "enter_file_" ^ alias
+		in	[
+			label ~a:[a_for lbl] [pcdata (Printf.sprintf "Enter file for bitmap '%s':" alias)];
+			Eliom_predefmod.Xhtml.file_input ~a:[a_id lbl] ~name:enter_file ();
+			]
+	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input aliases)))]
 
