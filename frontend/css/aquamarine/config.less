@@ -18,8 +18,25 @@
 @CCL_padding: 10px;
 @CCR_padding: 10px;
 
+@Vertical_separation: 20px;
+
+
+/********************************************************************************/
+/* Computed values.								*/
+/********************************************************************************/
+
+@LC_padding: @LCL_padding + @LCR_padding;
+@RC_padding: @RCL_padding + @RCR_padding;
+@CC_padding: @CCL_padding + @CCR_padding;
+
+@LC_fullwidth: @LC_width + @LCL_padding + @LCR_padding;
+@RC_fullwidth: @RC_width + @RCL_padding + @RCR_padding;
+
 
 /********************************************************************************/
 /* Colour scheme configuration.							*/
 /********************************************************************************/
+
+@Background_body: #fff;
+@Color_bar: #5b8ba6;
 

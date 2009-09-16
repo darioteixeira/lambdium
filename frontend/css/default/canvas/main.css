@@ -1,9 +1,0 @@
-/********************************************************************************/
-/* Main file for CSS. 								*/
-/********************************************************************************/
-
-@import url('canvas.css');
-@import url('story.css');
-@import url('comment.css');
-@import url('user.css');
-@import url('form.css');

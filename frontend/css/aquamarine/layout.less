@@ -2,12 +2,10 @@
 
 @import "config.less";
 
-@LC_padding: @LCL_padding + @LCR_padding;
-@RC_padding: @RCL_padding + @RCR_padding;
-@CC_padding: @CCL_padding + @CCR_padding;
-
-@LC_fullwidth: @LC_width + @LCL_padding + @LCR_padding;
-@RC_fullwidth: @RC_width + @RCL_padding + @RCR_padding;
+body
+	{
+	background: @Background_body;
+	}
 
 #regular
 	{
@@ -24,9 +22,15 @@
 	margin-right: -1 * (@RC_fullwidth + @CC_padding);
 	}
 
+#header
+	{
+	margin-bottom: @Vertical_separation;
+	}
+
 #footer
 	{
 	clear: both;
+	margin-top: @Vertical_separation;
 	}
 
 #core
