@@ -23,8 +23,8 @@ CREATE TYPE timezone_full_t AS
 CREATE TYPE user_full_t AS
 	(
 	user_id			int4,
-	user_name		text,
-	user_full_name		text,
+	user_nick		text,
+	user_fullname		text,
 	user_timezone_id	int4
 	);
 
@@ -32,7 +32,7 @@ CREATE TYPE user_full_t AS
 CREATE TYPE user_handle_t AS
 	(
 	user_id			int4,
-	user_name		text
+	user_nick		text
 	);
 
 
@@ -44,7 +44,7 @@ CREATE TYPE story_full_t AS
 	(
 	story_id		int4,
 	story_author_id		int4,
-	story_author_name	text,
+	story_author_nick	text,
 	story_title		text,
 	story_timestamp		text,
 	story_num_comments	int4,
@@ -57,7 +57,7 @@ CREATE TYPE story_blurb_t AS
 	(
 	story_id		int4,
 	story_author_id		int4,
-	story_author_name	text,
+	story_author_nick	text,
 	story_title		text,
 	story_timestamp		text,
 	story_num_comments	int4,
@@ -81,7 +81,7 @@ CREATE TYPE comment_full_t AS
 	comment_id		int4,
 	comment_story_id	int4,
 	comment_author_id	int4,
-	comment_author_name	text,
+	comment_author_nick	text,
 	comment_title		text,
 	comment_timestamp	text,
 	comment_body		bytea

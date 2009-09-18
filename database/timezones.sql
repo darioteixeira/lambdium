@@ -38,8 +38,6 @@ $$;
 SELECT add_timezone ('Africa/Abidjan');
 SELECT add_timezone ('Africa/Accra');
 SELECT add_timezone ('Africa/Addis_Ababa');
-
-/*
 SELECT add_timezone ('Africa/Algiers');
 SELECT add_timezone ('Africa/Asmara');
 SELECT add_timezone ('Africa/Bamako');
@@ -434,6 +432,6 @@ SELECT add_timezone ('Pacific/Tongatapu');
 SELECT add_timezone ('Pacific/Truk');
 SELECT add_timezone ('Pacific/Wake');
 SELECT add_timezone ('Pacific/Wallis');
-*/
 
 DROP FUNCTION add_timezone (text);
+

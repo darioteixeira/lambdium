@@ -1,0 +1,2 @@
+psql -d lambdium -c "COPY timezones FROM STDIN;" < timezones.dat
+
