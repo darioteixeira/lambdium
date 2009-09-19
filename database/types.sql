@@ -20,7 +20,7 @@ CREATE DOMAIN comment_id_t	AS id_t;
 CREATE TYPE timezone_full_t AS
 	(
 	timezone_id		timezone_id_t,
-	timezone_name		text,
+	timezone_name		text
 	);
 
 
@@ -54,7 +54,7 @@ CREATE TYPE story_full_t AS
 	story_author_id		user_id_t,
 	story_author_nick	text,
 	story_title		text,
-	story_timestamp		text,
+	story_timestamp		timestamp,
 	story_num_comments	comment_id_t,
 	story_intro		bytea,
 	story_body		bytea
@@ -67,7 +67,7 @@ CREATE TYPE story_blurb_t AS
 	story_author_id		user_id_t,
 	story_author_nick	text,
 	story_title		text,
-	story_timestamp		text,
+	story_timestamp		timestamp,
 	story_num_comments	comment_id_t,
 	story_intro		bytea
 	);
@@ -91,7 +91,7 @@ CREATE TYPE comment_full_t AS
 	comment_author_id	user_id_t,
 	comment_author_nick	text,
 	comment_title		text,
-	comment_timestamp	text,
+	comment_timestamp	timestamp,
 	comment_body		bytea
 	);
 

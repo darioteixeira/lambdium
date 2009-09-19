@@ -13,10 +13,10 @@ declare -a tasks
 tasks[1]="EXEC:dropdb lambdium:Deleting database (may fail upon first invocation)"
 tasks[2]="EXEC:createdb lambdium:Creating database"
 tasks[3]="PSQL:/usr/share/postgresql/8.4/contrib/pgcrypto.sql:Loading the pgcrypto module"
-tasks[4]="PSQL:structure.sql:Creating the database tables"
-tasks[5]="PSQL:triggers.sql:Creating triggers that ensure database consistency"
-tasks[6]="PSQL:api-types.sql:Creating types (SQL domains) visible in the user API"
-tasks[7]="PSQL:api-functions.sql:Creating the functions that make the user API"
+tasks[4]="PSQL:types.sql:Creating types (SQL domains)"
+tasks[5]="PSQL:structure.sql:Creating the database tables"
+tasks[6]="PSQL:triggers.sql:Creating triggers that ensure database consistency"
+tasks[7]="PSQL:api-functions.sql:Creating the API functions"
 tasks[8]="PSQL:timezones.sql:Initialising timezone data"
 tasks[9]="PSQL:analyze.sql:Using ANALYZE to optimise database access"
 
@@ -33,7 +33,7 @@ for i in `seq 1 $NUM_TASKS`; do
 		COMMENT=`echo ${tasks[$i]} | cut -d: -f3-`
 
 		if [ "$ACTION" = "PSQL" ];
-		then COMMAND="psql -d lambdium -f $FILENAME"
+		then COMMAND="psql --set ON_ERROR_STOP=on -d lambdium -f $FILENAME"
 		elif [ "$ACTION" = "SCRIPT" ];
 		then COMMAND=". $FILENAME"
 		elif [ "$ACTION" = "EXEC" ];
@@ -42,11 +42,14 @@ for i in `seq 1 $NUM_TASKS`; do
 		fi
 			
 		echo -e -n "\033[34m$COMMENT... \033[0m"
-		OUTPUT=`($COMMAND > /dev/null) 2> /dev/null`
+		OUTPUT=`$COMMAND 2>&1`
 
 		if [ $? -eq "0" ];
-		then echo -e "\033[32mSuccess!\033[0m";
-		else echo -e "\033[31mFailure!\033[0m";
+		then
+			echo -e "\033[32mSuccess!\033[0m";
+		else
+			echo -e "\033[31mFailure:\033[0m";
+			echo -e "\n$OUTPUT\n"
 		fi
 	else
 		echo -e "\033[31mTask $i is empty!\033[0m"

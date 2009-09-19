@@ -10,7 +10,7 @@ RETURNS VOID
 LANGUAGE sql VOLATILE AS
 $$
 	INSERT	INTO timezones (timezone_name)
-		VALUES ($1);
+		VALUES ($1)
 $$;
 
 SELECT add_timezone ('Africa/Abidjan');

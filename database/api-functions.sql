@@ -58,7 +58,7 @@ $$;
  * Returns all the information for a specified user.
  */
 
-CREATE FUNCTION get_user (user_id)
+CREATE FUNCTION get_user (user_id_t)
 RETURNS SETOF user_full_t
 LANGUAGE sql STABLE AS
 $$
@@ -286,7 +286,7 @@ BEGIN
 			(
 			_story_author_id,
 			_story_title,
-			now (),
+			now () AT TIME ZONE 'UTC',
 			0,
 			_story_intro_src,
 			_story_intro_doc,
@@ -331,7 +331,7 @@ BEGIN
 			_comment_story_id,
 			_comment_author_id,
 			_comment_title,
-			now (),
+			now () AT TIME ZONE 'UTC',
 			_comment_body_src,
 			_comment_body_doc,
 			_comment_body_xhtml
