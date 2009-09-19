@@ -7,32 +7,10 @@
 
 CREATE FUNCTION add_timezone (text)
 RETURNS VOID
-LANGUAGE plpgsql VOLATILE AS
+LANGUAGE sql VOLATILE AS
 $$
-DECLARE
-	_name		ALIAS FOR $1;
-	_abbrev		text;
-	_raw_offset	interval;
-	_hours		float;
-	_minutes	float;
-	_offset		float;
-	_dst		boolean;
-
-BEGIN
-	SELECT	INTO _abbrev, _raw_offset, _dst
-		abbrev, utc_offset, is_dst
-		FROM pg_timezone_names
-		WHERE name = _name;
-
-	_hours := extract (hour FROM _raw_offset);
-	_minutes := extract (minute FROM _raw_offset);
-	_offset := (_hours * 60.0 + _minutes) / 60.0;
-
-	RAISE NOTICE 'Adding % timezone (%, %, %)...', _name, _abbrev, _offset, _dst;
-
-	INSERT	INTO timezones (timezone_name, timezone_abbrev, timezone_offset, timezone_dst)
-		VALUES (_name, _abbrev, _offset, _dst);
-END
+	INSERT	INTO timezones (timezone_name)
+		VALUES ($1);
 $$;
 
 SELECT add_timezone ('Africa/Abidjan');

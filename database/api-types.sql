@@ -3,16 +3,24 @@
 /************************************************************************/
 
 /************************************************************************/
+/* Type of the various identifiers.					*/
+/************************************************************************/
+
+CREATE DOMAIN id_t		AS int4;
+CREATE DOMAIN timezone_id_t	AS id_t;
+CREATE DOMAIN user_id_t		AS id_t;
+CREATE DOMAIN story_id_t	AS id_t;
+CREATE DOMAIN comment_id_t	AS id_t;
+
+
+/************************************************************************/
 /* Timezone related types.						*/
 /************************************************************************/
 
 CREATE TYPE timezone_full_t AS
 	(
-	timezone_id		int4,
+	timezone_id		timezone_id_t,
 	timezone_name		text,
-	timezone_abbrev		text,
-	timezone_offset		float,
-	timezone_dst		boolean
 	);
 
 
@@ -22,16 +30,16 @@ CREATE TYPE timezone_full_t AS
 
 CREATE TYPE user_full_t AS
 	(
-	user_id			int4,
+	user_id			user_id_t,
 	user_nick		text,
 	user_fullname		text,
-	user_timezone_id	int4
+	user_timezone_id	timezone_id_t
 	);
 
 
 CREATE TYPE user_handle_t AS
 	(
-	user_id			int4,
+	user_id			user_id_t,
 	user_nick		text
 	);
 
@@ -42,12 +50,12 @@ CREATE TYPE user_handle_t AS
 
 CREATE TYPE story_full_t AS
 	(
-	story_id		int4,
-	story_author_id		int4,
+	story_id		story_id_t,
+	story_author_id		user_id_t,
 	story_author_nick	text,
 	story_title		text,
 	story_timestamp		text,
-	story_num_comments	int4,
+	story_num_comments	comment_id_t,
 	story_intro		bytea,
 	story_body		bytea
 	);
@@ -55,19 +63,19 @@ CREATE TYPE story_full_t AS
 
 CREATE TYPE story_blurb_t AS
 	(
-	story_id		int4,
-	story_author_id		int4,
+	story_id		story_id_t,
+	story_author_id		user_id_t,
 	story_author_nick	text,
 	story_title		text,
 	story_timestamp		text,
-	story_num_comments	int4,
+	story_num_comments	comment_id_t,
 	story_intro		bytea
 	);
 
 
 CREATE TYPE story_handle_t AS
 	(
-	story_id		int4,
+	story_id		story_id_t,
 	story_title		text
 	);
 
@@ -78,9 +86,9 @@ CREATE TYPE story_handle_t AS
 
 CREATE TYPE comment_full_t AS
 	(
-	comment_id		int4,
-	comment_story_id	int4,
-	comment_author_id	int4,
+	comment_id		comment_id_t,
+	comment_story_id	story_id_t,
+	comment_author_id	user_id_t,
 	comment_author_nick	text,
 	comment_title		text,
 	comment_timestamp	text,
@@ -90,7 +98,7 @@ CREATE TYPE comment_full_t AS
 
 CREATE TYPE comment_handle_t AS
 	(
-	comment_id		int4,
+	comment_id		comment_id_t,
 	comment_title		text
 	);
 

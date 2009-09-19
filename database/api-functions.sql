@@ -3,9 +3,7 @@
 /* This file defines a functional API for database access.		*/
 /* Clients should limit themselves to invoking these functions.		*/
 /* Direct manipulation of the database tables is neither necessary nor	*/
-/* recommended!  Note also that if you want secure storage of user	*/
-/* passwords, you must run the module securise.sql, which redefines	*/
-/* of couple of these functions.					*/
+/* recommended!								*/
 /************************************************************************/
 
 
@@ -21,36 +19,23 @@ CREATE FUNCTION get_timezones ()
 RETURNS SETOF timezone_full_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT timezone_id, timezone_name, timezone_abbrev, timezone_offset, timezone_dst
-	FROM timezones;
+	SELECT	timezone_id, timezone_name
+		FROM timezones;
 $$;
 
 /*
  * Returns the specified timezone.
  */
 
-CREATE FUNCTION get_timezone (int4)
+CREATE FUNCTION get_timezone (timezone_id_t)
 RETURNS timezone_full_t
-LANGUAGE plpgsql STABLE AS
+LANGUAGE sql STABLE AS
 $$
-DECLARE
-	_timezone_id		ALIAS FOR $1;
-	_timezone		timezone_full_t%ROWTYPE;
-BEGIN
-	SELECT	INTO _timezone	
-		timezone_id, timezone_name, timezone_abbrev, timezone_offset, timezone_dst
+	SELECT	timezone_id, timezone_name
 		FROM timezones
-		WHERE timezone_id = _timezone_id;
-
-	IF NOT FOUND
-	THEN
-		RAISE EXCEPTION 'Non-existent timezone';
-		RETURN NULL;
-	END IF;
-
-	RETURN _timezone;
-END
+		WHERE timezone_id = $1;
 $$;
+
 
 /************************************************************************/
 /* Functions returning users.						*/
@@ -64,8 +49,8 @@ CREATE FUNCTION get_users ()
 RETURNS SETOF user_handle_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT user_id, user_nick
-	FROM users;
+	SELECT	user_id, user_nick
+		FROM users;
 $$;
 
 
@@ -73,13 +58,13 @@ $$;
  * Returns all the information for a specified user.
  */
 
-CREATE FUNCTION get_user (user_id int4)
+CREATE FUNCTION get_user (user_id)
 RETURNS SETOF user_full_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT user_id, user_nick, user_fullname, user_timezone_id
-	FROM users
-	WHERE user_id = $1;
+	SELECT	user_id, user_nick, user_fullname, user_timezone_id
+		FROM users
+		WHERE user_id = $1;
 $$;
 
 
@@ -94,32 +79,34 @@ RETURNS user_handle_t
 LANGUAGE plpgsql AS
 $$
 DECLARE
-        _target_nick            ALIAS FOR $1;
-        _target_password        ALIAS FOR $2;
-        _target_password_hash   text;
-        _actual_user            users%ROWTYPE;
-        _actual_user_handle     user_handle_t;
+	_target_nick            ALIAS FOR $1;
+	_target_password        ALIAS FOR $2;
+	_target_password_hash   text;
+	_actual_user            users%ROWTYPE;
+	_actual_user_handle     user_handle_t;
 
 BEGIN
-        SELECT INTO _actual_user * FROM users WHERE user_nick = _target_nick;
-        IF FOUND
-        THEN
-                _target_password_hash := crypt (_target_password, _actual_user.user_password_salt);
-                IF _target_password_hash = _actual_user.user_password_hash
-                THEN
-                        _actual_user_handle := (_actual_user.user_id, _actual_user.user_nick);
-                        RETURN _actual_user_handle;
-                ELSE
-                        RAISE EXCEPTION 'Non-matching password';
-                        RETURN NULL;
-                END IF;
-        ELSE
-                RAISE EXCEPTION 'Non-existent user name';
-                RETURN NULL;
-        END IF;
+	SELECT	INTO _actual_user *
+		FROM users
+		WHERE user_nick = _target_nick;
+
+	IF FOUND
+	THEN
+		_target_password_hash := crypt (_target_password, _actual_user.user_password_salt);
+		IF _target_password_hash = _actual_user.user_password_hash
+		THEN
+			_actual_user_handle := (_actual_user.user_id, _actual_user.user_nick);
+			RETURN _actual_user_handle;
+		ELSE
+			RAISE EXCEPTION 'Non-matching password';
+			RETURN NULL;
+		END IF;
+	ELSE
+		RAISE EXCEPTION 'Non-existent user name';
+		RETURN NULL;
+	END IF;
 END
 $$;
-
 
 
 /************************************************************************/
@@ -127,36 +114,18 @@ $$;
 /************************************************************************/
 
 /*
- * Returns all stories in the database.  Only the story's blurb is returned.
- * If the specified client_id isn't null, the timestamp of each story is returned
- * in the user's localtime according to their timezone.
+ * Returns all stories in the database.
+ * Only the story's blurb is returned.
  */
 
-CREATE FUNCTION get_stories (int4)
+CREATE FUNCTION get_stories ()
 RETURNS SETOF story_blurb_t
-LANGUAGE plpgsql STABLE AS
+LANGUAGE sql STABLE AS
 $$
-DECLARE
-	_client_id	ALIAS FOR $1;
-	_timezone	timezone_brief_t%ROWTYPE;
-	_story		story_blurb_t%ROWTYPE;
-
-BEGIN
-	_timezone := get_user_timezone (_client_id);
-	
-	FOR _story IN
-		SELECT	story_id, user_id, user_nick, story_title,
-			timestamp_to_localtime (_timezone, story_timestamp),
-			story_num_comments, story_intro_raw
-			FROM stories, users
-			WHERE story_author_id = user_id
-			ORDER BY story_timestamp DESC
-		LOOP
-			RETURN NEXT _story;
-		END LOOP;
-
-	RETURN;
-END
+	SELECT	story_id, user_id, user_nick, story_title, story_timestamp, story_num_comments, story_intro_xhtml
+		FROM stories, users
+		WHERE story_author_id = user_id
+		ORDER BY story_timestamp DESC
 $$;
 
 
@@ -164,45 +133,28 @@ $$;
  * Returns all stories authored by a specified user.
  */
 
-CREATE FUNCTION get_user_stories (user_id int4)
+CREATE FUNCTION get_user_stories (user_id_t)
 RETURNS SETOF story_handle_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT story_id, story_title
-	FROM stories
-	WHERE story_author_id = $1
-	ORDER BY story_timestamp DESC
+	SELECT	story_id, story_title
+		FROM stories
+		WHERE story_author_id = $1
+		ORDER BY story_timestamp DESC
 $$;
 
 
 /*
  * Returns all existing information about the specified story.
- * If the specified client_id isn't null, the timestamp of the story
- * is returned in the user's localtime according to their timezone.
  */
 
-CREATE FUNCTION get_story (int4, int4)
+CREATE FUNCTION get_story (story_id_t)
 RETURNS story_full_t
-LANGUAGE plpgsql STABLE AS
+LANGUAGE sql STABLE AS
 $$
-DECLARE
-	_story_id	ALIAS FOR $1;
-	_client_id	ALIAS FOR $2;
-	_timezone	timezone_brief_t%ROWTYPE;
-	_story		story_full_t%ROWTYPE;
-
-BEGIN
-	_timezone:= get_user_timezone (_client_id);
-
-	SELECT	INTO _story
-		story_id, user_id, user_nick, story_title,
-		timestamp_to_localtime (_timezone, story_timestamp),
-		story_num_comments, story_intro_raw, story_body_raw
-	FROM stories, users
-	WHERE story_id = _story_id AND story_author_id = user_id;
-
-	RETURN _story;
-END
+	SELECT	story_id, user_id, user_nick, story_title, story_timestamp, story_num_comments, story_intro_xhtml, story_body_xhtml
+		FROM stories, users
+		WHERE story_id = $1 AND story_author_id = user_id;
 $$;
 
 
@@ -212,35 +164,16 @@ $$;
 
 /*
  * Returns all comments belonging to a specified story.
- * If the specified client_id isn't null, the timestamp of each comment
- * is returned in the user's localtime according to their timezone.
  */
 
-CREATE FUNCTION get_story_comments (int4, int4)
+CREATE FUNCTION get_story_comments (story_id_t)
 RETURNS SETOF comment_full_t
-LANGUAGE plpgsql STABLE AS
+LANGUAGE sql STABLE AS
 $$
-DECLARE
-	_story_id	ALIAS FOR $1;
-	_client_id	ALIAS FOR $2;
-	_timezone	timezone_brief_t%ROWTYPE;
-	_comment	comment_full_t%ROWTYPE;
-
-BEGIN
-	_timezone := get_user_timezone (_client_id);
-
-	FOR _comment IN
-		SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title,
-			timestamp_to_localtime (_timezone, comment_timestamp), comment_body_raw
-			FROM comments, users
-			WHERE comment_story_id = _story_id AND comment_author_id = user_id
-			ORDER BY comment_timestamp
-		LOOP
-			RETURN NEXT _comment;
-		END LOOP;
-
-	RETURN;
-END
+	SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title, comment_timestamp, comment_body_xhtml
+		FROM comments, users
+		WHERE comment_story_id = $1 AND comment_author_id = user_id
+		ORDER BY comment_timestamp
 $$;
 
 
@@ -248,44 +181,28 @@ $$;
  * Returns all comments authored by a specified user.
  */
 
-CREATE FUNCTION get_user_comments (user_id int4)
+CREATE FUNCTION get_user_comments (user_id_t)
 RETURNS SETOF comment_handle_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT comment_id, comment_title
-	FROM comments
-	WHERE comment_author_id = $1
-	ORDER BY comment_timestamp;
+	SELECT	comment_id, comment_title
+		FROM comments
+		WHERE comment_author_id = $1
+		ORDER BY comment_timestamp;
 $$;
 
 
 /*
  * Returns the specified comment.
- * If the specified client_id isn't null, the timestamp of the comment
- * is returned in the user's localtime according to their timezone.
  */
 
-CREATE FUNCTION get_comment (int4, int4)
+CREATE FUNCTION get_comment (comment_id_t)
 RETURNS comment_full_t
-LANGUAGE plpgsql STABLE AS
+LANGUAGE sql STABLE AS
 $$
-DECLARE
-	_comment_id	ALIAS FOR $1;
-	_client_id	ALIAS FOR $2;
-	_timezone	timezone_brief_t%ROWTYPE;
-	_comment	comment_full_t%ROWTYPE;
-
-BEGIN
-	_timezone := get_user_timezone (_client_id);
-
-	SELECT	INTO _comment
-		comment_id, comment_story_id, user_id, user_nick, comment_title,
-		timestamp_to_localtime (_timezone, comment_timestamp), comment_body_raw
+	SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title, comment_timestamp, comment_body_xhtml
 		FROM comments, users
-		WHERE _comment_id = comment_id AND comment_author_id = user_id;
-
-	RETURN _comment;
-END
+		WHERE comment_id = $1 AND comment_author_id = user_id;
 $$;
 
 
@@ -297,7 +214,7 @@ $$;
  * Adds a new user.
  */
 
-CREATE OR REPLACE FUNCTION add_user (text, text, text, int4)
+CREATE FUNCTION add_user (text, text, text, timezone_id_t)
 RETURNS void
 LANGUAGE plpgsql AS
 $$
@@ -337,7 +254,7 @@ $$;
  * Adds a new story.
  */
 
-CREATE FUNCTION add_story (int4, text, text, bytea, bytea, text, bytea, bytea)
+CREATE FUNCTION add_story (user_id_t, text, text, bytea, bytea, text, bytea, bytea)
 RETURNS void
 LANGUAGE plpgsql VOLATILE AS
 $$
@@ -345,11 +262,11 @@ DECLARE
 	_story_author_id	ALIAS FOR $1;
 	_story_title		ALIAS FOR $2;
 	_story_intro_src	ALIAS FOR $3;
-	_story_intro_ast	ALIAS FOR $4;
-	_story_intro_raw	ALIAS FOR $5;
+	_story_intro_doc	ALIAS FOR $4;
+	_story_intro_xhtml	ALIAS FOR $5;
 	_story_body_src		ALIAS FOR $6;
-	_story_body_ast		ALIAS FOR $7;
-	_story_body_raw		ALIAS FOR $8;
+	_story_body_doc		ALIAS FOR $7;
+	_story_body_xhtml	ALIAS FOR $8;
 
 BEGIN
 	INSERT	INTO stories
@@ -359,11 +276,11 @@ BEGIN
 			story_timestamp,
 			story_num_comments,
 			story_intro_src,
-			story_intro_ast,
-			story_intro_raw,
+			story_intro_doc,
+			story_intro_xhtml,
 			story_body_src,
-			story_body_ast,
-			story_body_raw
+			story_body_doc,
+			story_body_xhtml
 			)
 		VALUES
 			(
@@ -372,11 +289,11 @@ BEGIN
 			now (),
 			0,
 			_story_intro_src,
-			_story_intro_ast,
-			_story_intro_raw,
+			_story_intro_doc,
+			_story_intro_xhtml,
 			_story_body_src,
-			_story_body_ast,
-			_story_body_raw
+			_story_body_doc,
+			_story_body_xhtml
 			);
 END
 $$;
@@ -386,7 +303,7 @@ $$;
  * Adds a new comment.
  */
 
-CREATE FUNCTION add_comment (int4, int4, text, text, bytea, bytea)
+CREATE FUNCTION add_comment (story_id_t, user_id_t, text, text, bytea, bytea)
 RETURNS void
 LANGUAGE plpgsql VOLATILE AS
 $$
@@ -395,8 +312,8 @@ DECLARE
 	_comment_author_id	ALIAS FOR $2;
 	_comment_title		ALIAS FOR $3;
 	_comment_body_src	ALIAS FOR $4;
-	_comment_body_ast	ALIAS FOR $5;
-	_comment_body_raw	ALIAS FOR $6;
+	_comment_body_doc	ALIAS FOR $5;
+	_comment_body_xhtml	ALIAS FOR $6;
 
 BEGIN
 	INSERT	INTO comments
@@ -406,8 +323,8 @@ BEGIN
 			comment_title,
 			comment_timestamp,
 			comment_body_src,
-			comment_body_ast,
-			comment_body_raw
+			comment_body_doc,
+			comment_body_xhtml
 			)
 		VALUES
 			(
@@ -416,8 +333,8 @@ BEGIN
 			_comment_title,
 			now (),
 			_comment_body_src,
-			_comment_body_ast,
-			_comment_body_raw
+			_comment_body_doc,
+			_comment_body_xhtml
 			);
 END
 $$;
@@ -431,7 +348,7 @@ $$;
  * Changes the user's credentials (password).
  */
 
-CREATE OR REPLACE FUNCTION edit_user_credentials (int4, text, text)
+CREATE FUNCTION edit_user_credentials (user_id_t, text, text)
 RETURNS void
 LANGUAGE plpgsql VOLATILE AS
 $$
@@ -445,7 +362,10 @@ DECLARE
         _old_password_hash      text;
 
 BEGIN
-        SELECT INTO _actual_user * FROM users WHERE user_id = _user_id;
+        SELECT	INTO _actual_user *
+		FROM users
+		WHERE user_id = _user_id;
+
         IF FOUND
         THEN
                 _old_password_hash := crypt (_old_password, _actual_user.user_password_salt);
@@ -471,12 +391,11 @@ END
 $$;
 
 
-
 /*
  * Changes the user's settings.
  */
 
-CREATE FUNCTION edit_user_settings (int4, text, int4)
+CREATE FUNCTION edit_user_settings (user_id_t, text, timezone_id_t)
 RETURNS void
 LANGUAGE plpgsql VOLATILE AS
 $$
@@ -500,7 +419,7 @@ $$;
  * Is the given user name available?
  */
 
-CREATE FUNCTION is_available_nick (nick text)
+CREATE FUNCTION is_available_nick (text)
 RETURNS bool
 LANGUAGE sql STABLE AS
 $$

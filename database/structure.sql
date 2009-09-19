@@ -11,9 +11,6 @@ CREATE TABLE timezones
 	(
 	timezone_id		timezone_id_t UNIQUE NOT NULL,
 	timezone_name		text NOT NULL,
-	timezone_abbrev		text NOT NULL,
-	timezone_offset		float NOT NULL,
-	timezone_dst		boolean NOT NULL,
 	PRIMARY KEY (timezone_id)
 	);
 
@@ -46,6 +43,7 @@ ALTER TABLE users ALTER COLUMN user_id SET DEFAULT nextval ('user_id_seq');
 
 CREATE INDEX users_user_timezone_id_idx ON users (user_timezone_id);
 
+
 /************************************************************************/
 /* Stories.								*/
 /************************************************************************/
@@ -63,11 +61,11 @@ CREATE TABLE stories
 	story_timestamp 	timestamptz NOT NULL,
 	story_num_comments	comment_id_t NOT NULL,
 	story_intro_src		text NOT NULL,
-	story_intro_ast		bytea NOT NULL,
-	story_intro_raw		bytea NOT NULL,
+	story_intro_doc		bytea NOT NULL,
+	story_intro_xhtml	bytea NOT NULL,
 	story_body_src		text NULL,
-	story_body_ast		bytea NULL,
-	story_body_raw		bytea NULL,
+	story_body_doc		bytea NULL,
+	story_body_xhtml	bytea NULL,
 	PRIMARY KEY (story_id)
 	);
 
