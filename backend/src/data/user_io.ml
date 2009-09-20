@@ -67,10 +67,7 @@ let option_of_tz default tz =
 	in Eliom_predefmod.Xhtml.Option ([], Timezone.make_handle tz#tid, Some (Timezone_io.describe tz), correct_tz tz)
 
 
-let form_for_fresh ?user (enter_nick, (enter_fullname, (enter_password, (enter_password2, enter_timezone)))) =
-	let (value_nick, value_fullname, value_timezone) = match user with
-		| Some u -> (Some u#nick, Some u#fullname, Some u#timezone)
-		| None	 -> (None, None, None) in
+let form_for_fresh ?nick ?fullname ?timezone (enter_nick, (enter_fullname, (enter_password, (enter_password2, enter_timezone)))) =
 	Database.get_timezones () >>= fun timezones ->
 	Lwt.return
 		[fieldset
@@ -78,9 +75,9 @@ let form_for_fresh ?user (enter_nick, (enter_fullname, (enter_password, (enter_p
 			legend [pcdata "Information about new user:"];
 
 			label ~a:[a_class ["input_label"]; a_for "enter_nick"] [pcdata "Enter login name:"];
-			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_nick"] ~input_type:`Text ~name:enter_nick ?value:value_nick ();
+			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_nick"] ~input_type:`Text ~name:enter_nick ?value:nick ();
 			label ~a:[a_class ["input_label"]; a_for "enter_fullname"] [pcdata "Enter full name:"];
-			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_fullname"] ~input_type:`Text ~name:enter_fullname ?value:value_fullname ();
+			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_fullname"] ~input_type:`Text ~name:enter_fullname ?value:fullname ();
 			label ~a:[a_class ["input_label"]; a_for "enter_password"] [pcdata "Enter password:"];
 			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_password"] ~input_type:`Password ~name:enter_password ();
 			label ~a:[a_class ["input_label"]; a_for "enter_password2"] [pcdata "Confirm password:"];
@@ -89,8 +86,8 @@ let form_for_fresh ?user (enter_nick, (enter_fullname, (enter_password, (enter_p
 			Eliom_predefmod.Xhtml.user_type_select
 				~a:[a_id "enter_timezone"]
 				~name:enter_timezone
-				(option_of_tz value_timezone Timezone.utc)
-				(List.map (option_of_tz value_timezone) timezones)
+				(option_of_tz timezone Timezone.utc)
+				(List.map (option_of_tz timezone) timezones)
 				Timezone.to_string
 			]]
 

@@ -13,10 +13,7 @@ type handle_t =
 
 type full_t =
 	< tid: Id.t option;
-	name: string;
-	abbrev: string;
-	offset: float;
-	dst: bool >
+	name: string >
 
 val utc: full_t
 
@@ -25,11 +22,11 @@ val make_handle:
 	handle_t
 
 val make_full:
-	Id.t -> string -> string -> float -> bool ->
+	Id.t -> string ->
 	full_t
 
 val full_of_tuple:
-	Id.t * string * string * float * bool ->
+	Id.t * string ->
 	full_t
 
 val to_string:

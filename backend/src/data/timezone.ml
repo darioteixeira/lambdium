@@ -13,19 +13,13 @@ type handle_t =
 
 type full_t =
 	< tid: Id.t option;
-	name: string;
-	abbrev: string;
-	offset: float;
-	dst: bool >
+	name: string >
 
 
 let utc =
 	object
 		method tid = None
 		method name = "Coordinated Universal Time"
-		method abbrev = "UTC"
-		method offset = 0.0
-		method dst = false
 	end
 
 
@@ -35,18 +29,15 @@ let make_handle tid =
 	end
 
 
-let make_full tid name abbrev offset dst =
+let make_full tid name =
 	object
 		method tid = Some tid
 		method name = name
-		method abbrev = abbrev
-		method offset = offset
-		method dst = dst
 	end
 
 
-let full_of_tuple (tid, name, abbrev, offset, dst) =
-	make_full tid name abbrev offset dst
+let full_of_tuple (tid, name) =
+	make_full tid name
 
 
 let to_string tz = match tz#tid with

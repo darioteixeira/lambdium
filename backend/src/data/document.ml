@@ -13,7 +13,7 @@ open Lwt
 (**	{1 Type definitions}							*)
 (********************************************************************************)
 
-type timestamp_t = string
+type timestamp_t = CalendarLib.Calendar.t
 type source_t = string
 type output_t = [ `Div ] XHTML.M.elt
 type manuscript_t = Lambdoc_core.Valid.manuscript_t

@@ -16,7 +16,7 @@ open Page
 (********************************************************************************)
 
 let output_core maybe_login sp =
-	Database.get_stories maybe_login >>= fun stories ->
+	Database.get_stories () >>= fun stories ->
 	match stories with
 		| hd :: tl ->
 			let hd' = Story_io.output_blurb maybe_login sp hd

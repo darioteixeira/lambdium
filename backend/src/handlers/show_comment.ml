@@ -18,7 +18,7 @@ open Page
 let output_core cid maybe_login sp =
 	Lwt.catch
 		(fun () ->
-			Database.get_comment maybe_login cid >>= fun comment ->
+			Database.get_comment cid >>= fun comment ->
 			Lwt.return (Stat_nothing, Some [Comment_io.output_full maybe_login sp comment]))
 		(function
 			| Database.Cannot_get_comment -> Lwt.return (Stat_failure [p [pcdata "Cannot find specified comment!"]], None)

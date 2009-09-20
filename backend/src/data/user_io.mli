@@ -29,7 +29,9 @@ val output_handle:
 (********************************************************************************)
 
 val form_for_fresh:
-	?user:User.fresh_t ->
+	?nick:string ->
+	?fullname:string ->
+	?timezone:Timezone.handle_t ->
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *

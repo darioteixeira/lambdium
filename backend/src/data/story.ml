@@ -7,7 +7,9 @@
 (********************************************************************************)
 
 open Lwt
+open CalendarLib
 open Document
+
 
 module Id = Id.Id32
 
@@ -110,7 +112,7 @@ let make_fresh author title intro_src intro_doc intro_out body_src body_doc body
 	object
 		method author = author
 		method title = title
-		method timestamp = "soon"
+		method timestamp = Calendar.now ()
 		method intro_src = intro_src
 		method intro_doc = intro_doc
 		method intro_out = intro_out

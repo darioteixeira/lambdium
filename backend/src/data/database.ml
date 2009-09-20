@@ -31,9 +31,10 @@ let pool =
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
+exception Database_error
+
 exception Cannot_get_timezone
 exception Cannot_get_user
-exception Cannot_get_login
 exception Cannot_get_story
 exception Cannot_get_comment
 
@@ -100,9 +101,14 @@ let get_user uid =
 let get_login nick password =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_login (%s, %s)" nick password); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_login ($nick, $password)" >>= function
-			| [u]	-> Lwt.return (Login.of_tuple u)
-			| _	-> Lwt.fail Cannot_get_login
+		Lwt.catch
+			(fun () ->
+				PGSQL(dbh) "nullres=none" "SELECT * FROM get_login ($nick, $password)" >>= function
+					| [u]	-> Lwt.return (Some (Login.of_tuple u))
+					| _	-> Lwt.fail Database_error)
+			(function
+				| PGOCaml.PostgreSQL_Error _ -> Lwt.return None
+				| exc -> Lwt.fail exc)
 	in Lwt_pool.use !!pool get_data
 
 
@@ -110,11 +116,10 @@ let get_login nick password =
 (**	{2 Functions returning stories}						*)
 (********************************************************************************)
 
-let get_stories maybe_login =
+let get_stories () =
 	assert (Ocsigen_messages.warning "Database.get_stories ()"; true);
-	let client = Login.maybe_uid maybe_login in
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_stories ($?client)" >>= fun stories ->
+		PGSQL(dbh) "nullres=none" "SELECT * FROM get_stories ()" >>= fun stories ->
 		Lwt.return (List.map Story.blurb_of_tuple stories)
 	in Lwt_pool.use !!pool get_data
 
@@ -127,11 +132,10 @@ let get_user_stories uid =
 	in Lwt_pool.use !!pool get_data
 
 
-let get_story maybe_login sid =
+let get_story sid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_story %ld" sid); true);
-	let client = Login.maybe_uid maybe_login in
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story ($sid, $?client)" >>= function
+		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story ($sid)" >>= function
 			| [s]	-> Lwt.return (Story.full_of_tuple s)
 			| _	-> Lwt.fail Cannot_get_story
 	in Lwt_pool.use !!pool get_data
@@ -141,11 +145,10 @@ let get_story maybe_login sid =
 (**	{2 Functions returning comments}					*)
 (********************************************************************************)
 
-let get_story_comments maybe_login sid =
+let get_story_comments sid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_story_comments %ld" sid); true);
-	let client = Login.maybe_uid maybe_login in
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story_comments ($sid, $?client)" >>= fun comments ->
+		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story_comments ($sid)" >>= fun comments ->
 		Lwt.return (List.map Comment.full_of_tuple comments)
 	in Lwt_pool.use !!pool get_data
 
@@ -158,11 +161,10 @@ let get_user_comments uid =
 	in Lwt_pool.use !!pool get_data
 
 
-let get_comment maybe_login cid =
+let get_comment cid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database#get_comment %ld" cid); true);
-	let client = Login.maybe_uid maybe_login in
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_comment ($cid, $?client)" >>= function
+		PGSQL(dbh) "nullres=none" "SELECT * FROM get_comment ($cid)" >>= function
 			| [c]	-> Lwt.return (Comment.full_of_tuple c)
 			| _	-> Lwt.fail Cannot_get_comment
 	in Lwt_pool.use !!pool get_data
@@ -172,14 +174,14 @@ let get_comment maybe_login cid =
 (**	{2 Functions returning mixed content (this AND that)}			*)
 (********************************************************************************)
 
-let get_story_with_comments maybe_login sid =
+let get_story_with_comments sid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_story_with_comments %ld" sid); true);
 	let get_data dbh =
 		Lwt.catch
 			(fun () ->
 				PGOCaml.begin_work dbh >>= fun () ->
-				get_story maybe_login sid >>= fun story ->
-				get_story_comments maybe_login sid >>= fun comments ->
+				get_story sid >>= fun story ->
+				get_story_comments sid >>= fun comments ->
 				PGOCaml.commit dbh >>= fun () ->
 				Lwt.return (story, comments))
 			(function exc ->

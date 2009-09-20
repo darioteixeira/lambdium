@@ -215,6 +215,6 @@ let exception_handler sp exc =
 		| End_of_file ->
 			("Problem with database connection", Some 500)
 		| exc ->
-			("Internal server error", Some 500)
+			("Internal server error: " ^ (Printexc.to_string exc), Some 500)
 	in Eliom_predefmod.Xhtml.send ?code ~sp (failure_page ~sp ~page_title:"Exception" ~msg)
 

@@ -20,7 +20,7 @@ let output_metadata maybe_login sp comment =
 		[
 		h1 ~a:[a_class ["comment_author"]] [Eliom_predefmod.Xhtml.a !!Services.show_user sp [pcdata comment#author#nick] comment#author#uid];
 		h1 ~a:[a_class ["comment_title"]] [pcdata comment#title];
-		h1 ~a:[a_class ["comment_timestamp"]] [pcdata comment#timestamp];
+		h1 ~a:[a_class ["comment_timestamp"]] [pcdata (localise maybe_login comment#timestamp)];
 		]
 
 

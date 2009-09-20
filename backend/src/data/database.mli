@@ -20,9 +20,10 @@
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
+exception Database_error
+
 exception Cannot_get_timezone
 exception Cannot_get_user
-exception Cannot_get_login
 exception Cannot_get_story
 exception Cannot_get_comment
 
@@ -53,25 +54,25 @@ val get_timezone: Timezone.Id.t option -> Timezone.full_t Lwt.t
 
 val get_users: unit -> User.handle_t list Lwt.t
 val get_user: User.Id.t -> User.full_t Lwt.t
-val get_login: string -> string -> Login.t Lwt.t
+val get_login: string -> string -> Login.t option Lwt.t
 
 
 (********************************************************************************)
 (**	{2 Functions returning stories}						*)
 (********************************************************************************)
 
-val get_stories: Login.t option -> Story.blurb_t list Lwt.t
+val get_stories: unit -> Story.blurb_t list Lwt.t
 val get_user_stories: User.Id.t -> Story.handle_t list Lwt.t
-val get_story: Login.t option -> Story.Id.t -> Story.full_t Lwt.t
+val get_story: Story.Id.t -> Story.full_t Lwt.t
 
 
 (********************************************************************************)
 (**	{2 Functions returning comments}					*)
 (********************************************************************************)
 
-val get_story_comments: Login.t option -> Story.Id.t -> Comment.full_t list Lwt.t
+val get_story_comments: Story.Id.t -> Comment.full_t list Lwt.t
 val get_user_comments: User.Id.t -> Comment.handle_t list Lwt.t
-val get_comment: Login.t option -> Comment.Id.t -> Comment.full_t Lwt.t
+val get_comment: Comment.Id.t -> Comment.full_t Lwt.t
 
 
 (********************************************************************************)
@@ -84,7 +85,7 @@ val get_comment: Login.t option -> Comment.Id.t -> Comment.full_t Lwt.t
 	we use the transaction mechanisms (PGOCaml.begin_work et al) for that.
 *)
 
-val get_story_with_comments: Login.t option -> Story.Id.t -> (Story.full_t * Comment.full_t list) Lwt.t
+val get_story_with_comments: Story.Id.t -> (Story.full_t * Comment.full_t list) Lwt.t
 
 
 (********************************************************************************)

@@ -7,6 +7,7 @@
 (********************************************************************************)
 
 open Lwt
+open Common
 
 
 (********************************************************************************)
@@ -18,10 +19,35 @@ exception No_login
 
 
 (********************************************************************************)
+(**	{1 Type definitions}							*)
+(********************************************************************************)
+
+(**	The type of the login table.
+*)
+type 'a login_table_t =
+	| Persistent of 'a Eliom_sessions.persistent_table
+	| Volatile of 'a Eliom_sessions.volatile_table
+
+
+(********************************************************************************)
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let table = Eliom_sessions.create_persistent_table "login_table"
+(**	Creates the login table.  By default we use a persistent table, but you
+	can choose a volatile table by setting the 'login_table' configuration
+	option to 'volatile'.  Volatile tables tend to be faster, since they are
+	kept entirely in memory.  On the other hand, persistent tables can survive
+	across a restart of the server.
+*)
+let login_table = lazy
+	(let msg = Printf.sprintf "Lambdium using %s table for logins"
+	in match !Config.login_table with
+		| Config.Use_volatile ->
+			Ocsigen_messages.warning (msg "volatile");
+			Volatile (Eliom_sessions.create_volatile_table ())
+		| Config.Use_persistent ->
+			Ocsigen_messages.warning (msg "persistent");
+			Persistent (Eliom_sessions.create_persistent_table "login_table"))
 
 
 (********************************************************************************)
@@ -31,7 +57,12 @@ let table = Eliom_sessions.create_persistent_table "login_table"
 (**	Returns the currently logged-in user, if any.
 *)
 let get_maybe_login sp =
-	Eliom_sessions.get_persistent_session_data ~table ~sp () >>= function
+	(match !!login_table with
+		| Persistent table ->
+			Eliom_sessions.get_persistent_session_data ~table ~sp ()
+		| Volatile table ->
+			Lwt.return (Eliom_sessions.get_volatile_session_data table sp ())) >>= fun login_data ->
+	match login_data with
 		| Eliom_sessions.Data login		-> Lwt.return (Some login)
 		| Eliom_sessions.No_data 
 		| Eliom_sessions.Data_session_expired	-> Lwt.return None
@@ -41,33 +72,42 @@ let get_maybe_login sp =
 *)
 let get_login sp =
 	get_maybe_login sp >>= function
-		| Some login	-> Lwt.return login
-		| None		-> Lwt.fail No_login
+		| Some login -> Lwt.return login
+		| None	     -> Lwt.fail No_login
 
 
 (**	Handler for login action.
 *)
 let login_handler sp () (username, (password, remember)) =
-	Eliom_sessions.close_session ~sp () >>=
-	fun () -> Lwt.catch
-		(fun () ->
-			Database.get_login username password >>= fun login ->
+	Eliom_sessions.close_session ~sp () >>= fun () ->
+	Ocsigen_messages.warning "#D";
+	Database.get_login username password >>= function
+		| Some login ->
 			let login_group = User.Id.to_string (Login.uid login) in
 			Eliom_sessions.set_service_session_group ~set_max:(Some 4) ~sp login_group;
-			Eliom_sessions.set_persistent_session_data ~table ~sp login >>= fun () ->
-			Eliom_sessions.set_persistent_data_session_group ~set_max:(Some 4) ~sp login_group >>= fun () ->
 
+			(match !!login_table with
+				| Persistent table ->
+					Eliom_sessions.set_persistent_session_data ~table ~sp login >>= fun () ->
+					Eliom_sessions.set_persistent_data_session_group ~set_max:(Some 4) ~sp login_group
+				| Volatile table ->
+					Eliom_sessions.set_volatile_session_data ~table ~sp login;
+					Eliom_sessions.set_volatile_data_session_group ~set_max:(Some 4) ~sp login_group;
+					Lwt.return ()) >>= fun () ->
+	
 			(if remember
-			then
-				begin
+			then begin
 				Eliom_sessions.set_service_session_timeout ~sp None;
 				Eliom_sessions.set_persistent_data_session_timeout ~sp None >>= fun () ->
 				Eliom_sessions.set_persistent_data_session_cookie_exp_date ~sp (Some 3153600000.0)
-				end
-			else	Lwt.return ()) >>= fun () ->
-			Lwt.return [])
+			end
+			else begin
+				Lwt.return ()
+			end) >>= fun () ->
 
-		(function _ -> Lwt.return [Invalid_login])
+			Lwt.return []
+		| None ->
+			Lwt.return [Invalid_login]
 
 
 (**	Handler for logout action.

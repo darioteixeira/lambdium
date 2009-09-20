@@ -30,7 +30,7 @@ let output_metadata maybe_login sp story =
 		[
 		h1 ~a:[a_class ["story_title"]] [pcdata story#title];
 		h1 ~a:[a_class ["story_author"]] [Eliom_predefmod.Xhtml.a !!Services.show_user sp [pcdata story#author#nick] story#author#uid];
-		h1 ~a:[a_class ["story_timestamp"]] [pcdata story#timestamp];
+		h1 ~a:[a_class ["story_timestamp"]] [pcdata (localise maybe_login story#timestamp)];
 		]
 
 

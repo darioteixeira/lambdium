@@ -18,14 +18,8 @@ let output_full tz =
 		(dt [pcdata "Name:"])
 		[
 		dd [pcdata tz#name];
-		dt [pcdata "Abbrev:"];
-		dd [pcdata tz#abbrev];
-		dt [pcdata "UTC offset:"];
-		dd [pcdata (Printf.sprintf "%+06.2fh" tz#offset)];
-		dt [pcdata "Daylight savings:"];
-		dd [pcdata (string_of_bool tz#dst)]
 		]
 
 let describe tz =
-	pcdata (Printf.sprintf "%s (%s) UTC%+06.2f" tz#name tz#abbrev tz#offset)
+	pcdata (Printf.sprintf "%s" tz#name)
 
