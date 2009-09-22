@@ -75,7 +75,7 @@ $$;
  */
 
 CREATE OR REPLACE FUNCTION get_login (text, text)
-RETURNS user_handle_t
+RETURNS login_t
 LANGUAGE plpgsql AS
 $$
 DECLARE
@@ -83,7 +83,8 @@ DECLARE
 	_target_password        ALIAS FOR $2;
 	_target_password_hash   text;
 	_actual_user            users%ROWTYPE;
-	_actual_user_handle     user_handle_t;
+	_login			login_t;
+	_timezone		timezones%ROWTYPE;
 
 BEGIN
 	SELECT	INTO _actual_user *
@@ -95,8 +96,9 @@ BEGIN
 		_target_password_hash := crypt (_target_password, _actual_user.user_password_salt);
 		IF _target_password_hash = _actual_user.user_password_hash
 		THEN
-			_actual_user_handle := (_actual_user.user_id, _actual_user.user_nick);
-			RETURN _actual_user_handle;
+			SELECT INTO _timezone * FROM timezones WHERE timezone_id = _actual_user.user_timezone_id;
+			_login := (_actual_user.user_id, _actual_user.user_nick, _timezone.timezone_name);
+			RETURN _login;
 		ELSE
 			RAISE EXCEPTION 'Non-matching password';
 			RETURN NULL;

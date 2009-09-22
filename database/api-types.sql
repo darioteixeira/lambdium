@@ -33,6 +33,14 @@ CREATE TYPE user_handle_t AS
 	);
 
 
+CREATE TYPE login_t AS
+	(
+	login_id		user_id_t,
+	login_nick		text,
+	login_tz		text
+	);
+
+
 /************************************************************************/
 /* Story related types.							*/
 /************************************************************************/
