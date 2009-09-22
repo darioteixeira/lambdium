@@ -1,9 +1,27 @@
+/********************************************************************************/
+/*	Timestamp_lowlevel.c
+        Copyright (c) 2009 Dario Teixeira (dario.teixeira@yahoo.com)
+        This software is distributed under the terms of the GNU GPL version 2.
+        See LICENSE file for full license text.
+*/
+/********************************************************************************/
+
+/*	This module is necessary because Ocaml's Unix module gives us no access
+	to the 'tzname' variables from Libc, and we need them in order to print
+	out the abbreviated name of the user's timezone.
+*/
+
+
 #include <stdio.h>
 #include <time.h>
 
 #include <caml/memory.h>
 #include <caml/alloc.h>
 
+
+/********************************************************************************/
+/* Public functions and values.							*/
+/********************************************************************************/
 
 CAMLprim value sprint_timestamp (value v_time)
 
