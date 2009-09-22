@@ -40,7 +40,7 @@ let handler sp () (sid, (title, body_src)) =
 			Document.parse_composition body_src >>= fun (body_doc, body_out) ->
 			let author = Login.to_user login in
 			let comment = Comment.make_fresh sid author title body_src body_doc body_out in
-			let comment_xhtml = Comment_io.output_fresh sp comment
+			let comment_xhtml = Comment_io.output_fresh (Some login) sp comment
 			in Lwt.return (make_reply ~success:true comment_xhtml))
 		(function
 			| Session.No_login			-> Lwt.return (make_reply ~success:false (pcdata "Not logged in!"))

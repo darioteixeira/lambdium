@@ -16,12 +16,15 @@ val output_handle:
 	[> `Li ] XHTML.M.elt
 
 val output_full:
+	?localiser:(Timestamp.t -> string) ->
 	Login.t option ->
 	Eliom_sessions.server_params ->
 	Comment.full_t ->
 	[> `Div ] XHTML.M.elt
 
 val output_fresh:
+	?localiser:(Timestamp.t -> string) ->
+	Login.t option ->
 	Eliom_sessions.server_params ->
 	Comment.fresh_t ->
 	[> `Div ] XHTML.M.elt

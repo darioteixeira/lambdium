@@ -39,6 +39,8 @@ let _ = dispatch begin function
 	| After_rules ->
 
 		flag ["ocaml"; "link"; "program"] & A"-linkpkg";
+		flag ["ocaml"; "byte"; "link"] (S[A"-custom"]);
+		dep ["ocaml"; "link"] ["data/timestamp_lowlevel.o"];
 
 		List.iter begin fun pkg ->
 			flag ["ocaml"; "compile";  "pkg_"^pkg] & S[A"-package"; A pkg];

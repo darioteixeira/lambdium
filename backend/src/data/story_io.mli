@@ -25,12 +25,14 @@ val output_handle:
 	[> `Li ] XHTML.M.elt
 
 val output_blurb:
+	?localiser:(Timestamp.t -> string) ->
 	Login.t option ->
 	Eliom_sessions.server_params ->
 	Story.blurb_t ->
 	[> `Li ] XHTML.M.elt
 
 val output_full:
+	?localiser:(Timestamp.t -> string) ->
 	Login.t option ->
 	Eliom_sessions.server_params ->
 	Story.full_t ->
@@ -38,6 +40,7 @@ val output_full:
 	[> `Div ] XHTML.M.elt
 
 val output_fresh:
+	?localiser:(Timestamp.t -> string) ->
 	Login.t ->
 	Eliom_sessions.server_params ->
 	Story.fresh_t ->

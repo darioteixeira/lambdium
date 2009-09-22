@@ -25,12 +25,13 @@ exception Invalid_intro_and_body of Document.output_t * Document.output_t
 (**	{1 Output-related functions}						*)
 (********************************************************************************)
 
-let output_metadata maybe_login sp story =
-	div ~a:[a_class ("story_meta" :: (Login.own_element story#author maybe_login))]
+let output_metadata ?localiser maybe_login sp story =
+	let localiser = Timestamp.make_localiser ?localiser maybe_login
+	in div ~a:[a_class ("story_meta" :: (Login.own_element story#author maybe_login))]
 		[
 		h1 ~a:[a_class ["story_title"]] [pcdata story#title];
 		h1 ~a:[a_class ["story_author"]] [Eliom_predefmod.Xhtml.a !!Services.show_user sp [pcdata story#author#nick] story#author#uid];
-		h1 ~a:[a_class ["story_timestamp"]] [pcdata (localise maybe_login story#timestamp)];
+		h1 ~a:[a_class ["story_timestamp"]] [pcdata (localiser story#timestamp)];
 		]
 
 
@@ -44,8 +45,15 @@ let output_handle sp story =
 	li ~a:[a_class ["story_handle"]] [Eliom_predefmod.Xhtml.a !!Services.show_story sp [pcdata story#title] story#sid]
 
 
-let output_full maybe_login sp story comments =
-	let comments_out = div ~a:[a_class ["story_comments"]] (List.map (Comment_io.output_full maybe_login sp) comments)
+let output_blurb ?localiser maybe_login sp story =
+	let metadata = output_metadata ?localiser maybe_login sp story
+	and intro_out = (story#intro_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt)
+	and gateway = output_gateway sp story
+	in li ~a:[a_class ["story_blurb"]] [metadata; intro_out; gateway]
+
+
+let output_full ?localiser maybe_login sp story comments =
+	let comments_out = div ~a:[a_class ["story_comments"]] (List.map (Comment_io.output_full ?localiser maybe_login sp) comments)
 	and add_comment () =
 		let create_form (enter_sid, (enter_title, enter_body)) =
 			[
@@ -81,15 +89,8 @@ let output_full maybe_login sp story comments =
 		| Some _	-> add_comment ()))
 
 
-let output_blurb maybe_login sp story =
-	let metadata = output_metadata maybe_login sp story
-	and intro_out = (story#intro_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt)
-	and gateway = output_gateway sp story
-	in li ~a:[a_class ["story_blurb"]] [metadata; intro_out; gateway]
-
-
-let output_fresh login sp story =
-	let metadata = output_metadata (Some login) sp story
+let output_fresh ?localiser login sp story =
+	let metadata = output_metadata ?localiser (Some login) sp story
 	and intro_out = (story#intro_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt)
 	and body_out = (story#body_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt)
 	in div ~a:[a_class ["story_full"; "story_preview"]] [metadata; intro_out; body_out]

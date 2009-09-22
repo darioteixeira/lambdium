@@ -16,6 +16,3 @@ let maybe f = function
 	| Some x -> Some (f x)
 	| None	 -> None
 
-let localise maybe_login cal =
-	CalendarLib.Printer.Calendar.to_string cal
-

@@ -19,7 +19,7 @@ type full_t =
 	sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	body_out: output_t >
 
 type editable_t =
@@ -27,7 +27,7 @@ type editable_t =
 	sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	body_src: source_t;
 	body_out: output_t >
 
@@ -35,7 +35,7 @@ type fresh_t =
 	< sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	body_src: source_t;
 	body_doc: composition_t;
 	body_out: output_t >
@@ -54,11 +54,11 @@ val make_handle:
 	handle_t
 
 val make_full:
-	Id.t -> Story.Id.t -> User.handle_t -> string -> timestamp_t -> output_t ->
+	Id.t -> Story.Id.t -> User.handle_t -> string -> Timestamp.t -> output_t ->
 	full_t
 
 val make_editable:
-	Id.t -> Story.Id.t -> User.handle_t -> string -> timestamp_t -> source_t -> output_t ->
+	Id.t -> Story.Id.t -> User.handle_t -> string -> Timestamp.t -> source_t -> output_t ->
 	editable_t
 
 val make_fresh:
@@ -74,7 +74,7 @@ val handle_of_tuple:
 	handle_t
 
 val full_of_tuple:
-	(Id.t * Story.Id.t * User.Id.t * string * string * timestamp_t * string) ->
+	(Id.t * Story.Id.t * User.Id.t * string * string * Timestamp.t * string) ->
 	full_t
 
 val tuple_of_fresh:

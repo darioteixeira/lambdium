@@ -19,8 +19,9 @@ let output_core maybe_login sp =
 	Database.get_stories () >>= fun stories ->
 	match stories with
 		| hd :: tl ->
-			let hd' = Story_io.output_blurb maybe_login sp hd
-			and tl' = List.map (Story_io.output_blurb maybe_login sp) tl
+			let localiser = Timestamp.make_localiser maybe_login in
+			let hd' = Story_io.output_blurb ~localiser maybe_login sp hd
+			and tl' = List.map (Story_io.output_blurb ~localiser maybe_login sp) tl
 			in
 			Lwt.return (Stat_nothing, Some [ul ~a:[a_class ["list_of_stories"]] hd' tl'])
 		| [] ->

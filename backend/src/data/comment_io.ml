@@ -15,12 +15,13 @@ open Common
 (**	{1 Output-related functions}						*)
 (********************************************************************************)
 
-let output_metadata maybe_login sp comment =
-	div ~a:[a_class ("comment_meta" :: (Login.own_element comment#author maybe_login))]
+let output_metadata ?localiser maybe_login sp comment =
+	let localiser = Timestamp.make_localiser ?localiser maybe_login
+	in div ~a:[a_class ("comment_meta" :: (Login.own_element comment#author maybe_login))]
 		[
 		h1 ~a:[a_class ["comment_author"]] [Eliom_predefmod.Xhtml.a !!Services.show_user sp [pcdata comment#author#nick] comment#author#uid];
 		h1 ~a:[a_class ["comment_title"]] [pcdata comment#title];
-		h1 ~a:[a_class ["comment_timestamp"]] [pcdata (localise maybe_login comment#timestamp)];
+		h1 ~a:[a_class ["comment_timestamp"]] [pcdata (localiser comment#timestamp)];
 		]
 
 
@@ -31,20 +32,15 @@ let output_handle sp comment =
 		]
 
 
-let output_full maybe_login sp comment =
+let output_full ?localiser maybe_login sp comment =
 	div ~a:[a_class ["comment_full"]]
 		[
-		output_metadata maybe_login sp comment;
+		output_metadata ?localiser maybe_login sp comment;
 		comment#body_out
 		]
 
 
-let output_fresh sp comment =
-	div ~a:[a_class ["comment_full"; "comment_preview"]]
-		[
-		output_metadata None sp comment;
-		comment#body_out
-		]
+let output_fresh = output_full
 
 
 (********************************************************************************)

@@ -32,7 +32,7 @@ let rec step1_handler ~status sp () (sid, (title, body_src)) =
 			~sp
 			~content: (Comment_io.form_for_fresh ~sid ~title ~body_src)
 			() >>= fun form ->
-		Lwt.return (status, Some [Comment_io.output_fresh sp comment; form])
+		Lwt.return (status, Some [Comment_io.output_fresh (Some login) sp comment; form])
 	in Page.login_enforced_handler
 		~sp
 		~page_title: "Add Comment - Step 1/2"

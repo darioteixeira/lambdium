@@ -80,7 +80,6 @@ let get_login sp =
 *)
 let login_handler sp () (username, (password, remember)) =
 	Eliom_sessions.close_session ~sp () >>= fun () ->
-	Ocsigen_messages.warning "#D";
 	Database.get_login username password >>= function
 		| Some login ->
 			let login_group = User.Id.to_string (Login.uid login) in

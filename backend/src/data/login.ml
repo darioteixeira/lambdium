@@ -10,7 +10,12 @@
 (**	{1 Type definitions}							*)
 (********************************************************************************)
 
-type t = {uid: User.Id.t; nick: string;}
+type t =
+	{
+	uid: User.Id.t;
+	nick: string;
+	tz: string option;
+	}
 
 
 (********************************************************************************)
@@ -21,12 +26,11 @@ let uid x = x.uid
 
 let nick x = x.nick
 
-let of_tuple (uid, nick) =
-	{uid = uid; nick = nick;}
-	
-let of_user u =
-	{uid = u#uid; nick = u#nick;}
+let tz x = x.tz
 
+let of_tuple (uid, nick, tz) =
+	{uid = uid; nick = nick; tz = tz;}
+	
 let to_user x =
 	User.make_handle x.uid x.nick
 

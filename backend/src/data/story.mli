@@ -18,7 +18,7 @@ type blurb_t =
 	< sid: Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	num_comments: Id.t;
 	intro_out: output_t >
 
@@ -26,7 +26,7 @@ type full_t =
 	< sid: Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	num_comments: Id.t;
 	intro_out: output_t;
 	body_out: output_t >
@@ -35,7 +35,7 @@ type editable_t =
 	< sid: Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	num_comments: Id.t;
 	intro_src: source_t;
 	intro_out: output_t;
@@ -45,7 +45,7 @@ type editable_t =
 type fresh_t =
 	< author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	intro_src: source_t;
 	intro_doc: composition_t;
 	intro_out: output_t;
@@ -69,15 +69,15 @@ val make_handle:
 	handle_t
 
 val make_blurb:
-	Id.t -> User.handle_t -> string -> timestamp_t -> Id.t -> output_t ->
+	Id.t -> User.handle_t -> string -> Timestamp.t -> Id.t -> output_t ->
 	blurb_t
 
 val make_full:
-	Id.t -> User.handle_t -> string -> timestamp_t -> Id.t -> output_t -> output_t ->
+	Id.t -> User.handle_t -> string -> Timestamp.t -> Id.t -> output_t -> output_t ->
 	full_t
 
 val make_editable:
-	Id.t -> User.handle_t -> string -> timestamp_t -> Id.t -> source_t -> output_t -> source_t -> output_t ->
+	Id.t -> User.handle_t -> string -> Timestamp.t -> Id.t -> source_t -> output_t -> source_t -> output_t ->
 	editable_t
 
 val make_fresh:
@@ -93,11 +93,11 @@ val handle_of_tuple:
 	handle_t
 
 val blurb_of_tuple:
-	(Id.t * User.Id.t * string * string * timestamp_t * Id.t * string) ->
+	(Id.t * User.Id.t * string * string * Timestamp.t * Id.t * string) ->
 	blurb_t
 
 val full_of_tuple:
-	(Id.t * User.Id.t * string * string * timestamp_t * Id.t * string * string) ->
+	(Id.t * User.Id.t * string * string * Timestamp.t * Id.t * string * string) ->
 	full_t
 
 val tuple_of_fresh:

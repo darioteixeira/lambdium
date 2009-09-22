@@ -7,7 +7,6 @@
 (********************************************************************************)
 
 open Lwt
-open CalendarLib
 open Document
 
 
@@ -22,7 +21,7 @@ type full_t =
 	sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	body_out: output_t >
 
 type editable_t =
@@ -30,7 +29,7 @@ type editable_t =
 	sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	body_src: source_t;
 	body_out: output_t >
 
@@ -38,7 +37,7 @@ type fresh_t =
 	< sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
-	timestamp: timestamp_t;
+	timestamp: Timestamp.t;
 	body_src: source_t;
 	body_doc: composition_t;
 	body_out: output_t >
@@ -84,7 +83,7 @@ let make_fresh sid author title body_src body_doc body_out =
 		method sid = sid
 		method author = author
 		method title = title
-		method timestamp = Calendar.now ()
+		method timestamp = Timestamp.soon ()
 		method body_src = body_src
 		method body_doc = body_doc
 		method body_out = body_out

@@ -103,7 +103,7 @@ let get_login nick password =
 	let get_data dbh =
 		Lwt.catch
 			(fun () ->
-				PGSQL(dbh) "nullres=none" "SELECT * FROM get_login ($nick, $password)" >>= function
+				PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login ($nick, $password)" >>= function
 					| [u]	-> Lwt.return (Some (Login.of_tuple u))
 					| _	-> Lwt.fail Database_error)
 			(function
