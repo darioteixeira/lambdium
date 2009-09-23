@@ -16,9 +16,9 @@ open Common
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Invalid_intro of Document.output_t
-exception Invalid_body of Document.output_t
-exception Invalid_intro_and_body of Document.output_t * Document.output_t
+exception Invalid_story_intro of Document.output_t
+exception Invalid_story_body of Document.output_t
+exception Invalid_story_intro_and_body of Document.output_t * Document.output_t
 
 
 (********************************************************************************)
@@ -101,9 +101,20 @@ let output_fresh ?localiser login sp story =
 (********************************************************************************)
 
 let parse intro_src body_src =
-	Document.parse_composition intro_src >>= fun (intro_doc, intro_out) ->
-	Document.parse_manuscript body_src >>= fun (body_doc, body_out) ->
-	Lwt.return (intro_doc, intro_out, body_doc, body_out, [])
+	Document.parse_composition intro_src >>= fun intro_res ->
+	Document.parse_manuscript body_src >>= fun body_res ->
+	match (intro_res, body_res) with
+		| `Okay (intro_doc, _) , `Okay (body_doc, bitmaps) ->
+			let bitmap_lookup = XHTML.M.uri_of_string in
+			let intro_out = Document.output_of_composition bitmap_lookup intro_doc
+			and body_out = Document.output_of_manuscript bitmap_lookup body_doc
+			in Lwt.return (intro_doc, intro_out, body_doc, body_out, bitmaps)
+		| `Error intro_out, `Okay _ ->
+			Lwt.fail (Invalid_story_intro intro_out)
+		| `Okay _, `Error body_out ->
+			Lwt.fail (Invalid_story_body body_out)
+		| `Error intro_out, `Error body_out
+			-> Lwt.fail (Invalid_story_intro_and_body (intro_out, body_out))
 
 
 let form_for_fresh ?title ?intro_src ?body_src (enter_title, (enter_intro, enter_body)) =
@@ -124,12 +135,12 @@ let form_for_fresh ?title ?intro_src ?body_src (enter_title, (enter_intro, enter
 			]]
 
 
-let form_for_images ~aliases enter_file =
-	let make_input alias =
-		let lbl = "enter_file_" ^ alias
+let form_for_images ~bitmaps enter_file =
+	let make_input bitmap =
+		let lbl = "enter_file_" ^ bitmap
 		in	[
-			label ~a:[a_for lbl] [pcdata (Printf.sprintf "Enter file for bitmap '%s':" alias)];
+			label ~a:[a_for lbl] [pcdata (Printf.sprintf "Enter file for bitmap '%s':" bitmap)];
 			Eliom_predefmod.Xhtml.file_input ~a:[a_id lbl] ~name:enter_file ();
 			]
-	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input aliases)))]
+	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input bitmaps)))]
 

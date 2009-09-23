@@ -10,9 +10,9 @@
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Invalid_intro of Document.output_t
-exception Invalid_body of Document.output_t
-exception Invalid_intro_and_body of Document.output_t * Document.output_t
+exception Invalid_story_intro of Document.output_t
+exception Invalid_story_body of Document.output_t
+exception Invalid_story_intro_and_body of Document.output_t * Document.output_t
 
 
 (********************************************************************************)
@@ -63,7 +63,7 @@ val form_for_fresh:
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
 
 val form_for_images:
-	aliases:string list ->
+	bitmaps:string list ->
 	[< Ocsigen_extensions.file_info Eliom_parameters.setoneradio ] Eliom_parameters.param_name ->
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
 

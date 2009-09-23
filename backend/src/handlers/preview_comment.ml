@@ -37,7 +37,7 @@ let handler sp () (sid, (title, body_src)) =
 	Lwt.catch
 		(fun () ->
 			Session.get_login sp >>= fun login ->
-			Document.parse_composition body_src >>= fun (body_doc, body_out) ->
+			Comment_io.parse body_src >>= fun (body_doc, body_out) ->
 			let author = Login.to_user login in
 			let comment = Comment.make_fresh sid author title body_src body_doc body_out in
 			let comment_xhtml = Comment_io.output_fresh (Some login) sp comment

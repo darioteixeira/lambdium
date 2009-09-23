@@ -19,7 +19,7 @@ open Page
 
 let rec step1_handler ~status sp () (sid, (title, body_src)) =
 	let output_core login sp =
-		Document.parse_composition body_src >>= fun (body_doc, body_out) ->
+		Comment_io.parse body_src >>= fun (body_doc, body_out) ->
 		let author = Login.to_user login in
 		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session

@@ -41,27 +41,27 @@ let rec step1_handler ~status ?title ?intro_src ?body_src sp () () =
 and step2_handler ~login sp () (title, (intro_src, body_src)) =
 	Lwt.catch
 		(fun () ->
-			Story_io.parse intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, aliases) ->
+			Story_io.parse intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, bitmaps) ->
 			let author = Login.to_user login in
 			let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
-			if List.length aliases <> 0
-			then step3 ~story ~login ~sp ~aliases
+			if List.length bitmaps <> 0
+			then step3 ~story ~login ~sp ~bitmaps
 			else step5 ~story ~login ~sp)
 		(function
-			| Story_io.Invalid_intro intro_out ->
+			| Story_io.Invalid_story_intro intro_out ->
 				let status = Stat_failure ([intro_out] :> XHTML.M.block XHTML.M.elt list)
 				in step1_handler ~status ~title ~intro_src ~body_src sp () ()
-			| Story_io.Invalid_body body_out ->
+			| Story_io.Invalid_story_body body_out ->
 				let status = Stat_failure ([body_out] :> XHTML.M.block XHTML.M.elt list)
 				in step1_handler ~status ~title ~intro_src ~body_src sp () ()
-			| Story_io.Invalid_intro_and_body (intro_out, body_out) ->
+			| Story_io.Invalid_story_intro_and_body (intro_out, body_out) ->
 				let status = Stat_failure ([intro_out; body_out] :> XHTML.M.block XHTML.M.elt list)
 				in step1_handler ~status ~title ~intro_src ~body_src sp () ()
 			| exc ->
 				Lwt.fail exc)
 
 
-and step3 ~story ~login ~sp ~aliases =
+and step3 ~story ~login ~sp ~bitmaps =
 	let output_core login sp =
 		let step4_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -71,7 +71,7 @@ and step3 ~story ~login ~sp ~aliases =
 		Forms.Triatomic.make_form
 			~service: step4_service
 			~sp
-			~content: (Story_io.form_for_images ~aliases)
+			~content: (Story_io.form_for_images ~bitmaps)
 			() >>= fun form ->
 		Lwt.return (Stat_nothing, Some [form])
 	in Page.login_enforced_handler

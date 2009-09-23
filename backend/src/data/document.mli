@@ -6,6 +6,9 @@
 *)
 (********************************************************************************)
 
+open Common
+
+
 (********************************************************************************)
 (**	{1 Type definitions}							*)
 (********************************************************************************)
@@ -17,22 +20,17 @@ type composition_t
 
 
 (********************************************************************************)
-(**	{1 Exceptions}								*)
-(********************************************************************************)
-
-exception Invalid_manuscript of output_t
-exception Invalid_composition of output_t
-
-
-(********************************************************************************)
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-val parse_manuscript: string -> (manuscript_t * [> `Div ] XHTML.M.elt) Lwt.t
-val parse_composition: string -> (composition_t * [> `Div ] XHTML.M.elt) Lwt.t
+val output_of_manuscript: (string -> XHTML.M.uri) -> manuscript_t -> [> `Div ] XHTML.M.elt
+val output_of_composition: (string -> XHTML.M.uri) -> composition_t -> [> `Div ] XHTML.M.elt
 
-val output_of_string: string -> output_t
+val output_of_string: string -> [> `Div ] XHTML.M.elt
 val string_of_output: output_t -> string
+
+val parse_manuscript: source_t -> (manuscript_t * string list, [> `Div ] XHTML.M.elt) result_t Lwt.t
+val parse_composition: source_t -> (composition_t * string list, [> `Div ] XHTML.M.elt) result_t Lwt.t
 
 val serialise_manuscript: manuscript_t -> string
 val serialise_composition: composition_t -> string
