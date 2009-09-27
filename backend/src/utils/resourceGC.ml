@@ -39,12 +39,21 @@ type pool_t =
 (**	{1 Functions and values}						*)
 (********************************************************************************)
 
+(**	A no-operation function.  This is the default cleaner.
+*)
 let nop () = ()
 
 
+(**	The ID function.
+*)
 let id x = x
 
 
+(**	Gets a new token from the pool, if available.  You must also provide
+	the cleaner function that will be invoked if the token is not refreshed
+	nor returned for a period larger than the maximum defined for the pool.
+	Raises {!Token_unavailable} if the pool has no available tokens.
+*)
 let get_token pool cleaner =
 	if !(pool.ptr) > 0
 	then begin
@@ -60,6 +69,8 @@ let get_token pool cleaner =
 		raise Token_unavailable
 
 
+(**	Returns a token to the pool.  The client may not use it again.
+*)
 let put_token pool (token_ptr, token_pass) =
 	if (!(pool.ptr) < pool.size) && (pool.passwords.(token_ptr) = token_pass)
 	then begin
@@ -72,6 +83,8 @@ let put_token pool (token_ptr, token_pass) =
 		failwith "ResourceGC.put_token"
 
 
+(**	Refreshes the age of a previously retrieved token.
+*)
 let refresh_token pool (token_ptr, token_pass) =
 	if pool.passwords.(token_ptr) = token_pass
 	then
@@ -81,6 +94,10 @@ let refresh_token pool (token_ptr, token_pass) =
 		failwith "ResourceGC.refresh_token"
 
 
+(**	The watcher function wakes up periodically, checking if any of the outstanding
+	tokens has an age greater than allowed.  Those that do are forcibly returned to
+	the pool, and the corresponding cleaner function is invoked.
+*)
 let rec watcher pool () =
 	Ocsigen_messages.warning (Printf.sprintf "Watching '%s' pool:" pool.name);
 	let now = Unix.gettimeofday () in
@@ -97,6 +114,10 @@ let rec watcher pool () =
 	Lwt_timeout.start (Lwt_timeout.create 1 (watcher pool))
 
 
+(**	An invocation of [make_pool name size max_age] creates a new pool with the given
+	name and size, and whose tokens may be unrefreshed for a maximum time of [max_age]
+	before they are forcibly returned to the pool.
+*)
 let make_pool name size max_age =
 	let pool =
 		{
