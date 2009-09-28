@@ -59,7 +59,7 @@ $$;
  */
 
 CREATE FUNCTION get_user (user_id_t)
-RETURNS SETOF user_full_t
+RETURNS user_full_t
 LANGUAGE sql STABLE AS
 $$
 	SELECT	user_id, user_nick, user_fullname, user_timezone_id
@@ -70,11 +70,11 @@ $$;
 
 /*
  * Checks if the specified credentials (username, password) match
- * a user in the database.  If so, this function returns that user;
- * if not, an empty set is returned.
+ * a user in the database.  If so, this function returns the login
+ * information for that user; if not, an empty set is returned.
  */
 
-CREATE OR REPLACE FUNCTION get_login (text, text)
+CREATE FUNCTION get_login_from_credentials (text, text)
 RETURNS login_t
 LANGUAGE plpgsql AS
 $$
@@ -107,6 +107,26 @@ BEGIN
 		RAISE EXCEPTION 'Non-existent user name';
 		RETURN NULL;
 	END IF;
+END
+$$;
+
+
+/**	Returns the current login information for a given user
+	It is assumed that the user has previously logged in,
+	and therefore no credentials are required.
+*/
+
+CREATE FUNCTION get_login_update (user_id_t)
+RETURNS login_t
+LANGUAGE plpgsql AS
+$$
+DECLARE
+	_user	users%ROWTYPE;
+	_login	login_t;
+BEGIN
+	SELECT INTO _user * FROM users WHERE user_id = $1;
+	_login := (_user.user_id, _user.user_nick, (SELECT timezone_name FROM timezones WHERE timezone_id = _user.user_timezone_id));
+	RETURN _login;
 END
 $$;
 

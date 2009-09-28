@@ -80,7 +80,7 @@ let get_login sp =
 *)
 let login_handler sp () (username, (password, remember)) =
 	Eliom_sessions.close_session ~sp () >>= fun () ->
-	Database.get_login username password >>= function
+	Database.get_login_from_credentials username password >>= function
 		| Some login ->
 			let login_group = User.Id.to_string (Login.uid login) in
 			Eliom_sessions.set_service_session_group ~set_max:(Some 4) ~sp login_group;
@@ -114,4 +114,14 @@ let login_handler sp () (username, (password, remember)) =
 let logout_handler sp () global =
 	Eliom_sessions.close_session ~close_group:global ~sp () >>= fun () ->
 	Lwt.return []
+
+
+(**	Update login.  This function should be invoked upon
+	a change in the user's settings stored in the login.
+*)
+let update_login sp login =
+	Database.get_login_update (Login.uid login) >>= fun new_login ->
+	match !!login_table with
+		| Persistent table -> Eliom_sessions.set_persistent_session_data ~table ~sp new_login
+		| Volatile table   -> Lwt.return (Eliom_sessions.set_volatile_session_data ~table ~sp new_login)
 

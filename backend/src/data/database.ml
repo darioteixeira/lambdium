@@ -98,17 +98,26 @@ let get_user uid =
 	in Lwt_pool.use !!pool get_data
 
 
-let get_login nick password =
-	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_login (%s, %s)" nick password); true);
+let get_login_from_credentials nick password =
+	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_login_from_credentials (%s, ***)" nick); true);
 	let get_data dbh =
 		Lwt.catch
 			(fun () ->
-				PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login ($nick, $password)" >>= function
+				PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login_from_credentials ($nick, $password)" >>= function
 					| [u]	-> Lwt.return (Some (Login.of_tuple u))
 					| _	-> Lwt.fail Database_error)
 			(function
 				| PGOCaml.PostgreSQL_Error _ -> Lwt.return None
 				| exc -> Lwt.fail exc)
+	in Lwt_pool.use !!pool get_data
+
+
+let get_login_update uid =
+	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_login_update %ld" uid); true);
+	let get_data dbh =
+		PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login_update ($uid)" >>= function
+			| [u]	-> Lwt.return (Login.of_tuple u)
+			| _	-> Lwt.fail Database_error
 	in Lwt_pool.use !!pool get_data
 
 
@@ -236,7 +245,7 @@ let add_comment comment =
 (********************************************************************************)
 
 let edit_user_credentials user_credentials =
-	assert (Ocsigen_messages.warning "Database.edit_user_credentials ()"; true);
+	assert (Ocsigen_messages.warning "Database.edit_user_credentials"; true);
 	let (uid, old_password, new_password) = User.tuple_of_changed_credentials user_credentials in
 	let get_data dbh =
 		PGSQL(dbh) "SELECT edit_user_credentials ($uid, $old_password, $new_password)" >>= fun _ ->
@@ -245,7 +254,7 @@ let edit_user_credentials user_credentials =
 
 
 let edit_user_settings user_settings =
-	assert (Ocsigen_messages.warning "Database.edit_user_settings %ld"; true);
+	assert (Ocsigen_messages.warning "Database.edit_user_settings"; true);
 	let (uid, fullname, maybe_tid) = User.tuple_of_changed_settings user_settings in
 	let get_data dbh =
 		PGSQL(dbh) "SELECT edit_user_settings ($uid, $fullname, $?maybe_tid)" >>= fun _ ->

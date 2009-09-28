@@ -48,6 +48,7 @@ and step2_handler ~login sp () (fullname, timezone) =
 			let output_core login sp = Lwt.return (status, None) in
 			let settings = User.make_changed_settings (Login.uid login) fullname timezone in
 			Database.edit_user_settings settings >>= fun () ->
+			Session.update_login sp login >>= fun () ->
 			Page.login_enforced_handler ~sp ~page_title:"Edit settings - Step 2/2" ~output_core ())
 		(function
 			| Database.Cannot_edit_user_settings ->

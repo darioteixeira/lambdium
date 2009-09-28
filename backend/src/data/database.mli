@@ -54,7 +54,9 @@ val get_timezone: Timezone.Id.t option -> Timezone.full_t Lwt.t
 
 val get_users: unit -> User.handle_t list Lwt.t
 val get_user: User.Id.t -> User.full_t Lwt.t
-val get_login: string -> string -> Login.t option Lwt.t
+
+val get_login_from_credentials: string -> string -> Login.t option Lwt.t
+val get_login_update: User.Id.t -> Login.t Lwt.t
 
 
 (********************************************************************************)
