@@ -2,18 +2,23 @@
 
 .floatbox
 	{
-	margin: 0 0 2em;
+	margin-bottom: @Floatbox_separation;
+	background: @Color_floatbox;
 	}
 
 .floatbox_header
 	{
 	text-align: center;
-	color: @Color_fore;
-	background: @Color_back;
+	font-family: @Font_headline;
+	font-weight: bold;
+	color: @Color_floatbox;
+	background: @Color_key;
+	margin-bottom: 0.5em;
 	}
 
 .floatbox_body
 	{
+	padding: 0 0.5em 0.5em;
 	}
 
 .floatbox input[type="text"],
