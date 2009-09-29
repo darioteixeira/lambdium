@@ -22,16 +22,23 @@ type cleaner_t = unit -> unit
 
 type token_t = int * string
 
+type pool_entry_t =
+	{
+	mutable back_ptr: int;
+	cleaner: cleaner_t;
+	password: string;
+	timeout: float;
+	mutable age: float;
+	}
+
 type pool_t =
 	{
 	name: string;
-	buffer: int array;
-	cleaners: cleaner_t array;
-	passwords: string array;
-	last_used: float array;
-	max_age: float;
 	size: int;
-	ptr: int ref;
+	default_timeout: float;
+	mutable index: int;
+	pointers: int array;
+	entries: pool_entry_t array;
 	}
 
 
@@ -49,35 +56,42 @@ let nop () = ()
 let id x = x
 
 
-(**	Gets a new token from the pool, if available.  You must also provide
-	the cleaner function that will be invoked if the token is not refreshed
-	nor returned for a period larger than the maximum defined for the pool.
+(**	A dummy entry.
+*)
+let dummy_entry = {back_ptr = -1; cleaner = nop; password = ""; timeout = 0.0; age = 0.0;}
+
+
+(**	Function [get_token ?timeout pool cleaner] gets a new token from [pool],
+	if one is available.  You must also provide the cleaner function that will
+	be invoked if the token is not refreshed nor returned for a period larger
+	than either [timeout] (if specified), or the default timeout for the pool.
 	Raises {!Token_unavailable} if the pool has no available tokens.
 *)
-let get_token pool cleaner =
-	if !(pool.ptr) > 0
+let get_token ?timeout pool cleaner =
+	if pool.index > 0
 	then begin
-		decr (pool.ptr);
+		pool.index <- pool.index - 1;
 		let now = Unix.gettimeofday () in
-		let token_ptr = pool.buffer.(!(pool.ptr))
+		let timeout = Option.default pool.default_timeout timeout in
+		let token_idx = pool.pointers.(pool.index)
 		and token_pass = Printf.sprintf "%lx%lx" (Random.int32 Int32.max_int) (Int32.bits_of_float now) in
-		pool.cleaners.(token_ptr) <- cleaner;
-		pool.passwords.(token_ptr) <- token_pass;
-		pool.last_used.(token_ptr) <- now;
-		(token_ptr, token_pass)
+		pool.entries.(token_idx) <- {back_ptr = pool.index; cleaner = cleaner; password = token_pass; timeout = timeout; age = now};
+		(token_idx, token_pass)
 	end else
 		raise Token_unavailable
 
 
 (**	Returns a token to the pool.  The client may not use it again.
 *)
-let put_token pool (token_ptr, token_pass) =
-	if (!(pool.ptr) < pool.size) && (pool.passwords.(token_ptr) = token_pass)
+let put_token pool (token_idx, token_pass) =
+	if (pool.index < pool.size) && (pool.entries.(token_idx).password = token_pass)
 	then begin
-		pool.buffer.(!(pool.ptr)) <- token_ptr;
-		pool.cleaners.(token_ptr) <- nop;
-		pool.passwords.(token_ptr) <- "";
-		incr (pool.ptr)
+		let old_idx = pool.pointers.(pool.index) in
+		pool.pointers.(pool.index) <- token_idx;
+		pool.pointers.(pool.entries.(token_idx).back_ptr) <- old_idx;
+		pool.entries.(old_idx).back_ptr <- pool.entries.(token_idx).back_ptr;
+		pool.entries.(token_idx) <- dummy_entry;
+		pool.index <- pool.index + 1;
 	end else
 		(* This case should only happen if there is an application error. *)
 		failwith "ResourceGC.put_token"
@@ -85,10 +99,10 @@ let put_token pool (token_ptr, token_pass) =
 
 (**	Refreshes the age of a previously retrieved token.
 *)
-let refresh_token pool (token_ptr, token_pass) =
-	if pool.passwords.(token_ptr) = token_pass
+let refresh_token pool (token_idx, token_pass) =
+	if pool.entries.(token_idx).password = token_pass
 	then
-		pool.last_used.(token_ptr) <- Unix.gettimeofday ()
+		pool.entries.(token_idx).age <- Unix.gettimeofday ()
 	else
 		(* This case should only happen if there is an application error. *)
 		failwith "ResourceGC.refresh_token"
@@ -101,34 +115,32 @@ let refresh_token pool (token_ptr, token_pass) =
 let rec watcher pool () =
 	Ocsigen_messages.warning (Printf.sprintf "Watching '%s' pool:" pool.name);
 	let now = Unix.gettimeofday () in
-	let candidates = Array.sub pool.buffer !(pool.ptr) (pool.size - !(pool.ptr)) in
-	let collect token_ptr =
-		if (now -. pool.last_used.(token_ptr)) > pool.max_age
+	let candidates = Array.sub pool.pointers pool.index (pool.size - pool.index) in
+	let collect token_idx =
+		if (now -. pool.entries.(token_idx).age) > pool.entries.(token_idx).timeout
 		then begin
-			Ocsigen_messages.warning (Printf.sprintf "\tGarbage-collecting token %d" token_ptr);
-			pool.cleaners.(token_ptr) ();
-			put_token pool (token_ptr, pool.passwords.(token_ptr))
+			Ocsigen_messages.warning (Printf.sprintf "\tGarbage-collecting token %d" token_idx);
+			pool.entries.(token_idx).cleaner ();
+			put_token pool (token_idx, pool.entries.(token_idx).password)
 		end else
-			Ocsigen_messages.warning (Printf.sprintf "\tToken %d not garbage-collected" token_ptr) in
+			Ocsigen_messages.warning (Printf.sprintf "\tToken %d not garbage-collected" token_idx) in
 	Array.iter collect candidates;
 	Lwt_timeout.start (Lwt_timeout.create 1 (watcher pool))
 
 
-(**	An invocation of [make_pool name size max_age] creates a new pool with the given
-	name and size, and whose tokens may be unrefreshed for a maximum time of [max_age]
-	before they are forcibly returned to the pool.
+(**	An invocation of [make_pool name size timeout] creates a new pool with the given
+	name and size, and whose tokens may be unrefreshed for a default maximum time of
+	[timeout] before they are forcibly returned to the pool.
 *)
-let make_pool name size max_age =
+let make_pool name size default_timeout =
 	let pool =
 		{
 		name = name;
-		buffer = Array.init size id;
-		cleaners = Array.make size nop;
-		passwords = Array.make size "";
-		last_used = Array.make size 0.0;
-		max_age = max_age;
 		size = size;
-		ptr = ref size;
+		default_timeout = default_timeout;
+		index = size;
+		pointers = Array.init size id;
+		entries = Array.make size dummy_entry;
 		}
 	in watcher pool (); pool
 

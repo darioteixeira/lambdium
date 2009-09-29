@@ -126,7 +126,7 @@ let output_floatbox (id, header, contents) =
 		]
 
 
-let base_page ~sp ~page_title ~page_body =
+let base_page ~sp ~page_title ~page_content ~page_content_id =
 	let css_uri = Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["css"; "default.css"]
 	and js_uri = Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["scripts"; "default.js"]
 	in (html
@@ -137,7 +137,7 @@ let base_page ~sp ~page_title ~page_body =
 			Eliom_predefmod.Xhtml.css_link ~a:[(a_media [`All]); (a_title "Default")] ~uri:css_uri ();
 			Eliom_predefmod.Xhtml.js_script ~a:[] ~uri:js_uri ();
 			])
-		page_body)
+		(body [div ~a:[a_id page_content_id] page_content]))
 
 
 let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
@@ -150,21 +150,20 @@ let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
 	and core_content = match maybe_core_content with
 		| Some e -> [div ~a:[a_id "core_content"] e]
 		| None	 -> [] in
-	let page_body =
-		body ~a:[a_id "regular"]
-			[
-			div ~a:[a_id "header"] header;
-			div ~a:[a_id "core"] (core_status @ core_content);
-			div ~a:[a_id "nav"] (List.map output_floatbox nav);
-			div ~a:[a_id "context"] (List.map output_floatbox context);
-			div ~a:[a_id "footer"] footer;
-			]
-	in base_page ~sp ~page_title ~page_body
+	let page_content =
+		[
+		div ~a:[a_id "header"] header;
+		div ~a:[a_id "core"] (core_status @ core_content);
+		div ~a:[a_id "nav"] (List.map output_floatbox nav);
+		div ~a:[a_id "context"] (List.map output_floatbox context);
+		div ~a:[a_id "footer"] footer;
+		]
+	in base_page ~sp ~page_title ~page_content ~page_content_id:"regular"
 
 
 let failure_page ~sp ~page_title ~msg =
-	let page_body = body ~a:[a_id "failure"] [p [pcdata msg]]
-	in base_page ~sp ~page_title ~page_body
+	let page_content = [p [pcdata msg]]
+	in base_page ~sp ~page_title ~page_content ~page_content_id:"failure"
 
 
 let regular_handler ~maybe_login ~sp ~page_title ~output_core ?(output_context = fun _ _ -> Lwt.return []) () =

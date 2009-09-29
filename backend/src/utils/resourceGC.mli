@@ -29,7 +29,7 @@ type pool_t
 (********************************************************************************)
 
 val make_pool: string -> int -> float -> pool_t
-val get_token: pool_t -> cleaner_t -> token_t
+val get_token: ?timeout:float -> pool_t -> cleaner_t -> token_t
 val put_token: pool_t -> token_t -> unit
 val refresh_token: pool_t -> token_t -> unit
 
