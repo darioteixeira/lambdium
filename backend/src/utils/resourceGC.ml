@@ -37,9 +37,10 @@ type entries_t = (string, entry_t) Hashtbl.t
 type pool_t =
 	{
 	name: string;
-	mutable size: int;
-	max_size: int;
+	capacity: int;
+	period: int;
 	default_timeout: float;
+	mutable size: int;
 	global: entries_t;
 	groups: (string, entries_t) Hashtbl.t;
 	}
@@ -68,7 +69,7 @@ let request_token ?group ?timeout pool cleaner =
 			in if current >= grplimit then raise Group_pool_exhausted
  		| None ->
 			() in
-	if pool.size < pool.max_size
+	if pool.size < pool.capacity
 	then begin
 		let now = Unix.gettimeofday () in
 		let token_id = Printf.sprintf "%lx%lx" (Random.int32 Int32.max_int) (Int32.bits_of_float now) in
@@ -144,22 +145,26 @@ let rec watcher pool () =
 	in
 		process None pool.global;
 		Hashtbl.iter (fun grpid entries -> process (Some grpid) entries) pool.groups;
-		Lwt_timeout.start (Lwt_timeout.create 1 (watcher pool))
+		Lwt_timeout.start (Lwt_timeout.create pool.period (watcher pool))
 
 
-(**	An invocation of [make_pool name max_size default_timeout] creates a new pool
-	with the given name and size, and whose tokens may be unrefreshed for a default
-	maximum time of [default_timeout] before they are forcibly returned to the pool.
+(**	An invocation of [make_pool ~name ~capacity ~period ~default_timeout] creates a
+	new pool with the given name and capacity, and whose tokens may be unrefreshed
+	for a default maximum (approximate) time of [default_timeout] before they are
+	forcibly returned to the pool.  The garbage collector runs every [period] seconds.
 *)
-let make_pool name max_size default_timeout =
+let make_pool ~name ~capacity ~period ~default_timeout =
 	let pool =
 		{
 		name = name;
-		size = 0;
-		max_size = max_size;
+		capacity = capacity;
+		period = period;
 		default_timeout = default_timeout;
-		global = Hashtbl.create max_size;
-		groups = Hashtbl.create max_size;
+		size = 0;
+		global = Hashtbl.create capacity;
+		groups = Hashtbl.create capacity;
 		}
-	in watcher pool (); pool
+	in
+		Lwt_timeout.start (Lwt_timeout.create pool.period (watcher pool));
+		pool
 
