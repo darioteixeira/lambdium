@@ -84,7 +84,9 @@ let request_token ?group ?timeout pool cleaner =
 				assert (not (Hashtbl.mem pool.global token_id));
 				Hashtbl.add pool.global token_id new_entry;
 				None
-		in (token_grpid, token_id)
+		in
+			pool.size <- pool.size + 1;
+			(token_grpid, token_id)
 	end else
 		raise Global_pool_exhausted
 
@@ -92,14 +94,16 @@ let request_token ?group ?timeout pool cleaner =
 (**	Returns a token to the pool.
 *)
 let retire_token pool (token_grpid, token_id) =
-	try match token_grpid with
-		| Some grpid ->
-			let entries = Hashtbl.find pool.groups grpid
-			in Hashtbl.remove entries token_id;
-			if Hashtbl.length entries = 0
-			then Hashtbl.remove pool.groups grpid
-		| None ->
-			Hashtbl.remove pool.global token_id
+	try
+		let () = match token_grpid with
+			| Some grpid ->
+				let entries = Hashtbl.find pool.groups grpid
+				in Hashtbl.remove entries token_id;
+				if Hashtbl.length entries = 0
+				then Hashtbl.remove pool.groups grpid
+			| None ->
+				Hashtbl.remove pool.global token_id
+		in pool.size <- pool.size - 1
 	with
 		| Not_found ->
 			failwith "ResourceGC.retire_token"

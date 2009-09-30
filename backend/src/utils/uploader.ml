@@ -13,7 +13,7 @@ let pool =
 let make sp =
 	let timeout = Eliom_sessions.get_service_session_timeout ~sp () in
 	let cleaner () = Ocsigen_messages.warning "Cleaner called!"
-	in ResourceGC.get_token ?timeout !!pool cleaner
+	in ResourceGC.request_token ?timeout !!pool cleaner
 
 
 let refresh uploads =
