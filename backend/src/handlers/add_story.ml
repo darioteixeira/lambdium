@@ -66,7 +66,7 @@ and step2_handler ?uploads ~login sp () (title, (intro_src, body_src)) =
 and step3 ?uploads ~story ~login ~sp ~bitmaps =
 	let uploads = match uploads with
 		| Some u -> Uploader.refresh u; Some u
-		| None	 -> Some (Uploader.make sp) in
+		| None	 -> Some (Uploader.request ~sp ~login) in
 	let output_core login sp =
 		let step4_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -90,6 +90,7 @@ and step4_handler ?uploads ~story ~login sp () (action, files) =
 	Option.may Uploader.refresh uploads;
 	match action with
 		| `Cancel ->
+			Option.may Uploader.retire uploads;
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
@@ -122,11 +123,13 @@ and step6_handler ?uploads ~story sp () (action, ()) =
 	Option.may Uploader.refresh uploads;
 	match action with
 		| `Cancel ->
+			Option.may Uploader.retire uploads;
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
 			step1_handler ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
+			Option.may Uploader.retire uploads;
 			Lwt.catch
 				(fun () ->
 					Database.add_story story >>= fun () ->
