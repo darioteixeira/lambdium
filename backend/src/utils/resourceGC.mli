@@ -10,7 +10,8 @@
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Token_unavailable
+exception Global_pool_exhausted
+exception Group_pool_exhausted
 
 
 (********************************************************************************)
@@ -18,9 +19,7 @@ exception Token_unavailable
 (********************************************************************************)
 
 type cleaner_t = unit -> unit
-
 type token_t
-
 type pool_t
 
 
@@ -29,7 +28,7 @@ type pool_t
 (********************************************************************************)
 
 val make_pool: string -> int -> float -> pool_t
-val get_token: ?timeout:float -> pool_t -> cleaner_t -> token_t
-val put_token: pool_t -> token_t -> unit
+val request_token: ?group:(string * int) -> ?timeout:float -> pool_t -> cleaner_t -> token_t
+val retire_token: pool_t -> token_t -> unit
 val refresh_token: pool_t -> token_t -> unit
 
