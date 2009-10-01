@@ -8,7 +8,8 @@
 
 let init () =
 	Config.parse_config ();
-	ignore (Lazy.force Session.login_table);
+	Session.init ();
+	Uploader.init ();
 	Register.register ()
 
 let () =

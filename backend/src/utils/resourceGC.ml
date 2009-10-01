@@ -28,7 +28,7 @@ type token_t = string option * string
 type entry_t =
 	{
 	cleaner: cleaner_t;
-	timeout: float;
+	timeout: float option;
 	mutable age: float;
 	}
 
@@ -39,7 +39,7 @@ type pool_t =
 	name: string;
 	capacity: int;
 	period: int;
-	default_timeout: float;
+	default_timeout: float option;
 	mutable size: int;
 	global: entries_t;
 	groups: (string, entries_t) Hashtbl.t;
@@ -53,7 +53,8 @@ type pool_t =
 (**	Function [request_token ?group ?timeout pool cleaner] gets a new token from
 	[pool], if one is available.  You must also provide the cleaner function that
 	will be invoked if the token is not refreshed nor returned for a period larger
-	than either [timeout] (if specified), or the default timeout for the pool.
+	than either [timeout] (if specified), or the default timeout for the pool
+	(note that if [timeout] is set to [None], then the token will never expire).
 	The parameter [group] is optional, and is a pair composed of the group's name
 	and its maximum number of tokens.  If this parameter is provided, the token
 	is only returned if the maximum number of tokens for the group has not been
@@ -128,23 +129,24 @@ let refresh_token pool (token_grpid, token_id) =
 	the pool, and the corresponding cleaner function is invoked.
 *)
 let rec watcher pool () =
-	Ocsigen_messages.warning (Printf.sprintf "Watching '%s' pool:" pool.name);
+	let collected = ref 0
+	and uncollected = ref 0 in
 	let now = Unix.gettimeofday () in
 	let process token_grpid entries =
 		let filter_out token_id =
-			let entry = Hashtbl.find entries token_id in
-			if (entry.age +. entry.timeout) < now
-			then begin
-				Ocsigen_messages.warning (Printf.sprintf "\tGarbage-collecting token %s" token_id);
-				entry.cleaner ();
-				retire_token pool (token_grpid, token_id)
-			end else
-				Ocsigen_messages.warning (Printf.sprintf "\tToken %s not garbage-collected" token_id) in
-		let keys = Hashtbl.keys entries
-		in Enum.iter filter_out keys
+			let entry = Hashtbl.find entries token_id
+			in match entry.timeout with
+				| Some timeout when (entry.age +. timeout) < now ->
+					entry.cleaner ();
+					retire_token pool (token_grpid, token_id);
+					incr (collected)
+				| _ ->
+					incr (uncollected)
+		in Enum.iter filter_out (Hashtbl.keys entries)
 	in
 		process None pool.global;
 		Hashtbl.iter (fun grpid entries -> process (Some grpid) entries) pool.groups;
+		Ocsigen_messages.warning (Printf.sprintf "Watched '%s' pool: %d tokens collected and %d untouched" pool.name !collected !uncollected);
 		Lwt_timeout.start (Lwt_timeout.create pool.period (watcher pool))
 
 
@@ -152,6 +154,8 @@ let rec watcher pool () =
 	new pool with the given name and capacity, and whose tokens may be unrefreshed
 	for a default maximum (approximate) time of [default_timeout] before they are
 	forcibly returned to the pool.  The garbage collector runs every [period] seconds.
+	Note that [default_timeout] is an optional float, and setting it to [None] means
+	that by default tokens will never expire!
 *)
 let make_pool ~name ~capacity ~period ~default_timeout =
 	let pool =
@@ -165,6 +169,9 @@ let make_pool ~name ~capacity ~period ~default_timeout =
 		groups = Hashtbl.create capacity;
 		}
 	in
+		let msg = Printf.sprintf "Created pool '%s' with a capacity of %d, a GC period of %d, and a default timeout of %s"
+			name capacity period (match default_timeout with Some t -> string_of_float t | None -> "(none)")
+		in Ocsigen_messages.warning msg;
 		Lwt_timeout.start (Lwt_timeout.create pool.period (watcher pool));
 		pool
 

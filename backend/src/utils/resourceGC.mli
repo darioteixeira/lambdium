@@ -27,8 +27,8 @@ type pool_t
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-val make_pool: name:string -> capacity:int -> period:int -> default_timeout:float -> pool_t
-val request_token: ?group:(string * int) -> ?timeout:float -> pool_t -> cleaner_t -> token_t
+val make_pool: name:string -> capacity:int -> period:int -> default_timeout:float option -> pool_t
+val request_token: ?group:(string * int) -> ?timeout:float option -> pool_t -> cleaner_t -> token_t
 val retire_token: pool_t -> token_t -> unit
 val refresh_token: pool_t -> token_t -> unit
 

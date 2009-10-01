@@ -17,6 +17,7 @@ type t
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
+val init: unit -> unit
 val request: sp:Eliom_sessions.server_params -> login:Login.t -> t
 val retire: t -> unit
 val refresh: t -> unit

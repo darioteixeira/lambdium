@@ -54,6 +54,12 @@ let login_table = lazy
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
+(**	Initialises session handling.
+*)
+let init () =
+	ignore !!login_table
+
+
 (**	Returns the currently logged-in user, if any.
 *)
 let get_maybe_login sp =
