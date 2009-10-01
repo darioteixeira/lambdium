@@ -72,7 +72,7 @@ let request_token ?group ?timeout pool cleaner =
 	if pool.size < pool.capacity
 	then begin
 		let now = Unix.gettimeofday () in
-		let token_id = Printf.sprintf "%lx%lx" (Random.int32 Int32.max_int) (Int32.bits_of_float now) in
+		let token_id = Printf.sprintf "%Lx%Lx" (Random.int64 Int64.max_int) (Int64.bits_of_float now) in
 		let new_entry = {cleaner = cleaner; timeout = Option.default pool.default_timeout timeout; age = now;} in
 		let token_grpid = match group with
 			| Some (grpid, grplimit) ->
