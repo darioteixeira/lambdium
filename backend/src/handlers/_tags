@@ -1,0 +1,9 @@
+<add_comment.*>: pkg_lwt.syntax, syntax_camlp4o
+<add_story.*>: pkg_lwt.syntax, syntax_camlp4o
+<add_user.*>: pkg_lwt.syntax, syntax_camlp4o
+<edit_user_credentials.*>: pkg_lwt.syntax, syntax_camlp4o
+<edit_user_settings.*>: pkg_lwt.syntax, syntax_camlp4o
+<preview_comment.*>: pkg_lwt.syntax, syntax_camlp4o
+<show_comment.*>: pkg_lwt.syntax, syntax_camlp4o
+<show_story.*>: pkg_lwt.syntax, syntax_camlp4o
+<show_user.*>: pkg_lwt.syntax, syntax_camlp4o

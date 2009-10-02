@@ -1,1 +1,1 @@
-<database.*>: pkg_pgocaml.syntax, syntax_camlp4o
+<database.*>: pkg_pgocaml.syntax, pkg_lwt.syntax, syntax_camlp4o

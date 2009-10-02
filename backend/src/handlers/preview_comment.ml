@@ -34,17 +34,15 @@ let make_reply ~success fragment_xhtml =
 
 
 let handler sp () (sid, (title, body_src)) =
-	Lwt.catch
-		(fun () ->
-			Session.get_login sp >>= fun login ->
-			Comment_io.parse body_src >>= fun (body_doc, body_out) ->
-			let author = Login.to_user login in
-			let comment = Comment.make_fresh sid author title body_src body_doc body_out in
-			let comment_xhtml = Comment_io.output_fresh (Some login) sp comment
-			in Lwt.return (make_reply ~success:true comment_xhtml))
-		(function
-			| Session.No_login			-> Lwt.return (make_reply ~success:false (pcdata "Not logged in!"))
-			| exc					-> Lwt.fail exc)
+	try_lwt
+		Session.get_login sp >>= fun login ->
+		Comment_io.parse body_src >>= fun (body_doc, body_out) ->
+		let author = Login.to_user login in
+		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
+		let comment_xhtml = Comment_io.output_fresh (Some login) sp comment
+		in Lwt.return (make_reply ~success:true comment_xhtml)
+	with
+		| Session.No_login -> Lwt.return (make_reply ~success:false (pcdata "Not logged in!"))
 
 
 (********************************************************************************)

@@ -44,18 +44,15 @@ and step2_handler sp () (nick, (fullname, (password, (password2, timezone)))) =
 		let status = Stat_failure [p [pcdata "Passwords do not match!"]]
 		in step1_handler ~nick ~fullname ~timezone ~status sp () ()
 	else
-		Lwt.catch
-			(fun () ->
-				let user = User.make_fresh nick fullname password timezone in
-				Database.add_user user >>= fun () ->
-				let output_core _ _ = Lwt.return (Stat_success [p [pcdata "User has been added"]], None)
-				in Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ~output_core ())
-			(function 
-				| Database.Cannot_add_user ->
-					let output_core _ _ = Lwt.return (Stat_failure [p [pcdata "Cannot add user!"]], None)
-					in Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ~output_core ()
-				| exc ->
-					Lwt.fail exc)
+		try_lwt
+			let user = User.make_fresh nick fullname password timezone in
+			Database.add_user user >>= fun () ->
+			let output_core _ _ = Lwt.return (Stat_success [p [pcdata "User has been added"]], None)
+			in Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ~output_core ()
+		with
+			| Database.Cannot_add_user ->
+				let output_core _ _ = Lwt.return (Stat_failure [p [pcdata "Cannot add user!"]], None)
+				in Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ~output_core ()
 
 
 (********************************************************************************)

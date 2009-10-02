@@ -48,17 +48,14 @@ and step2_handler comment sp () (action, (sid, (title, body))) =
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
 		| `Finish ->
-			Lwt.catch
-				(fun () ->
-					Database.add_comment comment >>= fun () ->
-					let output_core login sp = Lwt.return (Stat_success [p [pcdata "Comment has been added!"]], None)
-					in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ())
-				(function
-					| Database.Cannot_get_comment ->
-						let status = Stat_failure [p [pcdata "Error!"]]
-						in step1_handler ~status sp () (sid, (title, body))
-					| exc ->
-						Lwt.fail exc)
+			try_lwt
+				Database.add_comment comment >>= fun () ->
+				let output_core login sp = Lwt.return (Stat_success [p [pcdata "Comment has been added!"]], None)
+				in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
+			with
+				| Database.Cannot_add_comment ->
+					let status = Stat_failure [p [pcdata "Error!"]]
+					in step1_handler ~status sp () (sid, (title, body))
 
 
 (********************************************************************************)

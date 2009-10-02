@@ -42,20 +42,17 @@ let rec step1_handler ?user ~status sp () () =
 
 
 and step2_handler ~login sp () (fullname, timezone) =
-	Lwt.catch
-		(fun () ->
-			let status = Stat_success [p [pcdata "User settings have been changed"]] in
-			let output_core login sp = Lwt.return (status, None) in
-			let settings = User.make_changed_settings (Login.uid login) fullname timezone in
-			Database.edit_user_settings settings >>= fun () ->
-			Session.update_login sp login >>= fun () ->
-			Page.login_enforced_handler ~sp ~page_title:"Edit settings - Step 2/2" ~output_core ())
-		(function
-			| Database.Cannot_edit_user_settings ->
-				let status = Stat_failure [p [pcdata "Error!"]]
-				in step1_handler ~status sp () ()
-			| exc ->
-				Lwt.fail exc)
+	try_lwt
+		let status = Stat_success [p [pcdata "User settings have been changed"]] in
+		let output_core login sp = Lwt.return (status, None) in
+		let settings = User.make_changed_settings (Login.uid login) fullname timezone in
+		Database.edit_user_settings settings >>= fun () ->
+		Session.update_login sp login >>= fun () ->
+		Page.login_enforced_handler ~sp ~page_title:"Edit settings - Step 2/2" ~output_core ()
+	with
+		| Database.Cannot_edit_user_settings ->
+			let status = Stat_failure [p [pcdata "Error!"]]
+			in step1_handler ~status sp () ()
 
 
 (********************************************************************************)

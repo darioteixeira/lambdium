@@ -16,19 +16,17 @@ open Page
 (********************************************************************************)
 
 let output_core uid maybe_login sp =
-	Lwt.catch
-		(fun () ->
-			Database.get_user uid >>= fun user ->
-			let stories_thread = Database.get_user_stories uid
-			and comments_thread = Database.get_user_comments uid
-			and timezone_thread = Database.get_timezone user#timezone#tid in
-			stories_thread >>= fun stories ->
-			comments_thread >>= fun comments ->
-			timezone_thread >>= fun timezone ->
-			Lwt.return (Stat_nothing, Some [User_io.output_full sp user timezone stories comments]))
-		(function
-			| Database.Cannot_get_user	-> Lwt.return (Stat_failure [p [pcdata "Cannot find specified user!"]], None)
-			| exc				-> Lwt.fail exc)
+	try_lwt
+		Database.get_user uid >>= fun user ->
+		let stories_thread = Database.get_user_stories uid
+		and comments_thread = Database.get_user_comments uid
+		and timezone_thread = Database.get_timezone user#timezone#tid in
+		stories_thread >>= fun stories ->
+		comments_thread >>= fun comments ->
+		timezone_thread >>= fun timezone ->
+		Lwt.return (Stat_nothing, Some [User_io.output_full sp user timezone stories comments])
+	with
+		| Database.Cannot_get_user -> Lwt.return (Stat_failure [p [pcdata "Cannot find specified user!"]], None)
 
 
 (********************************************************************************)

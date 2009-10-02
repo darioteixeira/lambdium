@@ -44,19 +44,16 @@ and step2_handler login sp () (old_password, (new_password, new_password2)) =
 		let status = Stat_failure [p [pcdata "Passwords do not match!"]]
 		in step1_handler ~status sp () ()
 	else
-		Lwt.catch
-			(fun () ->
-				let status = Stat_success [p [pcdata "Password has been changed!"]] in
-				let output_core login sp = Lwt.return (status, None) in
-				let credentials = User.make_changed_credentials (Login.uid login) old_password new_password in
-				Database.edit_user_credentials credentials >>= fun () ->
-				Page.login_enforced_handler ~sp ~page_title:"Change password - Step 2/2" ~output_core ())
-			(function
-				| Database.Cannot_edit_user_credentials ->
-					let status = Stat_failure [p [pcdata "Error!"]]
-					in step1_handler ~status sp () ()
-				| exc ->
-					Lwt.fail exc)
+		try_lwt
+			let status = Stat_success [p [pcdata "Password has been changed!"]] in
+			let output_core login sp = Lwt.return (status, None) in
+			let credentials = User.make_changed_credentials (Login.uid login) old_password new_password in
+			Database.edit_user_credentials credentials >>= fun () ->
+			Page.login_enforced_handler ~sp ~page_title:"Change password - Step 2/2" ~output_core ()
+		with
+			| Database.Cannot_edit_user_credentials ->
+				let status = Stat_failure [p [pcdata "Error!"]]
+				in step1_handler ~status sp () ()
 
 
 (********************************************************************************)
