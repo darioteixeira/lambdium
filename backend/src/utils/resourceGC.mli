@@ -18,9 +18,9 @@ exception Group_pool_exhausted
 (**	{1 Type definitions}							*)
 (********************************************************************************)
 
-type cleaner_t = unit -> unit
-type token_t
 type pool_t
+type token_t
+type cleaner_t = string -> unit
 
 
 (********************************************************************************)
@@ -29,6 +29,6 @@ type pool_t
 
 val make_pool: name:string -> capacity:int -> period:int -> default_timeout:float option -> pool_t
 val request_token: ?group:(string * int) -> ?timeout:float option -> pool_t -> cleaner_t -> token_t
-val retire_token: pool_t -> token_t -> unit
-val refresh_token: pool_t -> token_t -> unit
-
+val refresh_token: token_t -> unit
+val retire_token: token_t -> unit
+val uuid_of_token: token_t -> string

@@ -21,19 +21,6 @@ exception Group_pool_exhausted
 (**	{1 Type definitions}							*)
 (********************************************************************************)
 
-type cleaner_t = unit -> unit
-
-type token_t = string option * string
-
-type entry_t =
-	{
-	cleaner: cleaner_t;
-	timeout: float option;
-	mutable age: float;
-	}
-
-type entries_t = (string, entry_t) Hashtbl.t
-
 type pool_t =
 	{
 	name: string;
@@ -44,6 +31,20 @@ type pool_t =
 	global: entries_t;
 	groups: (string, entries_t) Hashtbl.t;
 	}
+
+and entries_t = (string, entry_t) Hashtbl.t
+
+and entry_t =
+	{
+	uuid: string;
+	cleaner: cleaner_t;
+	timeout: float option;
+	mutable age: float;
+	}
+
+and token_t = pool_t * string option * string * string
+
+and cleaner_t = string -> unit
 
 
 (********************************************************************************)
@@ -74,7 +75,12 @@ let request_token ?group ?timeout pool cleaner =
 	then begin
 		let now = Unix.gettimeofday () in
 		let token_id = Printf.sprintf "%Lx%Lx" (Random.int64 Int64.max_int) (Int64.bits_of_float now) in
-		let new_entry = {cleaner = cleaner; timeout = Option.default pool.default_timeout timeout; age = now;} in
+		let token_uuid =
+			let grp = match group with
+				| Some (grpid, _) -> "Group-" ^ grpid
+				| None		  -> "Global"
+			in Printf.sprintf "%s:%s:%s" pool.name grp token_id in
+		let new_entry = {uuid = token_uuid; cleaner = cleaner; timeout = Option.default pool.default_timeout timeout; age = now;} in
 		let token_grpid = match group with
 			| Some (grpid, grplimit) ->
 				let entries = try Hashtbl.find pool.groups grpid with Not_found -> Hashtbl.create grplimit in
@@ -88,14 +94,27 @@ let request_token ?group ?timeout pool cleaner =
 				None
 		in
 			pool.size <- pool.size + 1;
-			(token_grpid, token_id)
+			(pool, token_grpid, token_id, token_uuid)
 	end else
 		raise Global_pool_exhausted
 
 
-(**	Returns a token to the pool.
+(**	Refreshes the age of a previously requested token.
 *)
-let retire_token pool (token_grpid, token_id) =
+let refresh_token (pool, token_grpid, token_id, _) =
+	try
+		let entry = match token_grpid with
+			| Some grpid -> Hashtbl.find (Hashtbl.find pool.groups grpid) token_id
+			| None	     -> Hashtbl.find pool.global token_id
+		in entry.age <- Unix.gettimeofday ()
+	with
+		| Not_found -> failwith "ResourceGC.refresh_token"
+
+
+(**	Retires a token, freeing up one space in the pool.
+	The token may not be used again.
+*)
+let retire_token (pool, token_grpid, token_id, _) =
 	try
 		let () = match token_grpid with
 			| Some grpid ->
@@ -111,19 +130,6 @@ let retire_token pool (token_grpid, token_id) =
 			failwith "ResourceGC.retire_token"
 
 
-
-(**	Refreshes the age of a previously retrieved token.
-*)
-let refresh_token pool (token_grpid, token_id) =
-	try
-		let entry = match token_grpid with
-			| Some grpid -> Hashtbl.find (Hashtbl.find pool.groups grpid) token_id
-			| None	     -> Hashtbl.find pool.global token_id
-		in entry.age <- Unix.gettimeofday ()
-	with
-		| Not_found -> failwith "ResourceGC.refresh_token"
-
-
 (**	The watcher function wakes up periodically, checking if any of the outstanding
 	tokens has an age greater than allowed.  Those that do are forcibly returned to
 	the pool, and the corresponding cleaner function is invoked.
@@ -137,8 +143,9 @@ let rec watcher pool () =
 			let entry = Hashtbl.find entries token_id
 			in match entry.timeout with
 				| Some timeout when (entry.age +. timeout) < now ->
-					entry.cleaner ();
-					retire_token pool (token_grpid, token_id);
+					let token = (pool, token_grpid, token_id, entry.uuid) in
+					retire_token token;
+					entry.cleaner entry.uuid;
 					incr (collected)
 				| _ ->
 					incr (uncollected)
@@ -174,4 +181,9 @@ let make_pool ~name ~capacity ~period ~default_timeout =
 		in Ocsigen_messages.warning msg;
 		Lwt_timeout.start (Lwt_timeout.create pool.period (watcher pool));
 		pool
+
+
+(**	Returns the UUID associated with a token.
+*)
+let uuid_of_token (_, _, _, uuid) = uuid
 

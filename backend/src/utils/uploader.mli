@@ -19,6 +19,6 @@ type t
 
 val init: unit -> unit
 val request: sp:Eliom_sessions.server_params -> login:Login.t -> t
-val retire: t -> unit
 val refresh: t -> unit
+val retire: t -> unit
 
