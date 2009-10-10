@@ -237,7 +237,7 @@ $$;
  */
 
 CREATE FUNCTION add_user (text, text, text, timezone_id_t)
-RETURNS void
+RETURNS user_id_t
 LANGUAGE plpgsql AS
 $$
 DECLARE
@@ -268,6 +268,8 @@ BEGIN
                         _user_password_hash,
                         _user_timezone_id
                         );
+
+	RETURN currval ('user_id_seq');
 END
 $$;
 
@@ -277,7 +279,7 @@ $$;
  */
 
 CREATE FUNCTION add_story (user_id_t, text, text, bytea, bytea, text, bytea, bytea)
-RETURNS void
+RETURNS story_id_t
 LANGUAGE plpgsql VOLATILE AS
 $$
 DECLARE
@@ -317,6 +319,8 @@ BEGIN
 			_story_body_doc,
 			_story_body_xhtml
 			);
+
+	RETURN currval ('story_id_seq');
 END
 $$;
 
@@ -326,7 +330,7 @@ $$;
  */
 
 CREATE FUNCTION add_comment (story_id_t, user_id_t, text, text, bytea, bytea)
-RETURNS void
+RETURNS comment_id_t
 LANGUAGE plpgsql VOLATILE AS
 $$
 DECLARE
@@ -358,6 +362,8 @@ BEGIN
 			_comment_body_doc,
 			_comment_body_xhtml
 			);
+
+	RETURN currval ('comment_id_seq');
 END
 $$;
 

@@ -40,7 +40,7 @@ type 'a login_table_t =
 	across a restart of the server.
 *)
 let login_table = lazy
-	(let msg = Printf.sprintf "Lambdium using %s table for logins"
+	(let msg = Printf.sprintf "Using %s table for logins"
 	in match !Config.login_table with
 		| Config.Use_volatile ->
 			Ocsigen_messages.warning (msg "volatile");

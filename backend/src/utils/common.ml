@@ -24,3 +24,6 @@ let maybe f = function
 	| Some x -> Some (f x)
 	| None	 -> None
 
+let lwt_may f = function
+	| Some x -> f x
+	| None	 -> Lwt.return ()

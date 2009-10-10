@@ -28,6 +28,15 @@ type login_table_t =
 (********************************************************************************)
 
 let login_table = ref Use_persistent
+
+let story_data_dir = ref "sdata"
+let comment_data_dir = ref "cdata"
+
+let uploader_limbo_dir = ref "/tmp"
+let uploader_global_capacity = ref 20
+let uploader_group_capacity = ref 3
+let uploader_period = ref 60
+
 let pghost = ref None
 let pgport = ref None
 let pguser = ref None
@@ -41,6 +50,12 @@ let parse_config () =
 		| "volatile"	-> Use_volatile
 		| "persistent"	-> Use_persistent
 		| s		-> raise (Ocsigen_extensions.Error_in_config_file ("Unknown 'logintable' value: " ^ s)) in
+	let parse_uploader = function
+		| Element ("limbodir", [], [PCData s])		-> uploader_limbo_dir := s
+		| Element ("globalcapacity", [], [PCData s])	-> uploader_global_capacity := int_of_string s
+		| Element ("groupcapacity", [], [PCData s])	-> uploader_group_capacity := int_of_string s
+		| Element ("period", [], [PCData s])		-> uploader_period := int_of_string s
+		| _						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown element under 'uploader'") in
 	let parse_pgocaml = function
 		| Element ("pghost", [], [PCData s])		-> pghost := Some s
 		| Element ("pgport", [], [PCData s])		-> pgport := Some (int_of_string s)
@@ -48,11 +63,14 @@ let parse_config () =
 		| Element ("pgpassword", [], [PCData s])	-> pgpassword := Some s
 		| Element ("pgdatabase", [], [PCData s])	-> pgdatabase := Some s
 		| Element ("pgsocketdir", [], [PCData s])	-> pgsocketdir := Some s
-		| s						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown 'pgocaml' element") in
+		| _						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown element under 'pgocaml'") in
 	let parse_top = function
 		| Element ("logintable", [], [PCData s])	-> login_table := login_table_of_string s
+		| Element ("storydatadir", [], [PCData s])	-> story_data_dir := s
+		| Element ("commentdatadir", [], [PCData s])	-> comment_data_dir := s
+		| Element ("uploader", [], children)		-> List.iter parse_uploader children
 		| Element ("pgocaml", [], children)		-> List.iter parse_pgocaml children
-		| s						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown 'lambdium' element") in
+		| _						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown element under 'lambdium'") in
 	let config = Eliom_sessions.get_config ()
 	in List.iter parse_top config
 

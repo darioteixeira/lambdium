@@ -135,12 +135,17 @@ let form_for_fresh ?title ?intro_src ?body_src (enter_title, (enter_intro, enter
 			]]
 
 
-let form_for_images ~bitmaps enter_file =
-	let make_input bitmap =
-		let lbl = "enter_file_" ^ bitmap
-		in	[
-			label ~a:[a_for lbl] [pcdata (Printf.sprintf "Enter file for bitmap '%s':" bitmap)];
+let form_for_images ~uploader_status enter_file =
+	let make_input (alias, is_uploaded) =
+		let lbl = "enter_file_" ^ alias in
+		let enter =
+			[
+			label ~a:[a_for lbl] [pcdata (Printf.sprintf "Enter file for bitmap with alias '%s':" alias)];
 			Eliom_predefmod.Xhtml.file_input ~a:[a_id lbl] ~name:enter_file ();
 			]
-	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input bitmaps)))]
+		and show = match is_uploaded with
+			| true  -> [p [pcdata "Currently uploaded image:"]; pcdata alias]
+			| false -> []
+		in enter @ show
+	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input uploader_status)))]
 

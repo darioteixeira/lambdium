@@ -94,9 +94,9 @@ val get_story_with_comments: Story.Id.t -> (Story.full_t * Comment.full_t list) 
 (**	{2 Functions that add content to the database}				*)
 (********************************************************************************)
 
-val add_user: User.fresh_t -> unit Lwt.t
-val add_story: Story.fresh_t -> unit Lwt.t
-val add_comment: Comment.fresh_t -> unit Lwt.t
+val add_user: User.fresh_t -> User.Id.t Lwt.t
+val add_story: Story.fresh_t -> Story.Id.t Lwt.t
+val add_comment: Comment.fresh_t -> Comment.Id.t Lwt.t
 
 
 (********************************************************************************)

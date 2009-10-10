@@ -203,11 +203,9 @@ let add_user user =
 	assert (Ocsigen_messages.warning "Database.add_user ()"; true);
 	let (nick, fullname, password, maybe_tid) = User.tuple_of_fresh user in
 	let get_data dbh =
-		try_lwt
-			PGSQL(dbh) "SELECT add_user ($nick, $fullname, $password, $?maybe_tid)" >>= fun _ ->
-			Lwt.return ()
-		with
-			| _ -> Lwt.fail Cannot_add_user
+		PGSQL(dbh) "SELECT add_user ($nick, $fullname, $password, $?maybe_tid)" >>= function
+			| [Some uid] -> Lwt.return uid
+			| _	     -> Lwt.fail Cannot_add_user
 	in Lwt_pool.use !!pool get_data
 
 
@@ -215,11 +213,9 @@ let add_story story =
 	assert (Ocsigen_messages.warning "Database.add_story ()"; true);
 	let (uid, title, intro_src, intro_pickle, intro_out, body_src, body_pickle, body_out) = Story.tuple_of_fresh story in
 	let get_data dbh =
-		try_lwt
-			PGSQL(dbh) "SELECT add_story ($uid, $title, $intro_src, $intro_pickle, $intro_out, $body_src, $body_pickle, $body_out)" >>= fun _ ->
-			Lwt.return ()
-		with
-			| _ -> Lwt.fail Cannot_add_story
+		PGSQL(dbh) "SELECT add_story ($uid, $title, $intro_src, $intro_pickle, $intro_out, $body_src, $body_pickle, $body_out)" >>= function
+			| [Some sid] -> Lwt.return sid
+			| _	     -> Lwt.fail Cannot_add_story
 	in Lwt_pool.use !!pool get_data
 
 
@@ -227,11 +223,9 @@ let add_comment comment =
 	assert (Ocsigen_messages.warning "Database.add_comment ()"; true);
 	let (sid, uid, title, body_src, body_pickle, body_out) = Comment.tuple_of_fresh comment in
 	let get_data dbh =
-		try_lwt
-			PGSQL(dbh) "SELECT add_comment ($sid, $uid, $title, $body_src, $body_pickle, $body_out)" >>= fun _ ->
-			Lwt.return ()
-		with
-			| _ -> Lwt.fail Cannot_add_comment
+		PGSQL(dbh) "SELECT add_comment ($sid, $uid, $title, $body_src, $body_pickle, $body_out)" >>= function
+			| [Some cid] -> Lwt.return cid
+			| _	     -> Lwt.fail Cannot_add_comment
 	in Lwt_pool.use !!pool get_data
 
 

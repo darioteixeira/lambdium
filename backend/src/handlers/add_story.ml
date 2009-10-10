@@ -17,14 +17,14 @@ open Page
 (**	{1 Wizards steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ?uploads ?title ?intro_src ?body_src ~status sp () () =
-	Option.may Uploader.refresh uploads;
+let rec step1_handler ?maybe_uploader ?title ?intro_src ?body_src ~status sp () () =
+	Option.may Uploader.refresh maybe_uploader;
 	let output_core login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_story
 			~post_params: Params.add_story
-			(step2_handler ?uploads ~login) in
+			(step2_handler ?maybe_uploader ~login) in
 		Forms.Monatomic.make_form
 			~label: "Preview"
 			~service: step2_service
@@ -39,15 +39,15 @@ let rec step1_handler ?uploads ?title ?intro_src ?body_src ~status sp () () =
 		()
 
 
-and step2_handler ?uploads ~login sp () (title, (intro_src, body_src)) =
-	Option.may Uploader.refresh uploads;
+and step2_handler ?maybe_uploader ~login sp () (title, (intro_src, body_src)) =
+	Option.may Uploader.refresh maybe_uploader;
 	try_lwt
 		Story_io.parse intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, bitmaps) ->
 		let author = Login.to_user login in
 		let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
 		if List.length bitmaps <> 0
-		then step3 ?uploads ~story ~login ~sp ~bitmaps
-		else step5 ?uploads ~story ~login ~sp
+		then step3 ?maybe_uploader ~story ~login ~sp ~bitmaps
+		else step5 ?maybe_uploader ~story ~login ~sp
 	with
 		| Story_io.Invalid_story_intro intro_out ->
 			let status = Stat_failure ([intro_out] :> XHTML.M.block XHTML.M.elt list)
@@ -60,20 +60,20 @@ and step2_handler ?uploads ~login sp () (title, (intro_src, body_src)) =
 			in step1_handler ~title ~intro_src ~body_src ~status sp () ()
 
 
-and step3 ?uploads ~story ~login ~sp ~bitmaps =
-	let uploads = match uploads with
-		| Some u -> Uploader.refresh u; Some u
-		| None	 -> Some (Uploader.request ~sp ~login) in
+and step3 ?maybe_uploader ~story ~login ~sp ~bitmaps =
+	let uploader = match maybe_uploader with
+		| Some u -> Uploader.refresh u; u
+		| None	 -> Uploader.request ~sp ~login in
 	let output_core login sp =
 		let step4_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_story
 			~post_params: (Forms.Triatomic.param ** (Eliom_parameters.set Eliom_parameters.file "files"))
-			(step4_handler ?uploads ~story ~login) in
+			(step4_handler ~uploader ~story ~login ~bitmaps) in
 		Forms.Triatomic.make_form
 			~service: step4_service
 			~sp
-			~content: (Story_io.form_for_images ~bitmaps)
+			~content: (Story_io.form_for_images ~uploader_status:(Uploader.get_status uploader bitmaps))
 			() >>= fun form ->
 		Lwt.return (Stat_nothing, Some [form])
 	in Page.login_enforced_handler
@@ -83,27 +83,29 @@ and step3 ?uploads ~story ~login ~sp ~bitmaps =
 		()
 
 
-and step4_handler ?uploads ~story ~login sp () (action, files) =
-	Option.may Uploader.refresh uploads;
+and step4_handler ~uploader ~story ~login ~bitmaps sp () (action, files) =
+	Uploader.refresh uploader;
 	match action with
 		| `Cancel ->
-			Option.may Uploader.retire uploads;
+			Uploader.discard uploader >>= fun () ->
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
-			step1_handler ?uploads ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
+			step1_handler ?maybe_uploader:(Some uploader) ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
-			step5 ?uploads ~story ~login ~sp
+			if Uploader.add_files uploader bitmaps files
+			then step5 ?maybe_uploader:(Some uploader) ~story ~login ~sp
+			else step3 ?maybe_uploader:(Some uploader) ~story ~login ~sp ~bitmaps
 
 
-and step5 ?uploads ~story ~login ~sp =
-	Option.may Uploader.refresh uploads;
+and step5 ?maybe_uploader ~story ~login ~sp =
+	Option.may Uploader.refresh maybe_uploader;
 	let output_core login sp =
 		let step6_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_story
 			~post_params: (Forms.Triatomic.param ** Eliom_parameters.unit)
-			(step6_handler ?uploads ~story) in
+			(step6_handler ?maybe_uploader ~story) in
 		Forms.Triatomic.make_form
 			~service: step6_service
 			~sp
@@ -116,19 +118,19 @@ and step5 ?uploads ~story ~login ~sp =
 		()
 
 
-and step6_handler ?uploads ~story sp () (action, ()) =
-	Option.may Uploader.refresh uploads;
+and step6_handler ?maybe_uploader ~story sp () (action, ()) =
+	Option.may Uploader.refresh maybe_uploader;
 	match action with
 		| `Cancel ->
-			Option.may Uploader.retire uploads;
+			lwt_may Uploader.discard maybe_uploader >>= fun () ->
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
-			step1_handler ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
+			step1_handler ?maybe_uploader ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
-			Option.may Uploader.retire uploads;
 			try_lwt
-				Database.add_story story >>= fun () ->
+				Database.add_story story >>= fun sid ->
+				lwt_may (Uploader.commit (!Config.story_data_dir ^ "/" ^ Story.Id.to_string sid)) maybe_uploader >>= fun () ->
 				let output_core _ _ = Lwt.return (Stat_success [p [pcdata "Story has been added!"]], None)
 				in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 			with
