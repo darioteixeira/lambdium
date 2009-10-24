@@ -50,5 +50,5 @@ let of_string = function
 	| x		-> make_handle (Some (Id.of_string x))
 
 
-let param = Eliom_parameters.user_type of_string to_string
+let param = Eliom_parameters.user_type ~of_string ~to_string
 

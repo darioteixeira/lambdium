@@ -88,8 +88,7 @@ let output_user_menu maybe_login sp =
 			| Some login	-> personal_fragment login
 			| None		-> public_fragment ()
 	and error_fragment =
-		let exnlist = Eliom_sessions.get_exn sp in
-		if List.mem Session.Invalid_login exnlist
+		if Session.get_login_error sp
 		then [p ~a:[a_class ["error_msg"]] [pcdata "Invalid login!"]]
 		else []
 	and varying_fragment =

@@ -39,8 +39,8 @@ let register_visible () =
 (**	Register non-attached coservices (actions).
 *)
 let register_actions () =
-	Eliom_predefmod.Actions.register !!Services.login	Session.login_handler;
-	Eliom_predefmod.Actions.register !!Services.logout	Session.logout_handler
+	Eliom_predefmod.Action.register !!Services.login	Session.login_handler;
+	Eliom_predefmod.Action.register !!Services.logout	Session.logout_handler
 
 
 (**	Register services visible only to the Ajax API via XmlHttpRequest.

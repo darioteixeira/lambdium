@@ -71,10 +71,10 @@ let form_for_fresh ~sid ~title ~body_src (enter_sid, (enter_title, enter_body)) 
 			[
 			legend [pcdata "Enter comment:"];
 
-			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:sid Story.Id.to_string;
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:sid Story.Id.to_string ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter title:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~value:(pcdata title) ~rows:1 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~value:title ~rows:1 ~cols:80 ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter body:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ~value:(pcdata body_src) ~rows:10 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ~value:body_src ~rows:10 ~cols:80 ();
 			]]
 

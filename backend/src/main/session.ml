@@ -33,6 +33,13 @@ type 'a login_table_t =
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
 
+(**	The [Polytables] key that holds a boolean indicating
+	whether or not there was an error during login.
+*)
+let login_error_key =
+	lazy (Polytables.make_key ())
+
+
 (**	Creates the login table.  By default we use a persistent table, but you
 	can choose a volatile table by setting the 'login_table' configuration
 	option to 'volatile'.  Volatile tables tend to be faster, since they are
@@ -57,7 +64,17 @@ let login_table = lazy
 (**	Initialises session handling.
 *)
 let init () =
+	ignore !!login_error_key;
 	ignore !!login_table
+
+
+(**	Has there been an error during a login attempt?
+*)
+let get_login_error sp =
+	try
+		Polytables.get ~table:(Eliom_sessions.get_request_cache sp) ~key:!!login_error_key
+	with
+		Not_found -> false
 
 
 (**	Returns the currently logged-in user, if any.
@@ -108,18 +125,16 @@ let login_handler sp () (username, (password, remember)) =
 			end
 			else begin
 				Lwt.return ()
-			end) >>= fun () ->
-
-			Lwt.return []
+			end)
 		| None ->
-			Lwt.return [Invalid_login]
+			Polytables.set ~table:(Eliom_sessions.get_request_cache sp) ~key:!!login_error_key ~value:true;
+			Lwt.return ()
 
 
 (**	Handler for logout action.
 *)
 let logout_handler sp () global =
-	Eliom_sessions.close_session ~close_group:global ~sp () >>= fun () ->
-	Lwt.return []
+	Eliom_sessions.close_session ~close_group:global ~sp ()
 
 
 (**	Update login.  This function should be invoked upon

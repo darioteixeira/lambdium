@@ -10,7 +10,7 @@
 (**	{1 Type definitions}							*)
 (********************************************************************************)
 
-type t
+type token_t
 type status_t = (string * bool) list
 
 
@@ -19,11 +19,10 @@ type status_t = (string * bool) list
 (********************************************************************************)
 
 val init: unit -> unit
-val request: sp:Eliom_sessions.server_params -> login:Login.t -> t
-val refresh: t -> unit
-val discard: t -> unit Lwt.t
-val commit: string -> t -> unit Lwt.t
+val request: sp:Eliom_sessions.server_params -> uid:User.Id.t -> limit:int -> token_t
+val discard: token_t -> unit
+val commit: string -> token_t -> unit Lwt.t
 
-val add_files: t -> string list -> Ocsigen_extensions.file_info list -> bool
-val get_status: t -> string list -> status_t
+val add_files: string list -> Ocsigen_lib.file_info list -> token_t -> bool Lwt.t
+val get_status: string list -> token_t -> status_t
 

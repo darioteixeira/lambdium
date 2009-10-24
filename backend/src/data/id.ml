@@ -47,7 +47,7 @@ struct
 
 	let to_string = Int32.to_string
 	let of_string = Int32.of_string
-	let param = Eliom_parameters.user_type of_string to_string
+	let param = Eliom_parameters.user_type ~of_string ~to_string
 end
 
 
@@ -61,6 +61,6 @@ struct
 
 	let to_string = Int64.to_string
 	let of_string = Int64.of_string
-	let param = Eliom_parameters.user_type of_string to_string
+	let param = Eliom_parameters.user_type ~of_string ~to_string
 end
 

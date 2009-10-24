@@ -11,6 +11,10 @@ open Lwt
 open Common
 
 
+exception User_pool_exhausted
+exception Global_pool_exhausted
+
+
 (********************************************************************************)
 (**	{1 Type definitions}							*)
 (********************************************************************************)
@@ -18,9 +22,9 @@ open Common
 module Fileset = Set.Make (struct type t = string let compare = Pervasives.compare end)
 
 
-type t =
+type token_t =
 	{
-	token: ResourceGC.token_t;
+	owner: User.Id.t;
 	tmpdir: string;
 	mutable files: Fileset.t;
 	}
@@ -29,8 +33,16 @@ type t =
 type status_t = (string * bool) list
 
 
+type pool_t =
+	{
+	capacity: int;
+	mutable size: int;
+	usage: (User.Id.t, int) Hashtbl.t;
+	}
+
+
 (********************************************************************************)
-(**	{1 Public functions and values}						*)
+(**	{1 Private functions and values}					*)
 (********************************************************************************)
 
 let smartcp srcname dstname =
@@ -51,20 +63,21 @@ let deltree dir =
 	let rec del_next dh =
 		let name = dir ^ "/" ^ (Unix.readdir dh) in
 		if (Unix.stat name).st_kind == S_REG then Unix.unlink (name) else ();
-		Lwt_unix.yield () >>= fun () ->
 		del_next dh
 	in try
 		del_next dh
 	with
 		End_of_file ->
 			Unix.closedir dh;
-			Unix.rmdir dir;
-			Lwt.return ()
+			Unix.rmdir dir
 
 
-let pool =
-	let timeout = lazy (Eliom_sessions.get_global_service_session_timeout ())
-	in lazy (ResourceGC.make_pool ~name:"Uploader" ~capacity:!Config.uploader_global_capacity ~period:!Config.uploader_period ~default_timeout:!!timeout)
+let pool = lazy
+	{
+	capacity = !Config.uploader_global_capacity;
+	size = 0;
+	usage = Hashtbl.create !Config.uploader_global_capacity;
+	}
 
 
 (********************************************************************************)
@@ -75,53 +88,66 @@ let init () =
 	ignore !!pool
 
 
-let cleaner uuid =
-	Ocsigen_messages.warning (Printf.sprintf "Cleaner called for UUID %s!" uuid);
-	Unix.rmdir (!Config.uploader_limbo_dir ^ "/" ^ uuid)
+let discard token =
+	Ocsigen_messages.warning (Printf.sprintf "Called discard for token %s" token.tmpdir);
+	deltree token.tmpdir
 
 
-let request ~sp ~login =
-	(* let timeout = Some (Eliom_sessions.get_service_session_timeout ~sp ()) in *)
-	let timeout = Some (Some 120.0) in
-	let token = ResourceGC.request_token ~group:(Login.nick login, !Config.uploader_group_capacity) ?timeout !!pool cleaner in
-	let tmpdir = !Config.uploader_limbo_dir ^ "/" ^ (ResourceGC.uuid_of_token token) in
-	let () = Unix.mkdir tmpdir 0o750
-	in {token = token; tmpdir = tmpdir; files = Fileset.empty;}
+let finaliser token =
+	Ocsigen_messages.warning (Printf.sprintf "Called finaliser for token %s" token.tmpdir);
+	discard token
 
 
-let refresh uploader =
-	ResourceGC.refresh_token uploader.token
+let finaliser2 str =
+	prerr_endline "Called finaliser2"
 
 
-let discard uploader =
-	ResourceGC.retire_token uploader.token;
-	deltree uploader.tmpdir
+let request ~sp ~uid ~limit =
+	let current = try Hashtbl.find !!pool.usage uid with Not_found -> 0 in
+	if current >= limit
+	then
+		raise User_pool_exhausted
+	else if !!pool.size >= !!pool.capacity
+	then
+		raise Global_pool_exhausted
+	else
+		let now = Unix.gettimeofday () in
+		let dirname = Printf.sprintf "%ld-%Lx-%Lx" uid (Random.int64 Int64.max_int) (Int64.bits_of_float now) in
+		let tmpdir = !Config.uploader_limbo_dir ^ "/" ^ dirname in
+		let () = Unix.mkdir tmpdir 0o750 in
+		let token = {owner = uid; tmpdir = tmpdir; files = Fileset.empty;}
+		in	Hashtbl.replace !!pool.usage uid (current + 1);
+			Gc.finalise finaliser token;
+			let token2 = {owner = 0l; tmpdir = ""; files = Fileset.empty;} in Gc.finalise finaliser2 token2; ignore token2;
+			Ocsigen_messages.warning (Printf.sprintf "Called request for token %s" token.tmpdir);
+			token
 
 
-let commit destination uploader =
-	ResourceGC.retire_token uploader.token;
+let commit destination token =
+	Ocsigen_messages.warning (Printf.sprintf "Called commit for token %s" token.tmpdir);
 	Unix.mkdir destination 0o750;
 	let copy file =
-		let src = uploader.tmpdir ^ "/" ^ file
+		let src = token.tmpdir ^ "/" ^ file
 		and dst = destination ^ "/" ^ file
 		in smartcp src dst in
-	Lwt_util.iter_serial copy (Fileset.elements uploader.files)
+	Lwt_util.iter_serial copy (Fileset.elements token.files) >>= fun () ->
+	Lwt.return (deltree token.tmpdir)
 
 
-let add_files uploader aliases submissions =
-	let add alias file = match Eliom_sessions.get_filesize file with
+let add_files aliases submissions token =
+	let add (alias, file) = match Eliom_sessions.get_filesize file with
 		| 0L ->
 			Lwt.return ()
 		| _ ->
 			let tmpname = Eliom_sessions.get_tmp_filename file in
-			let newname = uploader.tmpdir ^ "/" ^ alias in
+			let newname = token.tmpdir ^ "/" ^ alias in
 			smartcp tmpname newname >>= fun () ->
-			uploader.files <- Fileset.add alias uploader.files;
-			Lwt.return () in
-	ignore (List.rev_map2 add aliases submissions);
-	List.for_all (fun alias -> Fileset.mem alias uploader.files) aliases
+			token.files <- Fileset.add alias token.files;
+			Lwt.return ()
+	in	Lwt_util.iter_serial add (List.map2 (fun x y -> (x, y)) aliases submissions) >>= fun () ->
+		Lwt.return (List.for_all (fun alias -> Fileset.mem alias token.files) aliases)
 
 
-let get_status uploader aliases =
-	List.map (fun alias -> (alias, Fileset.mem alias uploader.files)) aliases
+let get_status aliases token =
+	List.map (fun alias -> (alias, Fileset.mem alias token.files)) aliases
 

@@ -63,7 +63,7 @@ val form_for_fresh:
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
 
 val form_for_images:
-	uploader_status:Uploader.status_t ->
-	[< Ocsigen_extensions.file_info Eliom_parameters.setoneradio ] Eliom_parameters.param_name ->
+	status:Uploader.status_t ->
+	[< Ocsigen_lib.file_info Eliom_parameters.setoneradio ] Eliom_parameters.param_name ->
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
 

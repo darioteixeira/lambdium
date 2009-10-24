@@ -60,7 +60,7 @@ let output_full ?localiser maybe_login sp story comments =
 			fieldset ~a:[a_class ["form_fields"]]
 				[
 				legend [pcdata "Enter new comment:"];
-				Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:story#sid Story.Id.to_string;
+				Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:story#sid Story.Id.to_string ();
 				label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter title:"];
 				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~rows:1 ~cols:80 ();
 				label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter body:"];
@@ -118,24 +118,21 @@ let parse intro_src body_src =
 
 
 let form_for_fresh ?title ?intro_src ?body_src (enter_title, (enter_intro, enter_body)) =
-	let value_title = maybe pcdata title
-	and value_intro_src = maybe pcdata intro_src
-	and value_body_src = maybe pcdata body_src
-	in Lwt.return
+	Lwt.return
 		[fieldset
 			[
 			legend [pcdata "Story contents:"];
 
 			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter story title:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ?value:value_title ~rows:1 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ?value:title ~rows:1 ~cols:80 ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_intro"] [pcdata "Enter story introduction:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro"] ~name:enter_intro ?value:value_intro_src ~rows:5 ~cols:80 ();
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro"] ~name:enter_intro ?value:intro_src ~rows:5 ~cols:80 ();
 			label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter story body:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ?value:value_body_src ~rows:10 ~cols:80 ()
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ?value:body_src ~rows:10 ~cols:80 ()
 			]]
 
 
-let form_for_images ~uploader_status enter_file =
+let form_for_images ~status enter_file =
 	let make_input (alias, is_uploaded) =
 		let lbl = "enter_file_" ^ alias in
 		let enter =
@@ -147,5 +144,5 @@ let form_for_images ~uploader_status enter_file =
 			| true  -> [p [pcdata "Currently uploaded image:"]; pcdata alias]
 			| false -> []
 		in enter @ show
-	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input uploader_status)))]
+	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input status)))]
 

@@ -84,11 +84,11 @@ let form_for_fresh ?nick ?fullname ?timezone (enter_nick, (enter_fullname, (ente
 			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_password2"] ~input_type:`Password ~name:enter_password2 ();
 			label ~a:[a_class ["input_label"]; a_for "enter_timezone"] [pcdata "Choose timezone:"];
 			Eliom_predefmod.Xhtml.user_type_select
+				Timezone.to_string
 				~a:[a_id "enter_timezone"]
 				~name:enter_timezone
 				(option_of_tz timezone Timezone.utc)
 				(List.map (option_of_tz timezone) timezones)
-				Timezone.to_string
 			]]
 
 
@@ -118,10 +118,10 @@ let form_for_changed_settings ~user (enter_fullname, enter_timezone) =
 			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_fullname"] ~input_type:`Text ~name:enter_fullname ~value:user#fullname ();
 			label ~a:[a_class ["input_label"]; a_for "enter_timezone"] [pcdata "Choose timezone:"];
 			Eliom_predefmod.Xhtml.user_type_select
+				Timezone.to_string
 				~a:[a_id "enter_timezone"]
 				~name:enter_timezone
 				(option_of_tz (Some user#timezone) Timezone.utc)
 				(List.map (option_of_tz (Some user#timezone)) timezones)
-				Timezone.to_string
 			]]
 

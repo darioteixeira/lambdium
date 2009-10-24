@@ -44,9 +44,9 @@ struct
 	let make_buttons enter_action =
 		fieldset
 			[
-			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Cancel to_string;
-			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Continue to_string;
-			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Conclude to_string;
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Cancel to_string ();
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Continue to_string ();
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Conclude to_string ();
 			]
 
 	let make_form ~service ~sp ?content () =
@@ -79,9 +79,9 @@ struct
 	let make_buttons enter_action =
 		fieldset
 			[
-			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Cancel to_string;
-			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Preview to_string;
-			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Finish to_string;
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Cancel to_string ();
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Preview to_string ();
+			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Finish to_string ();
 			]
 
 	let make_form ~service ~sp ?content () =
