@@ -59,9 +59,9 @@ and step2_handler ?maybe_token ~login sp () (title, (intro_src, body_src)) =
 
 
 and step3 ?maybe_token ~story ~login ~sp ~bitmaps =
-	let token = match maybe_token with
-		| Some t -> t
-		| None	 -> Uploader.request ~sp ~uid:(Login.uid login) ~limit:3 in
+	(match maybe_token with
+		| Some t -> Lwt.return t
+		| None	 -> Uploader.request ~sp ~uid:(Login.uid login) ~limit:3) >>= fun token ->
 	let output_core login sp =
 		let step4_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -84,10 +84,11 @@ and step3 ?maybe_token ~story ~login ~sp ~bitmaps =
 and step4_handler ~token ~story ~login ~bitmaps sp () (action, files) =
 	match action with
 		| `Cancel ->
-			Uploader.discard token;
+			Uploader.discard token >>= fun () ->
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
+			Uploader.add_files bitmaps files token >>= fun _ ->
 			step1_handler ?maybe_token:(Some token) ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
 			Uploader.add_files bitmaps files token >>= function
@@ -117,7 +118,7 @@ and step5 ?maybe_token ~story ~login ~sp =
 and step6_handler ?maybe_token ~story sp () (action, ()) =
 	match action with
 		| `Cancel ->
-			Option.may Uploader.discard maybe_token;
+			lwt_may Uploader.discard maybe_token >>= fun () ->
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
@@ -139,7 +140,5 @@ and step6_handler ?maybe_token ~story sp () (action, ()) =
 (********************************************************************************)
 
 let handler sp () () =
-	Eliom_sessions.set_global_service_session_timeout ~sp (Some 120.0);
-	Eliom_sessions.set_service_session_timeout ~sp (Some 120.0);
 	step1_handler ~status:Stat_nothing sp () ()
 

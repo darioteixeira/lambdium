@@ -34,8 +34,6 @@ let comment_data_dir = ref "cdata"
 
 let uploader_limbo_dir = ref "/tmp"
 let uploader_global_capacity = ref 20
-let uploader_group_capacity = ref 3
-let uploader_period = ref 60
 
 let pghost = ref None
 let pgport = ref None
@@ -53,8 +51,6 @@ let parse_config () =
 	let parse_uploader = function
 		| Element ("limbodir", [], [PCData s])		-> uploader_limbo_dir := s
 		| Element ("globalcapacity", [], [PCData s])	-> uploader_global_capacity := int_of_string s
-		| Element ("groupcapacity", [], [PCData s])	-> uploader_group_capacity := int_of_string s
-		| Element ("period", [], [PCData s])		-> uploader_period := int_of_string s
 		| _						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown element under 'uploader'") in
 	let parse_pgocaml = function
 		| Element ("pghost", [], [PCData s])		-> pghost := Some s
