@@ -94,12 +94,8 @@ let discard token =
 
 
 let finaliser token =
-	Ocsigen_messages.warning (Printf.sprintf "Called finaliser for token %s" token.tmpdir);
+	Ocsigen_messages.warning (Printf.sprintf "\x1b[31mCalled finaliser for token %s\x1b[0m" token.tmpdir);
 	discard token
-
-
-let finaliser2 str =
-	prerr_endline "Called finaliser2"
 
 
 let request ~sp ~uid ~limit =
@@ -118,7 +114,6 @@ let request ~sp ~uid ~limit =
 		let token = {owner = uid; tmpdir = tmpdir; files = Fileset.empty;}
 		in	Hashtbl.replace !!pool.usage uid (current + 1);
 			Gc.finalise finaliser token;
-			let token2 = {owner = 0l; tmpdir = ""; files = Fileset.empty;} in Gc.finalise finaliser2 token2; ignore token2;
 			Ocsigen_messages.warning (Printf.sprintf "Called request for token %s" token.tmpdir);
 			token
 
