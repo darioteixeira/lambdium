@@ -9,7 +9,7 @@
 open Lwt
 open XHTML.M
 open Eliom_parameters
-open Common
+open Prelude
 open Page
 
 

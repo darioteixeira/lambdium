@@ -13,7 +13,7 @@
 	pseudo-services like the registration of a global exception handler.
 *)
 
-open Common
+open Prelude
 
 
 (********************************************************************************)

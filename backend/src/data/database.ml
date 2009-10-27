@@ -7,7 +7,7 @@
 (********************************************************************************)
 
 open Lwt
-open Common
+open Prelude
 
 module PGOCaml = PGOCaml_generic.Make (struct include Lwt include Lwt_chan end)
 

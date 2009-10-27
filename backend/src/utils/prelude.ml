@@ -1,10 +1,14 @@
 (********************************************************************************)
-(*	Common.ml
+(*	Prelude.ml
 	Copyright (c) 2009 Dario Teixeira (dario.teixeira@yahoo.com)
 	This software is distributed under the terms of the GNU GPL version 2.
 	See LICENSE file for full license text.
 *)
 (********************************************************************************)
+
+(**	This module contains just generic, commonly used functions and operators
+	that for some reason are not part of the standard library or Extlib.
+*)
 
 
 (********************************************************************************)
@@ -27,3 +31,4 @@ let maybe f = function
 let lwt_may f = function
 	| Some x -> f x
 	| None	 -> Lwt.return ()
+

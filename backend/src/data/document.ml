@@ -7,7 +7,7 @@
 (********************************************************************************)
 
 open Lwt
-open Common
+open Prelude
 open Lambdoc_core
 open Lambdoc_writer.Settings
 
