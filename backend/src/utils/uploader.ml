@@ -11,8 +11,13 @@ open Lwt
 open Prelude
 
 
+(********************************************************************************)
+(**	{1 Exceptions}								*)
+(********************************************************************************)
+
 exception User_pool_exhausted
 exception Global_pool_exhausted
+exception Invalid_token
 
 
 (********************************************************************************)
@@ -37,8 +42,6 @@ type status_t = (string * bool) list
 
 type pool_t =
 	{
-	capacity: int;
-	mutable size: int;
 	usage: (User.Id.t, int) Hashtbl.t;
 	mutable uuids: Uuidset.t;
 	}
@@ -47,6 +50,13 @@ type pool_t =
 (********************************************************************************)
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
+
+let pool = lazy
+	{
+	usage = Hashtbl.create !Config.uploader_global_capacity;
+	uuids = Uuidset.empty;
+	}
+
 
 let smartcp srcname dstname =
 	(try Unix.unlink dstname with _ -> ());
@@ -67,32 +77,13 @@ let deltree dir =
 	let rec del_next dh =
 		let name = dir ^ "/" ^ (Unix.readdir dh) in
 		if (Unix.stat name).st_kind == S_REG then Unix.unlink (name) else ();
-		Lwt_unix.yield () >>= fun () ->
 		del_next dh
 	in try
 		del_next dh
 	with
 		End_of_file ->
 			Unix.closedir dh;
-			Unix.rmdir dir;
-			Lwt.return ()
-
-
-let pool = lazy
-	{
-	capacity = !Config.uploader_global_capacity;
-	size = 0;
-	usage = Hashtbl.create !Config.uploader_global_capacity;
-	uuids = Uuidset.empty;
-	}
-
-
-(********************************************************************************)
-(**	{1 Public functions and values}						*)
-(********************************************************************************)
-
-let init () =
-	ignore !!pool
+			Unix.rmdir dir
 
 
 let remove_references token =
@@ -103,20 +94,31 @@ let remove_references token =
 	else Hashtbl.replace !!pool.usage token.owner new_count
 
 
-let discard token =
-	Ocsigen_messages.warning (Printf.sprintf "Called discard for token %s" token.uuid);
+let discard_aux ~manual token =
+	Ocsigen_messages.warning (Printf.sprintf "Called discard for token %s with manual=%B" token.uuid manual);
 	if Uuidset.mem token.uuid !!pool.uuids
 	then begin
 		Ocsigen_messages.warning (Printf.sprintf "Actually discarding token %s" token.uuid);
 		remove_references token;
-		deltree token.tmpdir
+		deltree token.tmpdir;
+		Lwt.return ()
 	end
-	else Lwt.return ()
+	else
+		if manual
+		then Lwt.fail Invalid_token
+		else Lwt.return ()
 
 
-let finaliser token =
-	Ocsigen_messages.warning (Printf.sprintf "\x1b[31mCalled finaliser for token %s\x1b[0m" token.uuid);
-	discard token
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
+let init () =
+	ignore !!pool
+
+
+let discard =
+	discard_aux ~manual:true
 
 
 let request ~sp ~uid ~limit =
@@ -124,32 +126,40 @@ let request ~sp ~uid ~limit =
 	if current >= limit
 	then
 		raise User_pool_exhausted
-	else if !!pool.size >= !!pool.capacity
-	then
-		raise Global_pool_exhausted
 	else
-		let now = Unix.gettimeofday () in
-		let uuid = Printf.sprintf "%ld-%Lx-%Lx" uid (Random.int64 Int64.max_int) (Int64.bits_of_float now) in
-		let tmpdir = !Config.uploader_limbo_dir ^ "/lambdium-" ^ uuid in
-		let () = Unix.mkdir tmpdir 0o750 in
-		let token = {owner = uid; uuid = uuid; tmpdir = tmpdir; files = Fileset.empty;}
-		in	Hashtbl.replace !!pool.usage uid (current + 1);
-			!!pool.uuids <- Uuidset.add uuid !!pool.uuids;
-			Lwt_gc.finalise finaliser token;
-			Ocsigen_messages.warning (Printf.sprintf "Called request for token %s" token.uuid);
-			Lwt.return token
+		if Uuidset.cardinal !!pool.uuids >= !Config.uploader_global_capacity
+		then
+			raise Global_pool_exhausted
+		else
+			let now = Unix.gettimeofday () in
+			let uuid = Printf.sprintf "%ld-%Lx-%Lx" uid (Int64.bits_of_float now) (Random.int64 Int64.max_int) in
+			let tmpdir = !Config.uploader_limbo_dir ^ "/lambdium-" ^ uuid in
+			let () = Unix.mkdir tmpdir 0o750 in
+			let token = {owner = uid; uuid = uuid; tmpdir = tmpdir; files = Fileset.empty;}
+			in	Hashtbl.replace !!pool.usage uid (current + 1);
+				!!pool.uuids <- Uuidset.add uuid !!pool.uuids;
+				Lwt_gc.finalise (discard_aux ~manual:false) token;
+				Ocsigen_messages.warning (Printf.sprintf "Called request for token %s" token.uuid);
+				Lwt.return token
 
 
 let commit destination token =
 	Ocsigen_messages.warning (Printf.sprintf "Called commit for token %s" token.uuid);
-	Unix.mkdir destination 0o750;
-	let copy file =
-		let src = token.tmpdir ^ "/" ^ file
-		and dst = destination ^ "/" ^ file
-		in smartcp src dst in
-	Lwt_util.iter_serial copy (Fileset.elements token.files) >>= fun () ->
-	remove_references token;
-	deltree token.tmpdir
+	if Uuidset.mem token.uuid !!pool.uuids
+	then begin
+		Ocsigen_messages.warning (Printf.sprintf "Actually committing token %s" token.uuid);
+		Unix.mkdir destination 0o750;
+		let copy file =
+			let src = token.tmpdir ^ "/" ^ file
+			and dst = destination ^ "/" ^ file
+			in smartcp src dst in
+		Lwt_util.iter_serial copy (Fileset.elements token.files) >>= fun () ->
+		remove_references token;
+		deltree token.tmpdir;
+		Lwt.return ()
+	end
+	else
+		Lwt.fail Invalid_token
 
 
 let add_files aliases submissions token =
