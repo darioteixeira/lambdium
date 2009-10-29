@@ -29,11 +29,11 @@ type login_table_t =
 
 let login_table = ref Use_persistent
 
-let story_data_dir = ref "sdata"
-let comment_data_dir = ref "cdata"
-
-let uploader_limbo_dir = ref "/tmp"
-let uploader_global_capacity = ref 20
+let static_dir = ref "static"
+let story_dir = ref "sdata"
+let comment_dir = ref "cdata"
+let limbo_dir = ref "limbo"
+let global_upload_limit = ref 20
 
 let pghost = ref None
 let pgport = ref None
@@ -48,10 +48,6 @@ let parse_config () =
 		| "volatile"	-> Use_volatile
 		| "persistent"	-> Use_persistent
 		| s		-> raise (Ocsigen_extensions.Error_in_config_file ("Unknown 'logintable' value: " ^ s)) in
-	let parse_uploader = function
-		| Element ("limbodir", [], [PCData s])		-> uploader_limbo_dir := s
-		| Element ("globalcapacity", [], [PCData s])	-> uploader_global_capacity := int_of_string s
-		| _						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown element under 'uploader'") in
 	let parse_pgocaml = function
 		| Element ("pghost", [], [PCData s])		-> pghost := Some s
 		| Element ("pgport", [], [PCData s])		-> pgport := Some (int_of_string s)
@@ -62,9 +58,11 @@ let parse_config () =
 		| _						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown element under 'pgocaml'") in
 	let parse_top = function
 		| Element ("logintable", [], [PCData s])	-> login_table := login_table_of_string s
-		| Element ("storydatadir", [], [PCData s])	-> story_data_dir := s
-		| Element ("commentdatadir", [], [PCData s])	-> comment_data_dir := s
-		| Element ("uploader", [], children)		-> List.iter parse_uploader children
+		| Element ("staticdir", [], [PCData s])		-> static_dir := s
+		| Element ("storydir", [], [PCData s])		-> story_dir := s
+		| Element ("commentdir", [], [PCData s])	-> comment_dir := s
+		| Element ("limbodir", [], [PCData s])		-> limbo_dir := s
+		| Element ("globaluploadlimit", [], [PCData s])	-> global_upload_limit := int_of_string s
 		| Element ("pgocaml", [], children)		-> List.iter parse_pgocaml children
 		| _						-> raise (Ocsigen_extensions.Error_in_config_file "Unknown element under 'lambdium'") in
 	let config = Eliom_sessions.get_config ()

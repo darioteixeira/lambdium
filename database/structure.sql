@@ -61,7 +61,7 @@ CREATE INDEX users_user_timezone_id_idx ON users (user_timezone_id);
 /*
  * Create the "stories" relation, together with the sequence
  * that automatically increments the story_id of new stories.
- * Note that the timestamp is stored in UTC.
+ * Note that the timestamp is stored in UTC, without TZ info.
  */
 
 CREATE TABLE stories
@@ -73,10 +73,10 @@ CREATE TABLE stories
 	story_num_comments	comment_id_t NOT NULL,
 	story_intro_src		text NOT NULL,
 	story_intro_doc		bytea NOT NULL,
-	story_intro_xhtml	bytea NOT NULL,
-	story_body_src		text NULL,
-	story_body_doc		bytea NULL,
-	story_body_xhtml	bytea NULL,
+	story_intro_out	bytea NOT NULL,
+	story_body_src		text NOT NULL,
+	story_body_doc		bytea NOT NULL,
+	story_body_out	bytea NOT NULL,
 	PRIMARY KEY (story_id)
 	);
 
@@ -93,7 +93,7 @@ CREATE INDEX stories_story_author_id_idx ON stories (story_author_id);
 /*
  * Create the "comments" relation, together with the sequence
  * that automatically increments the comment_id of new comments.
- * Note that the timestamp is stored in UTC.
+ * Note that the timestamp is stored in UTC, without TZ info.
  */
 
 CREATE TABLE comments
@@ -105,7 +105,7 @@ CREATE TABLE comments
 	comment_timestamp	timestamp NOT NULL,
 	comment_body_src	text NOT NULL,
 	comment_body_doc	bytea NOT NULL,
-	comment_body_xhtml	bytea NOT NULL,
+	comment_body_out	bytea NOT NULL,
 	PRIMARY KEY (comment_id)
 	);
 

@@ -144,7 +144,7 @@ CREATE FUNCTION get_stories ()
 RETURNS SETOF story_blurb_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT	story_id, user_id, user_nick, story_title, story_timestamp, story_num_comments, story_intro_xhtml
+	SELECT	story_id, user_id, user_nick, story_title, story_timestamp, story_num_comments, story_intro_out
 		FROM stories, users
 		WHERE story_author_id = user_id
 		ORDER BY story_timestamp DESC
@@ -174,7 +174,7 @@ CREATE FUNCTION get_story (story_id_t)
 RETURNS story_full_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT	story_id, user_id, user_nick, story_title, story_timestamp, story_num_comments, story_intro_xhtml, story_body_xhtml
+	SELECT	story_id, user_id, user_nick, story_title, story_timestamp, story_num_comments, story_intro_out, story_body_out
 		FROM stories, users
 		WHERE story_id = $1 AND story_author_id = user_id;
 $$;
@@ -192,7 +192,7 @@ CREATE FUNCTION get_story_comments (story_id_t)
 RETURNS SETOF comment_full_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title, comment_timestamp, comment_body_xhtml
+	SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title, comment_timestamp, comment_body_out
 		FROM comments, users
 		WHERE comment_story_id = $1 AND comment_author_id = user_id
 		ORDER BY comment_timestamp
@@ -222,7 +222,7 @@ CREATE FUNCTION get_comment (comment_id_t)
 RETURNS comment_full_t
 LANGUAGE sql STABLE AS
 $$
-	SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title, comment_timestamp, comment_body_xhtml
+	SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title, comment_timestamp, comment_body_out
 		FROM comments, users
 		WHERE comment_id = $1 AND comment_author_id = user_id;
 $$;
@@ -287,10 +287,10 @@ DECLARE
 	_story_title		ALIAS FOR $2;
 	_story_intro_src	ALIAS FOR $3;
 	_story_intro_doc	ALIAS FOR $4;
-	_story_intro_xhtml	ALIAS FOR $5;
+	_story_intro_out	ALIAS FOR $5;
 	_story_body_src		ALIAS FOR $6;
 	_story_body_doc		ALIAS FOR $7;
-	_story_body_xhtml	ALIAS FOR $8;
+	_story_body_out	ALIAS FOR $8;
 
 BEGIN
 	INSERT	INTO stories
@@ -301,10 +301,10 @@ BEGIN
 			story_num_comments,
 			story_intro_src,
 			story_intro_doc,
-			story_intro_xhtml,
+			story_intro_out,
 			story_body_src,
 			story_body_doc,
-			story_body_xhtml
+			story_body_out
 			)
 		VALUES
 			(
@@ -314,10 +314,10 @@ BEGIN
 			0,
 			_story_intro_src,
 			_story_intro_doc,
-			_story_intro_xhtml,
+			_story_intro_out,
 			_story_body_src,
 			_story_body_doc,
-			_story_body_xhtml
+			_story_body_out
 			);
 
 	RETURN currval ('story_id_seq');
@@ -339,7 +339,7 @@ DECLARE
 	_comment_title		ALIAS FOR $3;
 	_comment_body_src	ALIAS FOR $4;
 	_comment_body_doc	ALIAS FOR $5;
-	_comment_body_xhtml	ALIAS FOR $6;
+	_comment_body_out	ALIAS FOR $6;
 
 BEGIN
 	INSERT	INTO comments
@@ -350,7 +350,7 @@ BEGIN
 			comment_timestamp,
 			comment_body_src,
 			comment_body_doc,
-			comment_body_xhtml
+			comment_body_out
 			)
 		VALUES
 			(
@@ -360,7 +360,7 @@ BEGIN
 			now () AT TIME ZONE 'UTC',
 			_comment_body_src,
 			_comment_body_doc,
-			_comment_body_xhtml
+			_comment_body_out
 			);
 
 	RETURN currval ('comment_id_seq');
@@ -436,6 +436,34 @@ BEGIN
 		SET (user_fullname, user_timezone_id) = (_user_fullname, _user_timezone_id)
 		WHERE user_id = _user_id;
 END
+$$;
+
+
+/*
+ * Updates the precomputed XHTML output for a given story.
+ */
+
+CREATE FUNCTION edit_story_output (story_id_t, bytea, bytea)
+RETURNS void
+LANGUAGE sql VOLATILE AS
+$$
+	UPDATE	stories
+		SET (story_intro_out, story_body_out) = ($2, $3)
+		WHERE story_id = $1;
+$$;
+
+
+/*
+ * Updates the precomputed XHTML output for a given comment.
+ */
+
+CREATE FUNCTION edit_comment_output (comment_id_t, bytea)
+RETURNS void
+LANGUAGE sql VOLATILE AS
+$$
+	UPDATE	comments
+		SET comment_body_out = $2
+		WHERE comment_id = $1;
 $$;
 
 

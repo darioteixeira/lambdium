@@ -23,19 +23,26 @@ type composition_t = Valid.composition_t
 
 
 (********************************************************************************)
+(**	{1 Private functions and values}					*)
+(********************************************************************************)
+
+let output writer ~sp ~path doc =
+	let bitmap_lookup bmp = Eliom_predefmod.Xhtml.make_uri ~service:(External.link_static (path @ [bmp])) ~sp () in
+	let settings = Some {Lambdoc_writer.Settings.default with bitmap_lookup = bitmap_lookup} in
+	let xhtml = writer ?settings doc
+	in (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)
+
+
+(********************************************************************************)
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-let output_of_manuscript bitmap_lookup doc =
-	let settings = {Lambdoc_writer.Settings.default with bitmap_lookup = bitmap_lookup;} in
-	let xhtml = Lambdoc_write_xhtml.Main.write_valid_manuscript ~settings doc
-	in (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)
+let output_of_manuscript =
+	output Lambdoc_write_xhtml.Main.write_valid_manuscript
 
 
-let output_of_composition bitmap_lookup doc =
-	let settings = {Lambdoc_writer.Settings.default with bitmap_lookup = bitmap_lookup;} in
-	let xhtml = Lambdoc_write_xhtml.Main.write_valid_composition ~settings doc
-	in (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)
+let output_of_composition =
+	output Lambdoc_write_xhtml.Main.write_valid_composition
 
 
 let output_of_string str =

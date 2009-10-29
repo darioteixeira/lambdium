@@ -17,13 +17,13 @@ open Page
 (**	{1 Wizards steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ?maybe_token ?title ?intro_src ?body_src ~status sp () () =
+let rec step1_handler ?token ?title ?intro_src ?body_src ~status sp () () =
 	let output_core login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_story
 			~post_params: Params.add_story
-			(step2_handler ?maybe_token ~login) in
+			(step2_handler ?token ~login) in
 		Forms.Monatomic.make_form
 			~label: "Preview"
 			~service: step2_service
@@ -38,14 +38,17 @@ let rec step1_handler ?maybe_token ?title ?intro_src ?body_src ~status sp () () 
 		()
 
 
-and step2_handler ?maybe_token ~login sp () (title, (intro_src, body_src)) =
+and step2_handler ?token ~login sp () (title, (intro_src, body_src)) =
+	(match token with
+		| Some t -> Lwt.return t
+		| None	 -> Uploader.request ~sp ~uid:(Login.uid login) ~limit:3) >>= fun token ->
 	try_lwt
-		Story_io.parse intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, bitmaps) ->
+		Story_io.parse ~sp ~path:(Uploader.get_path token) intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, bitmaps) ->
 		let author = Login.to_user login in
 		let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
 		if List.length bitmaps <> 0
-		then step3 ?maybe_token ~story ~login ~sp ~bitmaps
-		else step5 ?maybe_token ~story ~login ~sp
+		then step3 ~token ~story ~login ~sp ~bitmaps
+		else step5 ~token ~story ~login ~sp
 	with
 		| Story_io.Invalid_story_intro intro_out ->
 			let status = Stat_failure ([intro_out] :> XHTML.M.block XHTML.M.elt list)
@@ -58,10 +61,7 @@ and step2_handler ?maybe_token ~login sp () (title, (intro_src, body_src)) =
 			in step1_handler ~title ~intro_src ~body_src ~status sp () ()
 
 
-and step3 ?maybe_token ~story ~login ~sp ~bitmaps =
-	(match maybe_token with
-		| Some t -> Lwt.return t
-		| None	 -> Uploader.request ~sp ~uid:(Login.uid login) ~limit:3) >>= fun token ->
+and step3 ~token ~story ~login ~sp ~bitmaps =
 	let output_core login sp =
 		let step4_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -71,7 +71,7 @@ and step3 ?maybe_token ~story ~login ~sp ~bitmaps =
 		Forms.Triatomic.make_form
 			~service: step4_service
 			~sp
-			~content: (Story_io.form_for_images ~status:(Uploader.get_status bitmaps token))
+			~content: (Story_io.form_for_images ~sp ~path:(Uploader.get_path token) ~status:(Uploader.get_status bitmaps token))
 			() >>= fun form ->
 		Lwt.return (Stat_nothing, Some [form])
 	in Page.login_enforced_handler
@@ -89,20 +89,20 @@ and step4_handler ~token ~story ~login ~bitmaps sp () (action, files) =
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
 			Uploader.add_files bitmaps files token >>= fun _ ->
-			step1_handler ?maybe_token:(Some token) ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
+			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
 			Uploader.add_files bitmaps files token >>= function
-				| true  -> step5 ?maybe_token:(Some token) ~story ~login ~sp
-				| false -> step3 ?maybe_token:(Some token) ~story ~login ~sp ~bitmaps
+				| true  -> step5 ?token ~story ~login ~sp
+				| false -> step3 ?token ~story ~login ~sp ~bitmaps
 
 
-and step5 ?maybe_token ~story ~login ~sp =
+and step5 ~token ~story ~login ~sp =
 	let output_core login sp =
 		let step6_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_story
 			~post_params: (Forms.Triatomic.param ** Eliom_parameters.unit)
-			(step6_handler ?maybe_token ~story) in
+			(step6_handler ?token ~story) in
 		Forms.Triatomic.make_form
 			~service: step6_service
 			~sp
@@ -115,18 +115,22 @@ and step5 ?maybe_token ~story ~login ~sp =
 		()
 
 
-and step6_handler ?maybe_token ~story sp () (action, ()) =
+and step6_handler ~token ~story sp () (action, ()) =
 	match action with
 		| `Cancel ->
-			lwt_may Uploader.discard maybe_token >>= fun () ->
+			Uploader.discard token >>= fun () ->
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
-			step1_handler ?maybe_token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
+			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
 			try_lwt
 				Database.add_story story >>= fun sid ->
-				lwt_may (Uploader.commit (!Config.story_data_dir ^ "/" ^ Story.Id.to_string sid)) maybe_token >>= fun () ->
+				let path = [!Config.story_dir; Story.Id.to_string sid] in
+				Uploader.commit ~path token >>= fun () ->
+				let intro_out = Document.string_of_output (Document.output_of_composition ~sp ~path story#intro_doc)
+				and body_out = Document.string_of_output (Document.output_of_manuscript ~sp ~path story#body_doc) in
+				Database.edit_story_output sid intro_out body_out >>= fun () ->
 				let output_core _ _ = Lwt.return (Stat_success [p [pcdata "Story has been added!"]], None)
 				in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 			with

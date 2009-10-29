@@ -32,7 +32,7 @@ type token_t =
 	{
 	owner: User.Id.t;
 	uuid: string;
-	tmpdir: string;
+	tmp_dir: string;
 	mutable files: Fileset.t;
 	}
 
@@ -53,7 +53,7 @@ type pool_t =
 
 let pool = lazy
 	{
-	usage = Hashtbl.create !Config.uploader_global_capacity;
+	usage = Hashtbl.create !Config.global_upload_limit;
 	uuids = Uuidset.empty;
 	}
 
@@ -100,7 +100,7 @@ let discard_aux ~manual token =
 	then begin
 		Ocsigen_messages.warning (Printf.sprintf "Actually discarding token %s" token.uuid);
 		remove_references token;
-		deltree token.tmpdir;
+		deltree token.tmp_dir;
 		Lwt.return ()
 	end
 	else
@@ -127,15 +127,21 @@ let request ~sp ~uid ~limit =
 	then
 		raise User_pool_exhausted
 	else
-		if Uuidset.cardinal !!pool.uuids >= !Config.uploader_global_capacity
+		if Uuidset.cardinal !!pool.uuids >= !Config.global_upload_limit
 		then
 			raise Global_pool_exhausted
 		else
 			let now = Unix.gettimeofday () in
 			let uuid = Printf.sprintf "%ld-%Lx-%Lx" uid (Int64.bits_of_float now) (Random.int64 Int64.max_int) in
-			let tmpdir = !Config.uploader_limbo_dir ^ "/lambdium-" ^ uuid in
-			let () = Unix.mkdir tmpdir 0o750 in
-			let token = {owner = uid; uuid = uuid; tmpdir = tmpdir; files = Fileset.empty;}
+			let tmp_dir = (Unix.getcwd ()) ^ "/" ^ !Config.static_dir ^ "/" ^ !Config.limbo_dir ^ "/" ^ uuid in
+			let () = Unix.mkdir tmp_dir 0o750 in
+			let token =
+				{
+				owner = uid;
+				uuid = uuid;
+				tmp_dir = tmp_dir;
+				files = Fileset.empty;
+				}
 			in	Hashtbl.replace !!pool.usage uid (current + 1);
 				!!pool.uuids <- Uuidset.add uuid !!pool.uuids;
 				Lwt_gc.finalise (discard_aux ~manual:false) token;
@@ -143,19 +149,22 @@ let request ~sp ~uid ~limit =
 				Lwt.return token
 
 
-let commit destination token =
+let commit ~path token =
 	Ocsigen_messages.warning (Printf.sprintf "Called commit for token %s" token.uuid);
 	if Uuidset.mem token.uuid !!pool.uuids
 	then begin
 		Ocsigen_messages.warning (Printf.sprintf "Actually committing token %s" token.uuid);
-		Unix.mkdir destination 0o750;
+		let full_path = [Unix.getcwd (); !Config.static_dir] @ path in
+		let dst_dir = (List.hd full_path) ^ (List.fold_left (fun acc x -> acc ^ "/" ^ x) "" (List.tl full_path)) in
+		Ocsigen_messages.warning (Printf.sprintf "Destination dir: %s" dst_dir);
+		Unix.mkdir dst_dir 0o750;
 		let copy file =
-			let src = token.tmpdir ^ "/" ^ file
-			and dst = destination ^ "/" ^ file
+			let src = token.tmp_dir ^ "/" ^ file
+			and dst = dst_dir ^ "/" ^ file
 			in smartcp src dst in
 		Lwt_util.iter_serial copy (Fileset.elements token.files) >>= fun () ->
 		remove_references token;
-		deltree token.tmpdir;
+		deltree token.tmp_dir;
 		Lwt.return ()
 	end
 	else
@@ -168,7 +177,7 @@ let add_files aliases submissions token =
 			Lwt.return ()
 		| _ ->
 			let tmpname = Eliom_sessions.get_tmp_filename file in
-			let newname = token.tmpdir ^ "/" ^ alias in
+			let newname = token.tmp_dir ^ "/" ^ alias in
 			smartcp tmpname newname >>= fun () ->
 			token.files <- Fileset.add alias token.files;
 			Lwt.return ()
@@ -178,4 +187,8 @@ let add_files aliases submissions token =
 
 let get_status aliases token =
 	List.map (fun alias -> (alias, Fileset.mem alias token.files)) aliases
+
+
+let get_path token =
+	[!Config.limbo_dir; token.uuid]
 

@@ -51,7 +51,12 @@ val output_fresh:
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-val parse: string -> string -> (Document.composition_t * Document.output_t * Document.manuscript_t * Document.output_t * string list) Lwt.t
+val parse:
+	sp:Eliom_sessions.server_params ->
+	path:string list ->
+	string ->
+	string ->
+	(Document.composition_t * Document.output_t * Document.manuscript_t * Document.output_t * string list) Lwt.t
 
 val form_for_fresh:
 	?title:string ->
@@ -63,6 +68,8 @@ val form_for_fresh:
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
 
 val form_for_images:
+	sp:Eliom_sessions.server_params ->
+	path:string list ->
 	status:Uploader.status_t ->
 	[< Ocsigen_lib.file_info Eliom_parameters.setoneradio ] Eliom_parameters.param_name ->
 	[> `Fieldset ] XHTML.M.elt list Lwt.t

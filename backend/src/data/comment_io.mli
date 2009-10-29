@@ -42,7 +42,11 @@ val output_fresh:
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-val parse: string -> (Document.composition_t * Document.output_t) Lwt.t
+val parse:
+	sp:Eliom_sessions.server_params ->
+	path:string list ->
+	string ->
+	(Document.composition_t * Document.output_t) Lwt.t
 
 val form_for_fresh:
 	sid:Story.Id.t ->

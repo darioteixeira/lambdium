@@ -55,11 +55,10 @@ let output_fresh = output_full
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-let parse src =
+let parse ~sp ~path src =
 	Document.parse_composition src >>= function
 		| `Okay (doc, _) ->
-			let bitmap_lookup = XHTML.M.uri_of_string in
-			let out = Document.output_of_composition bitmap_lookup doc
+			let out = Document.output_of_composition ~sp ~path doc
 			in Lwt.return (doc, out)
 		| `Error out ->
 			Lwt.fail (Invalid_comment out)

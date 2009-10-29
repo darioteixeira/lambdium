@@ -105,6 +105,8 @@ val add_comment: Comment.fresh_t -> Comment.Id.t Lwt.t
 
 val edit_user_credentials: User.changed_credentials_t -> unit Lwt.t
 val edit_user_settings: User.changed_settings_t -> unit Lwt.t
+val edit_story_output: Story.Id.t -> string -> string -> unit Lwt.t
+val edit_comment_output: Comment.Id.t -> string -> unit Lwt.t
 
 
 (********************************************************************************)

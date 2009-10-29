@@ -100,14 +100,13 @@ let output_fresh ?localiser login sp story =
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-let parse intro_src body_src =
+let parse ~sp ~path intro_src body_src =
 	Document.parse_composition intro_src >>= fun intro_res ->
 	Document.parse_manuscript body_src >>= fun body_res ->
 	match (intro_res, body_res) with
 		| `Okay (intro_doc, _) , `Okay (body_doc, bitmaps) ->
-			let bitmap_lookup = XHTML.M.uri_of_string in
-			let intro_out = Document.output_of_composition bitmap_lookup intro_doc
-			and body_out = Document.output_of_manuscript bitmap_lookup body_doc
+			let intro_out = Document.output_of_composition ~sp ~path intro_doc
+			and body_out = Document.output_of_manuscript ~sp ~path body_doc
 			in Lwt.return (intro_doc, intro_out, body_doc, body_out, bitmaps)
 		| `Error intro_out, `Okay _ ->
 			Lwt.fail (Invalid_story_intro intro_out)
@@ -132,7 +131,7 @@ let form_for_fresh ?title ?intro_src ?body_src (enter_title, (enter_intro, enter
 			]]
 
 
-let form_for_images ~status enter_file =
+let form_for_images ~sp ~path ~status enter_file =
 	let make_input (alias, is_uploaded) =
 		let lbl = "enter_file_" ^ alias in
 		let enter =
@@ -141,7 +140,9 @@ let form_for_images ~status enter_file =
 			Eliom_predefmod.Xhtml.file_input ~a:[a_id lbl] ~name:enter_file ();
 			]
 		and show = match is_uploaded with
-			| true  -> [p [pcdata "Currently uploaded image:"]; pcdata alias]
+			| true  ->
+				let uri = Eliom_predefmod.Xhtml.make_uri ~service:(External.link_static (path @ [alias])) ~sp ()
+				in [p [pcdata "Currently uploaded image:"]; XHTML.M.img ~src:uri ~alt:"" ()]
 			| false -> []
 		in enter @ show
 	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input status)))]

@@ -169,7 +169,7 @@ let get_user_comments uid =
 
 
 let get_comment cid =
-	assert (Ocsigen_messages.warning (Printf.sprintf "Database#get_comment %ld" cid); true);
+	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_comment %ld" cid); true);
 	let get_data dbh =
 		PGSQL(dbh) "nullres=none" "SELECT * FROM get_comment ($cid)" >>= function
 			| [c]	-> Lwt.return (Comment.full_of_tuple c)
@@ -249,6 +249,23 @@ let edit_user_settings user_settings =
 		PGSQL(dbh) "SELECT edit_user_settings ($uid, $fullname, $?maybe_tid)" >>= fun _ ->
 		Lwt.return ()
 	in Lwt_pool.use !!pool get_data
+
+
+let edit_story_output sid intro_out body_out =
+	assert (Ocsigen_messages.warning (Printf.sprintf "Database.edit_story_output (%ld)" sid) ; true);
+	let get_data dbh =
+		PGSQL(dbh) "SELECT edit_story_output ($sid, $intro_out, $body_out)" >>= fun _ ->
+		Lwt.return ()
+	in Lwt_pool.use !!pool get_data
+
+
+let edit_comment_output cid body_out =
+	assert (Ocsigen_messages.warning (Printf.sprintf "Database.edit_comment_output (%ld)" cid) ; true);
+	let get_data dbh =
+		PGSQL(dbh) "SELECT edit_comment_output ($cid, $body_out)" >>= fun _ ->
+		Lwt.return ()
+	in Lwt_pool.use !!pool get_data
+
 
 
 (********************************************************************************)
