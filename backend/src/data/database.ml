@@ -183,11 +183,18 @@ let get_comment cid =
 
 let get_story_with_comments sid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_story_with_comments %ld" sid); true);
+	let get_story dbh =
+		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story ($sid)" >>= function
+			| [s]	-> Lwt.return (Story.full_of_tuple s)
+			| _	-> Lwt.fail Cannot_get_story in
+	let get_story_comments dbh =
+		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story_comments ($sid)" >>= fun comments ->
+		Lwt.return (List.map Comment.full_of_tuple comments) in
 	let get_data dbh =
 		try_lwt
 			PGOCaml.begin_work dbh >>= fun () ->
-			get_story sid >>= fun story ->
-			get_story_comments sid >>= fun comments ->
+			get_story dbh >>= fun story ->
+			get_story_comments dbh >>= fun comments ->
 			PGOCaml.commit dbh >>= fun () ->
 			Lwt.return (story, comments)
 		with
@@ -209,23 +216,52 @@ let add_user user =
 	in Lwt_pool.use !!pool get_data
 
 
-let add_story story =
+let add_story ~output_maker story =
 	assert (Ocsigen_messages.warning "Database.add_story ()"; true);
-	let (uid, title, intro_src, intro_pickle, intro_out, body_src, body_pickle, body_out) = Story.tuple_of_fresh story in
-	let get_data dbh =
-		PGSQL(dbh) "SELECT add_story ($uid, $title, $intro_src, $intro_pickle, $intro_out, $body_src, $body_pickle, $body_out)" >>= function
+	let add dbh =
+		let (uid, title, intro_src, intro_pickle, _intro_out, body_src, body_pickle, _body_out) = Story.tuple_of_fresh story in
+		let intro_out = ""
+		and body_out = ""
+		in PGSQL(dbh) "SELECT add_story ($uid, $title, $intro_src, $intro_pickle, $intro_out, $body_src, $body_pickle, $body_out)" >>= function
 			| [Some sid] -> Lwt.return sid
-			| _	     -> Lwt.fail Cannot_add_story
+			| _	     -> Lwt.fail Cannot_add_story in
+	let edit dbh sid intro_out body_out =
+		PGSQL(dbh) "SELECT edit_story_output ($sid, $intro_out, $body_out)" >>= fun _ ->
+		Lwt.return () in
+	let get_data dbh =
+		try_lwt
+			PGOCaml.begin_work dbh >>= fun () ->
+			add dbh >>= fun sid ->
+			let (intro_out, body_out) = output_maker sid in
+			edit dbh sid intro_out body_out >>= fun () ->
+			PGOCaml.commit dbh >>= fun () ->
+			Lwt.return sid
+		with
+			| exc -> PGOCaml.rollback dbh >>= fun () -> Lwt.fail exc
 	in Lwt_pool.use !!pool get_data
 
 
-let add_comment comment =
+let add_comment ~output_maker comment =
 	assert (Ocsigen_messages.warning "Database.add_comment ()"; true);
-	let (sid, uid, title, body_src, body_pickle, body_out) = Comment.tuple_of_fresh comment in
-	let get_data dbh =
-		PGSQL(dbh) "SELECT add_comment ($sid, $uid, $title, $body_src, $body_pickle, $body_out)" >>= function
+	let add dbh =
+		let (sid, uid, title, body_src, body_pickle, _body_out) = Comment.tuple_of_fresh comment in
+		let body_out = ""
+		in PGSQL(dbh) "SELECT add_comment ($sid, $uid, $title, $body_src, $body_pickle, $body_out)" >>= function
 			| [Some cid] -> Lwt.return cid
-			| _	     -> Lwt.fail Cannot_add_comment
+			| _	     -> Lwt.fail Cannot_add_comment in
+	let edit dbh cid body_out =
+		PGSQL(dbh) "SELECT edit_comment_output ($cid, $body_out)" >>= fun _ ->
+		Lwt.return () in
+	let get_data dbh =
+		try_lwt
+			PGOCaml.begin_work dbh >>= fun () ->
+			add dbh >>= fun cid ->
+			let body_out = output_maker cid in
+			edit dbh cid body_out >>= fun () ->
+			PGOCaml.commit dbh >>= fun () ->
+			Lwt.return cid
+		with
+			| exc -> PGOCaml.rollback dbh >>= fun () -> Lwt.fail exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -249,23 +285,6 @@ let edit_user_settings user_settings =
 		PGSQL(dbh) "SELECT edit_user_settings ($uid, $fullname, $?maybe_tid)" >>= fun _ ->
 		Lwt.return ()
 	in Lwt_pool.use !!pool get_data
-
-
-let edit_story_output sid intro_out body_out =
-	assert (Ocsigen_messages.warning (Printf.sprintf "Database.edit_story_output (%ld)" sid) ; true);
-	let get_data dbh =
-		PGSQL(dbh) "SELECT edit_story_output ($sid, $intro_out, $body_out)" >>= fun _ ->
-		Lwt.return ()
-	in Lwt_pool.use !!pool get_data
-
-
-let edit_comment_output cid body_out =
-	assert (Ocsigen_messages.warning (Printf.sprintf "Database.edit_comment_output (%ld)" cid) ; true);
-	let get_data dbh =
-		PGSQL(dbh) "SELECT edit_comment_output ($cid, $body_out)" >>= fun _ ->
-		Lwt.return ()
-	in Lwt_pool.use !!pool get_data
-
 
 
 (********************************************************************************)

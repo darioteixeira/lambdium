@@ -125,12 +125,14 @@ and step6_handler ~token ~story sp () (action, ()) =
 			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
 			try_lwt
-				Database.add_story story >>= fun sid ->
-				let path = [!Config.story_dir; Story.Id.to_string sid] in
-				Uploader.commit ~path token >>= fun () ->
-				let intro_out = Document.string_of_output (Document.output_of_composition ~sp ~path story#intro_doc)
-				and body_out = Document.string_of_output (Document.output_of_manuscript ~sp ~path story#body_doc) in
-				Database.edit_story_output sid intro_out body_out >>= fun () ->
+				let path_maker sid = [!Config.story_dir; Story.Id.to_string sid] in
+				let output_maker sid =
+					let path = path_maker sid in
+					let intro_out = Document.string_of_output (Document.output_of_composition ~sp ~path story#intro_doc)
+					and body_out = Document.string_of_output (Document.output_of_manuscript ~sp ~path story#body_doc)
+					in (intro_out, body_out) in
+				Database.add_story ~output_maker story >>= fun sid ->
+				Uploader.commit ~path:(path_maker sid) token >>= fun () ->
 				let output_core _ _ = Lwt.return (Stat_success [p [pcdata "Story has been added!"]], None)
 				in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 			with

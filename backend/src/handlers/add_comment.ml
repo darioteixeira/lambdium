@@ -49,7 +49,9 @@ and step2_handler comment sp () (action, (sid, (title, body))) =
 			in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
 		| `Finish ->
 			try_lwt
-				Database.add_comment comment >>= fun _ ->
+				let output_maker cid =
+					Document.string_of_output comment#body_out in
+				Database.add_comment ~output_maker comment >>= fun _ ->
 				let output_core login sp = Lwt.return (Stat_success [p [pcdata "Comment has been added!"]], None)
 				in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
 			with
