@@ -1,0 +1,182 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, button
+	{
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
+	}
+
+:focus
+	{
+	outline: 0;
+	}
+
+body
+	{
+	line-height: 1;
+	color: black;
+	background: white;
+	}
+
+ol, ul
+	{
+	list-style: none;
+	}
+
+table
+	{
+	border-collapse: separate;
+	border-spacing: 0;
+	}
+
+caption, th, td
+	{
+	text-align: left;
+	font-weight: normal;
+	}
+
+body
+	{
+	font-size: 0.625em;
+	background: #fff;
+	line-height: 1.5;
+	}
+
+body
+	{
+	margin: 5px;
+	}
+
+#regular
+	{
+	margin: 0 auto;
+	padding-left: 180px;
+	padding-right: 220px;
+	min-width: 200px;
+	max-width: 700px;
+	}
+
+#header, #footer
+	{
+	margin-left: -180px;
+	margin-right: -220px;
+	}
+
+#header
+	{
+	margin-bottom: 20px;
+	}
+
+#footer
+	{
+	clear: both;
+	margin-top: 20px;
+	}
+
+#core
+	{
+	position: relative;
+	float: left;
+	padding: 0 10px 0 10px;
+	width: 100%;
+	}
+
+#nav
+	{
+	position: relative;
+	float: left;
+	width: 160px;
+	padding: 0 20px 0 0px;
+	right: 200px;
+	margin-left: -100%;
+	}
+
+#context
+	{
+	position: relative;
+	float: left;
+	width: 180px;
+	padding: 0 0px 0 20px;
+	margin-right: -100%;
+	}
+
+#header > h1
+	{
+	margin-left: 180px;
+	margin-right: 200px;
+	padding-left: 120px;
+	line-height: 120px;
+	font-family: sans-serif;
+	font-size: 2em;
+	font-weight: bold;
+	color: #5b8ba6;
+	background: url("images/lambdium-logo.png") no-repeat;
+	}
+
+#footer
+	{
+	background: #ffc;
+	}
+
+#footer > h1
+	{
+	padding: 0.25em;
+	text-align: center;
+	color: #fff;
+	background: #5b8ba6;
+	}
+
+#footer ul
+	{
+	text-align: center;
+	margin: 2em auto 0;
+	}
+
+#footer li
+	{
+	display: inline;
+	margin: 0 0.5em;
+	}
+
+#core
+	{
+	background: #c9c;
+	}
+
+.floatbox
+	{
+	margin-bottom: 20px;
+	background: #eee;
+	}
+
+.floatbox_header
+	{
+	text-align: center;
+	font-family: sans-serif;
+	font-weight: bold;
+	color: #eee;
+	background: #5b8ba6;
+	margin-bottom: 0.5em;
+	}
+
+.floatbox_body
+	{
+	padding: 0 0.5em 0.5em;
+	}
+
+.floatbox input[type="text"], .floatbox input[type="password"], .floatbox input[type="submit"]
+	{
+	width: 100%;
+	margin-bottom: 0.5em;
+	}
+
+.floatbox input[type="submit"]
+	{
+	margin-top: 0.5em;
+	}
+

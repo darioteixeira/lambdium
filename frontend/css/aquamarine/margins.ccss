@@ -1,18 +1,16 @@
-@import "config.less";
-
 .floatbox
 	{
-	margin-bottom: @Floatbox_separation;
-	background: @Color_floatbox;
+	margin-bottom: Floatbox_separation;
+	background: Color_floatbox;
 	}
 
 .floatbox_header
 	{
 	text-align: center;
-	font-family: @Font_headline;
+	font-family: Font_headline;
 	font-weight: bold;
-	color: @Color_floatbox;
-	background: @Color_key;
+	color: Color_floatbox;
+	background: Color_key;
 	margin-bottom: 0.5em;
 	}
 

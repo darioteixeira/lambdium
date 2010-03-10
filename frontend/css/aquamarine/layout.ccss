@@ -1,0 +1,60 @@
+/* Layout */
+
+body
+	{
+	margin: Body_margin;
+	}
+
+#regular
+	{
+	margin: 0 auto;
+	padding-left: LC_fullwidth;
+	padding-right: RC_fullwidth + CC_padding;
+	min-width: LC_fullwidth + CC_padding;
+	max-width: LC_fullwidth + RC_fullwidth + CC_padding + CC_maxwidth;
+	}
+
+#header, #footer
+	{
+	margin-left: -1 * (LC_fullwidth);
+	margin-right: -1 * (RC_fullwidth + CC_padding);
+	}
+
+#header
+	{
+	margin-bottom: Vertical_separation;
+	}
+
+#footer
+	{
+	clear: both;
+	margin-top: Vertical_separation;
+	}
+
+#core
+	{
+	position: relative;
+	float: left;
+	padding: 0 CCR_padding 0 CCL_padding;
+	width: 100%;
+	}
+
+#nav
+	{
+	position: relative;
+	float: left;
+	width: LC_width;
+	padding: 0 LCR_padding 0 LCL_padding;	
+	right: LC_fullwidth + CC_padding;
+	margin-left: -100%;
+	}
+
+#context
+	{
+	position: relative;
+	float: left;
+	width: RC_width;
+	padding: 0 RCR_padding 0 RCL_padding;
+	margin-right: -100%;
+	}
+
