@@ -15,7 +15,7 @@ export PGDATABASE=lambdium
 
 
 OCAMLBUILD_OPTS=
-SRC_DIR=src
+SRC_DIR=.
 TARGETS=lambdium.native #lambdium.byte
 
 
