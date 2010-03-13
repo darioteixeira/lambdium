@@ -106,7 +106,7 @@ let login_handler sp () (username, (password, remember)) =
 	Database.get_login_from_credentials username password >>= function
 		| Some login ->
 			let login_group = User.Id.to_string (Login.uid login) in
-			Eliom_sessions.set_service_session_group ~set_max:(Some 4) ~sp login_group;
+			Eliom_sessions.set_service_session_group ~set_max:4 ~sp login_group;
 
 			(match !!login_table with
 				| Persistent table ->
@@ -114,7 +114,7 @@ let login_handler sp () (username, (password, remember)) =
 					Eliom_sessions.set_persistent_data_session_group ~set_max:(Some 4) ~sp login_group
 				| Volatile table ->
 					Eliom_sessions.set_volatile_session_data ~table ~sp login;
-					Eliom_sessions.set_volatile_data_session_group ~set_max:(Some 4) ~sp login_group;
+					Eliom_sessions.set_volatile_data_session_group ~set_max:4 ~sp login_group;
 					Lwt.return ()) >>= fun () ->
 	
 			(if remember

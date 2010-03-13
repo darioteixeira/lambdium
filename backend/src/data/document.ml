@@ -10,6 +10,7 @@ open Lwt
 open Prelude
 open Lambdoc_core
 open Lambdoc_writer.Settings
+open Lambdoc_proxy
 
 
 (********************************************************************************)
@@ -27,8 +28,8 @@ type composition_t = Valid.composition_t
 (********************************************************************************)
 
 let output writer ~sp ~path doc =
-	let bitmap_lookup bmp = Eliom_predefmod.Xhtml.make_uri ~service:(External.link_static (path @ [bmp])) ~sp () in
-	let settings = Some {Lambdoc_writer.Settings.default with bitmap_lookup = bitmap_lookup} in
+	let image_lookup img = Eliom_predefmod.Xhtml.make_uri ~service:(External.link_static (path @ [img])) ~sp () in
+	let settings = Some {Lambdoc_writer.Settings.default with image_lookup = image_lookup} in
 	let xhtml = writer ?settings doc
 	in (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)
 
@@ -54,9 +55,9 @@ let string_of_output raw =
 
 
 let parse_manuscript src =
-	Lambdoc_proxy.Client.ambivalent_manuscript_from_string `Lambtex src >>= function
+	Client.ambivalent_manuscript_from_string Protocol.Lambtex src >>= function
 		| `Valid doc ->
-			Lwt.return (`Okay (doc, Resource.elements doc.Valid.bitmaps))
+			Lwt.return (`Okay (doc, doc.Valid.images))
 		| `Invalid doc ->
 			let xhtml = Lambdoc_write_xhtml.Main.write_invalid_manuscript doc in
 			let out = (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)
@@ -64,9 +65,9 @@ let parse_manuscript src =
 
 
 let parse_composition src =
-	Lambdoc_proxy.Client.ambivalent_composition_from_string `Lambtex src >>= function
+	Client.ambivalent_composition_from_string Protocol.Lambtex src >>= function
 		| `Valid doc ->
-			Lwt.return (`Okay (doc, Resource.elements doc.Valid.bitmaps))
+			Lwt.return (`Okay (doc, doc.Valid.images))
 		| `Invalid doc ->
 			let xhtml = Lambdoc_write_xhtml.Main.write_invalid_composition doc in
 			let out = (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)
