@@ -1,5 +1,5 @@
 IMAGES=images/lambdium-logo.png
-SOURCES=reset.ccss config.ccss style.ccss layout.ccss header.ccss footer.ccss core.ccss margins.ccss
+SOURCES=reset.ccss config.ccss global.ccss header.ccss footer.ccss margins.ccss core.ccss
 
 all: main.css $(IMAGES)
 

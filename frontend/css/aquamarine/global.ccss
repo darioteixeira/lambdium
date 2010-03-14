@@ -3,6 +3,9 @@
 body
 	{
 	margin: Body_margin;
+	font-size: Size_root;
+	background: Color_page;
+	line-height: 1.5;
 	}
 
 #regular
