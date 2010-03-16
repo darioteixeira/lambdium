@@ -6,21 +6,22 @@
 /* Layout configuration.							*/
 /********************************************************************************/
 
-Body_margin: 5px;
+Body_margin: 10px;
 
 LC_width: 160px;
 LCL_padding: 0px;
-LCR_padding: 20px;
+LCR_padding: 30px;
 
 RC_width: 180px;
-RCL_padding: 20px;
+RCL_padding: 30px;
 RCR_padding: 0px;
 
 CC_maxwidth: 300px;
-CCL_padding: 10px;
-CCR_padding: 10px;
+CCL_padding: 0px;
+CCR_padding: 0px;
 
-Vertical_separation: 20px;
+Header_separation: 20px;
+Footer_separation: 20px;
 Floatbox_separation: 20px;
 
 
@@ -44,14 +45,33 @@ Color_page: #fff;
 Color_key: #5b8ba6;
 Color_floatbox: #eee;
 
+Color_header_fore: Color_key;
+Color_header_back: Color_page;
+
+Color_footer_fore: Color_page;
+Color_footer_back: Color_key;
+
+Core_fore: #fff;
+Core_back_success: #007f00;
+Core_back_warning: #3f3f00;
+Core_back_failure: #7f0000;
+
+
+/********************************************************************************/
+/* Border configuration.							*/
+/********************************************************************************/
+
+Border_success: none;
+Border_warning: none;
+Border_failure: none;
+
 
 /********************************************************************************/
 /* Font configuration.								*/
 /********************************************************************************/
 
-Font_headline: sans-serif;
-Font_bodytext: serif;
-
-Size_root: 0.625em;
-Size_huge: 2em;
+Font_root: 0.625em sans-serif;
+Font_headline: bold 1.4em sans-serif;
+Font_title: bold 1.8em sans-serif;
+Font_bodytext: inherit serif;
 

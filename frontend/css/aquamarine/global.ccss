@@ -3,12 +3,12 @@
 body
 	{
 	margin: Body_margin;
-	font-size: Size_root;
-	background: Color_page;
+	font: Font_root;
 	line-height: 1.5;
+	background: Color_page;
 	}
 
-#regular
+#root
 	{
 	margin: 0 auto;
 	padding-left: LC_fullwidth;
@@ -25,13 +25,13 @@ body
 
 #header
 	{
-	margin-bottom: Vertical_separation;
+	padding-bottom: Header_separation;
 	}
 
 #footer
 	{
 	clear: both;
-	margin-top: Vertical_separation;
+	padding-top: Footer_separation;
 	}
 
 #core

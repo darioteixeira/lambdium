@@ -1,5 +1,27 @@
-#core
+#core_status
 	{
-	background: #c9c;
+	padding: 0.5em;
+	margin-bottom: 1em;
+	text-align: center;
+	font: Font_headline;
+	color: Core_fore;
+	}
+
+.core_success
+	{
+	background: Core_back_success;
+	border: Border_success;
+	}
+
+.core_warning
+	{
+	background: Core_back_warning;
+	border: Border_warning;
+	}
+
+.core_failure
+	{
+	background: Core_back_failure;
+	border: Border_failure;
 	}
 

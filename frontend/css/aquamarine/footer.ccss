@@ -1,25 +1,22 @@
-#footer
-	{
-	background: #ffc;
-	}
-
 #footer > h1
 	{
-	padding: 0.25em;
+	margin-left: LC_fullwidth;
+	margin-right: RC_fullwidth;
 	text-align: center;
-	color: #fff;
-	background: #5b8ba6;
+	font: Font_headline;
+	color: Color_footer_fore;
+	background: Color_footer_back;
 	}
 
-#footer ul
+#footer > ul
 	{
 	text-align: center;
-	margin: 2em auto 0;
+	margin: 1em auto 0;
 	}
 
-#footer li
+#footer > ul > li
 	{
 	display: inline;
-	margin: 0 0.5em;
+	margin: 0 1em;
 	}
 

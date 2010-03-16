@@ -42,43 +42,43 @@ caption, th, td
 
 body
 	{
-	margin: 5px;
-	font-size: 0.625em;
-	background: #fff;
+	margin: 10px;
+	font: 0.625em sans-serif;
 	line-height: 1.5;
+	background: #fff;
 	}
 
-#regular
+#root
 	{
 	margin: 0 auto;
-	padding-left: 180px;
-	padding-right: 220px;
-	min-width: 200px;
+	padding-left: 190px;
+	padding-right: 210px;
+	min-width: 190px;
 	max-width: 700px;
 	}
 
 #header, #footer
 	{
-	margin-left: -180px;
-	margin-right: -220px;
+	margin-left: -190px;
+	margin-right: -210px;
 	}
 
 #header
 	{
-	margin-bottom: 20px;
+	padding-bottom: 20px;
 	}
 
 #footer
 	{
 	clear: both;
-	margin-top: 20px;
+	padding-top: 20px;
 	}
 
 #core
 	{
 	position: relative;
 	float: left;
-	padding: 0 10px 0 10px;
+	padding: 0 0px 0 0px;
 	width: 100%;
 	}
 
@@ -87,8 +87,8 @@ body
 	position: relative;
 	float: left;
 	width: 160px;
-	padding: 0 20px 0 0px;
-	right: 200px;
+	padding: 0 30px 0 0px;
+	right: 190px;
 	margin-left: -100%;
 	}
 
@@ -97,46 +97,41 @@ body
 	position: relative;
 	float: left;
 	width: 180px;
-	padding: 0 0px 0 20px;
+	padding: 0 0px 0 30px;
 	margin-right: -100%;
 	}
 
 #header > h1
 	{
-	margin-left: 180px;
-	margin-right: 200px;
+	font: bold 1.8em sans-serif;
+	margin-left: 190px;
+	margin-right: 210px;
 	padding-left: 120px;
 	line-height: 120px;
-	font-family: sans-serif;
-	font-size: 2em;
-	font-weight: bold;
 	color: #5b8ba6;
-	background: url("images/lambdium-logo.png") no-repeat;
-	}
-
-#footer
-	{
-	background: #ffc;
+	background: #fff url("images/lambdium-logo.png") no-repeat;
 	}
 
 #footer > h1
 	{
-	padding: 0.25em;
+	margin-left: 190px;
+	margin-right: 210px;
 	text-align: center;
+	font: bold 1.4em sans-serif;
 	color: #fff;
 	background: #5b8ba6;
 	}
 
-#footer ul
+#footer > ul
 	{
 	text-align: center;
-	margin: 2em auto 0;
+	margin: 1em auto 0;
 	}
 
-#footer li
+#footer > ul > li
 	{
 	display: inline;
-	margin: 0 0.5em;
+	margin: 0 1em;
 	}
 
 .floatbox
@@ -147,12 +142,11 @@ body
 
 .floatbox_header
 	{
+	margin-bottom: 0.5em;
 	text-align: center;
-	font-family: sans-serif;
-	font-weight: bold;
+	font: bold 1.4em sans-serif;
 	color: #eee;
 	background: #5b8ba6;
-	margin-bottom: 0.5em;
 	}
 
 .floatbox_body
@@ -171,8 +165,30 @@ body
 	margin-top: 0.5em;
 	}
 
-#core
+#core_status
 	{
-	background: #c9c;
+	padding: 0.5em;
+	margin-bottom: 1em;
+	text-align: center;
+	font: bold 1.4em sans-serif;
+	color: #fff;
+	}
+
+.core_success
+	{
+	background: #007f00;
+	border: none;
+	}
+
+.core_warning
+	{
+	background: #3f3f00;
+	border: none;
+	}
+
+.core_failure
+	{
+	background: #7f0000;
+	border: none;
 	}
 

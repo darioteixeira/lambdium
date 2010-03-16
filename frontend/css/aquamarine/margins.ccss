@@ -6,12 +6,11 @@
 
 .floatbox_header
 	{
+	margin-bottom: 0.5em;
 	text-align: center;
-	font-family: Font_headline;
-	font-weight: bold;
+	font: Font_headline;
 	color: Color_floatbox;
 	background: Color_key;
-	margin-bottom: 0.5em;
 	}
 
 .floatbox_body
