@@ -21,9 +21,10 @@ let output_core maybe_login sp =
 		| hd :: tl ->
 			let hd' = User_io.output_handle sp hd
 			and tl' = List.map (User_io.output_handle sp) tl
-			in Lwt.return (Stat_nothing, Some [ul ~a:[a_class ["list_of_users"]] hd' tl'])
+			in Lwt.return [ul ~a:[a_class ["list_of_users"]] hd' tl']
 		| [] ->
-			Lwt.return (Stat_warning [p [pcdata "There are no users in the system!"]], None)
+			Status.warning ~sp [p [pcdata "There are no users in the system!"]];
+			Lwt.return []
 
 
 (********************************************************************************)

@@ -17,7 +17,7 @@ open Page
 (**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ~status sp () (sid, (title, body_src)) =
+let rec step1_handler sp () (sid, (title, body_src)) =
 	let output_core login sp =
 		Comment_io.parse body_src >>= fun (body_doc, body_out) ->
 		let author = Login.to_user login in
@@ -32,7 +32,7 @@ let rec step1_handler ~status sp () (sid, (title, body_src)) =
 			~sp
 			~content: (Comment_io.form_for_fresh ~sid ~title ~body_src)
 			() >>= fun form ->
-		Lwt.return (status, Some [Comment_io.output_fresh (Some login) sp comment; form])
+		Lwt.return [Comment_io.output_fresh (Some login) sp comment; form]
 	in Page.login_enforced_handler
 		~sp
 		~page_title: "Add Comment - Step 1/2"
@@ -43,19 +43,19 @@ let rec step1_handler ~status sp () (sid, (title, body_src)) =
 and step2_handler comment sp () (action, (sid, (title, body))) =
 	match action with
 		| `Preview ->
-			step1_handler ~status:Stat_nothing sp () (sid, (title, body))
+			step1_handler sp () (sid, (title, body))
 		| `Cancel ->
-			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
-			in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
+			Status.warning ~sp [p [pcdata "You have cancelled!"]];
+			Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ()
 		| `Finish ->
 			try_lwt
 				Database.add_comment comment >>= fun _ ->
-				let output_core login sp = Lwt.return (Stat_success [p [pcdata "Comment has been added!"]], None)
-				in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
+				Status.success ~sp [p [pcdata "Comment has been added!"]];
+				Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ()
 			with
 				| Database.Cannot_add_comment ->
-					let status = Stat_failure [p [pcdata "Error!"]]
-					in step1_handler ~status sp () (sid, (title, body))
+					Status.failure ~sp [p [pcdata "Error!"]];
+					step1_handler sp () (sid, (title, body))
 
 
 (********************************************************************************)
@@ -66,6 +66,5 @@ let fallback_handler sp () () =
 	Page.fallback_handler ~sp ~page_title: "Add Comment"
 
 
-let handler sp () (sid, (title, body_src)) =
-	step1_handler ~status:Stat_nothing sp () (sid, (title, body_src))
+let handler = step1_handler
 

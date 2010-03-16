@@ -17,7 +17,7 @@ open Page
 (**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ?user ~status sp () () =
+let rec step1_handler ?user sp () () =
 	let output_core login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -33,7 +33,7 @@ let rec step1_handler ?user ~status sp () () =
 			~sp
 			~content: (User_io.form_for_changed_settings ~user)
 			() >>= fun form ->
-		Lwt.return (status, Some [form])
+		Lwt.return [form]
 	in Page.login_enforced_handler
 		~sp
 		~page_title: "Edit settings - Step 1/2"
@@ -43,22 +43,20 @@ let rec step1_handler ?user ~status sp () () =
 
 and step2_handler ~login sp () (fullname, timezone) =
 	try_lwt
-		let status = Stat_success [p [pcdata "User settings have been changed"]] in
-		let output_core login sp = Lwt.return (status, None) in
 		let settings = User.make_changed_settings (Login.uid login) fullname timezone in
 		Database.edit_user_settings settings >>= fun () ->
 		Session.update_login sp login >>= fun () ->
-		Page.login_enforced_handler ~sp ~page_title:"Edit settings - Step 2/2" ~output_core ()
+		Status.success ~sp [p [pcdata "User settings have been changed"]];
+		Page.login_enforced_handler ~sp ~page_title:"Edit settings - Step 2/2" ()
 	with
 		| Database.Cannot_edit_user_settings ->
-			let status = Stat_failure [p [pcdata "Error!"]]
-			in step1_handler ~status sp () ()
+			Status.failure ~sp [p [pcdata "Error!"]];
+			step1_handler sp () ()
 
 
 (********************************************************************************)
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-let handler sp () () =
-	step1_handler ~status:Stat_nothing sp () ()
+let handler = step1_handler
 

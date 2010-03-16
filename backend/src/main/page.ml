@@ -12,17 +12,6 @@ open Prelude
 
 
 (********************************************************************************)
-(**	{1 Type definitions}							*)
-(********************************************************************************)
-
-type core_status_t =
-	| Stat_success of XHTML.M.block XHTML.M.elt list
-	| Stat_warning of XHTML.M.block XHTML.M.elt list
-	| Stat_failure of XHTML.M.block XHTML.M.elt list
-	| Stat_nothing
-
-
-(********************************************************************************)
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
 
@@ -87,17 +76,13 @@ let output_user_menu maybe_login sp =
 		in match maybe_login with
 			| Some login	-> personal_fragment login
 			| None		-> public_fragment ()
-	and error_fragment =
-		if Session.get_login_error sp
-		then [p ~a:[a_class ["error_msg"]] [pcdata "Invalid login!"]]
-		else []
 	and varying_fragment =
 		let personal_fragment user = []
 		and public_fragment () = []
 		in match maybe_login with
 			| Some login	-> personal_fragment login
 			| None		-> public_fragment () in
-	let contents = session_fragment @ error_fragment @ varying_fragment
+	let contents = session_fragment @ varying_fragment
 	in Lwt.return ("user_menu", "User Menu", contents)
 
 
@@ -140,19 +125,13 @@ let base_page ~sp ~page_title ~page_content ~page_content_id =
 
 
 let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
-	let (maybe_core_status, maybe_core_content) = core in
-	let core_status = match maybe_core_status with
-		| Stat_success x -> [div ~a:[a_id "core_success"] x]
-		| Stat_warning x -> [div ~a:[a_id "core_warning"] x]
-		| Stat_failure x -> [div ~a:[a_id "core_failure"] x]
-		| Stat_nothing   -> []
-	and core_content = match maybe_core_content with
-		| Some e -> [div ~a:[a_id "core_content"] e]
-		| None	 -> [] in
+	let core_status = match Status.get sp with
+		| Some (stat, msg) -> [div ~a:[a_id "core_status"; a_class ["core_" ^ (Status.string_of_stat stat)]] msg]
+		| None -> [] in
 	let page_content =
 		[
 		div ~a:[a_id "header"] header;
-		div ~a:[a_id "core"] (core_status @ core_content);
+		div ~a:[a_id "core"] (core_status @ core);
 		div ~a:[a_id "nav"] (List.map output_floatbox nav);
 		div ~a:[a_id "context"] (List.map output_floatbox context);
 		div ~a:[a_id "footer"] footer;
@@ -165,7 +144,7 @@ let failure_page ~sp ~page_title ~msg =
 	in base_page ~sp ~page_title ~page_content ~page_content_id:"failure"
 
 
-let regular_handler ~maybe_login ~sp ~page_title ~output_core ?(output_context = fun _ _ -> Lwt.return []) () =
+let regular_handler ~maybe_login ~sp ~page_title ?(output_core = fun _ -> Lwt.return []) ?(output_context = fun _ _ -> Lwt.return []) () =
 	let header_thread = output_header maybe_login sp
 	and footer_thread = output_footer maybe_login sp
 	and credits_thread = output_credits maybe_login sp
@@ -189,17 +168,20 @@ let regular_handler ~maybe_login ~sp ~page_title ~output_core ?(output_context =
 (**	{2 Public functions and values}						*)
 (********************************************************************************)
 
-let login_agnostic_handler ~sp ~page_title ~output_core ?output_context () =
+let login_agnostic_handler ~sp ~page_title ?output_core ?output_context () =
 	Session.get_maybe_login sp >>= fun maybe_login ->
-	regular_handler ~maybe_login ~sp ~page_title ~output_core:(output_core maybe_login) ?output_context ()
+	let output_core = match output_core with
+		| Some f -> Some (f maybe_login)
+		| None	 -> None
+	in regular_handler ~maybe_login ~sp ~page_title ?output_core ?output_context ()
 
 
-let login_enforced_handler ~sp ~page_title ~output_core ?output_context () =
+let login_enforced_handler ~sp ~page_title ?output_core ?output_context () =
 	Session.get_maybe_login sp >>= fun maybe_login ->
 	let output_core = match maybe_login with
-		| Some login -> output_core login
-		| None	     -> fun _ -> Lwt.return (Stat_failure [p [pcdata "You are not logged in!"]], None)
-	in regular_handler ~maybe_login ~sp ~page_title ~output_core ?output_context ()
+		| Some login -> (match output_core with Some f -> Some (f login) | None -> None)
+		| None	     -> (Status.failure ~sp [p [pcdata "You are not logged in!"]]; None)
+	in regular_handler ~maybe_login ~sp ~page_title ?output_core ?output_context ()
 
 
 let fallback_handler ~sp ~page_title =

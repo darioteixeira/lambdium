@@ -17,7 +17,7 @@ open Page
 (**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ~status sp () () =
+let rec step1_handler sp () () =
 	let output_core login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -30,7 +30,7 @@ let rec step1_handler ~status sp () () =
 			~sp
 			~content: User_io.form_for_changed_credentials
 			() >>= fun form ->
-		Lwt.return (status, Some [form])
+		Lwt.return [form]
 	in Page.login_enforced_handler
 		~sp
 		~page_title: "Change password - Step 1/2"
@@ -40,26 +40,25 @@ let rec step1_handler ~status sp () () =
 
 and step2_handler login sp () (old_password, (new_password, new_password2)) =
 	if new_password <> new_password2
-	then
-		let status = Stat_failure [p [pcdata "Passwords do not match!"]]
-		in step1_handler ~status sp () ()
+	then begin
+		Status.failure ~sp [p [pcdata "Passwords do not match!"]];
+		step1_handler sp () ()
+	end
 	else
 		try_lwt
-			let status = Stat_success [p [pcdata "Password has been changed!"]] in
-			let output_core login sp = Lwt.return (status, None) in
 			let credentials = User.make_changed_credentials (Login.uid login) old_password new_password in
 			Database.edit_user_credentials credentials >>= fun () ->
-			Page.login_enforced_handler ~sp ~page_title:"Change password - Step 2/2" ~output_core ()
+			Status.success ~sp [p [pcdata "Password has been changed!"]];
+			Page.login_enforced_handler ~sp ~page_title:"Change password - Step 2/2" ()
 		with
 			| Database.Cannot_edit_user_credentials ->
-				let status = Stat_failure [p [pcdata "Error!"]]
-				in step1_handler ~status sp () ()
+				Status.failure ~sp [p [pcdata "Error!"]];
+				step1_handler sp () ()
 
 
 (********************************************************************************)
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-let handler sp () () =
-	step1_handler ~status:Stat_nothing sp () ()
+let handler = step1_handler
 

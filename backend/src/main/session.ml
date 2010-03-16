@@ -7,6 +7,7 @@
 (********************************************************************************)
 
 open Lwt
+open XHTML.M
 open Prelude
 
 
@@ -33,18 +34,11 @@ type 'a login_table_t =
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-(**	The [Polytables] key that holds a boolean indicating
-	whether or not there was an error during login.
-*)
-let login_error_key =
-	lazy (Polytables.make_key ())
-
-
 (**	Creates the login table.  By default we use a persistent table, but you
 	can choose a volatile table by setting the 'login_table' configuration
 	option to 'volatile'.  Volatile tables tend to be faster, since they are
 	kept entirely in memory.  On the other hand, persistent tables can survive
-	across a restart of the server.
+	a restart of the server.
 *)
 let login_table = lazy
 	(let msg = Printf.sprintf "Using %s table for logins"
@@ -64,17 +58,7 @@ let login_table = lazy
 (**	Initialises session handling.
 *)
 let init () =
-	ignore !!login_error_key;
 	ignore !!login_table
-
-
-(**	Has there been an error during a login attempt?
-*)
-let get_login_error sp =
-	try
-		Polytables.get ~table:(Eliom_sessions.get_request_cache sp) ~key:!!login_error_key
-	with
-		Not_found -> false
 
 
 (**	Returns the currently logged-in user, if any.
@@ -86,9 +70,9 @@ let get_maybe_login sp =
 		| Volatile table ->
 			Lwt.return (Eliom_sessions.get_volatile_session_data table sp ())) >>= fun login_data ->
 	match login_data with
-		| Eliom_sessions.Data login -> Ocsigen_messages.warning "### 2"; Lwt.return (Some login)
-		| Eliom_sessions.No_data -> Ocsigen_messages.warning "### 3"; Lwt.return None
-		| Eliom_sessions.Data_session_expired -> Ocsigen_messages.warning "### 4"; Lwt.return None
+		| Eliom_sessions.Data login -> Lwt.return (Some login)
+		| Eliom_sessions.No_data
+		| Eliom_sessions.Data_session_expired -> Lwt.return None
 
 
 (**	Returns the currently logged-in user.  Fails if none.
@@ -106,7 +90,6 @@ let login_handler sp () (username, (password, remember)) =
 	Database.get_login_from_credentials username password >>= function
 		| Some login ->
 			let login_group = User.Id.to_string (Login.uid login) in
-			Ocsigen_messages.warning (Printf.sprintf "### Storing %s" login_group);
 			Eliom_sessions.set_service_session_group ~set_max:4 ~sp login_group;
 
 			(match !!login_table with
@@ -128,7 +111,7 @@ let login_handler sp () (username, (password, remember)) =
 				Lwt.return ()
 			end)
 		| None ->
-			Polytables.set ~table:(Eliom_sessions.get_request_cache sp) ~key:!!login_error_key ~value:true;
+			Status.failure ~sp [p [pcdata "Invalid login"]];
 			Lwt.return ()
 
 

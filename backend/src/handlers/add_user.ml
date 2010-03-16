@@ -17,7 +17,7 @@ open Page
 (**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ?nick ?fullname ?timezone ~status sp () () =
+let rec step1_handler ?nick ?fullname ?timezone sp () () =
 	let output_core maybe_login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -30,7 +30,7 @@ let rec step1_handler ?nick ?fullname ?timezone ~status sp () () =
 			~sp
 			~content: (User_io.form_for_fresh ?nick ?fullname ?timezone)
 			() >>= fun form ->
-		Lwt.return (status, Some [form])
+		Lwt.return [form]
 	in Page.login_agnostic_handler
 		~sp
 		~page_title: "Add User - Step 1/2"
@@ -40,25 +40,25 @@ let rec step1_handler ?nick ?fullname ?timezone ~status sp () () =
 
 and step2_handler sp () (nick, (fullname, (password, (password2, timezone)))) =
 	if password <> password2
-	then
-		let status = Stat_failure [p [pcdata "Passwords do not match!"]]
-		in step1_handler ~nick ~fullname ~timezone ~status sp () ()
+	then begin
+		Status.failure ~sp [p [pcdata "Passwords do not match!"]];
+		step1_handler ~nick ~fullname ~timezone sp () ()
+	end
 	else
 		try_lwt
 			let user = User.make_fresh nick fullname password timezone in
 			Database.add_user user >>= fun _ ->
-			let output_core _ _ = Lwt.return (Stat_success [p [pcdata "User has been added"]], None)
-			in Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ~output_core ()
+			Status.success ~sp [p [pcdata "User has been added"]];
+			Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ()
 		with
 			| Database.Cannot_add_user ->
-				let output_core _ _ = Lwt.return (Stat_failure [p [pcdata "Cannot add user!"]], None)
-				in Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ~output_core ()
+				Status.failure ~sp [p [pcdata "Cannot add user!"]];
+				Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ()
 
 
 (********************************************************************************)
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-let handler sp () () =
-	step1_handler ~status:Stat_nothing sp () ()
+let handler = step1_handler
 
