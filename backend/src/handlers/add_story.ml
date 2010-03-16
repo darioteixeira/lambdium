@@ -43,11 +43,11 @@ and step2_handler ?token ~login sp () (title, (intro_src, body_src)) =
 		| Some t -> Lwt.return t
 		| None	 -> Uploader.request ~sp ~uid:(Login.uid login) ~limit:3) >>= fun token ->
 	try_lwt
-		Story_io.parse ~sp ~path:(Uploader.get_path token) intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, bitmaps) ->
+		Story_io.parse intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, images) ->
 		let author = Login.to_user login in
 		let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
-		if List.length bitmaps <> 0
-		then step3 ~token ~story ~login ~sp ~bitmaps
+		if List.length images <> 0
+		then step3 ~token ~story ~login ~sp ~images
 		else step5 ~token ~story ~login ~sp
 	with
 		| Story_io.Invalid_story_intro intro_out ->
@@ -61,17 +61,17 @@ and step2_handler ?token ~login sp () (title, (intro_src, body_src)) =
 			in step1_handler ~title ~intro_src ~body_src ~status sp () ()
 
 
-and step3 ~token ~story ~login ~sp ~bitmaps =
+and step3 ~token ~story ~login ~sp ~images =
 	let output_core login sp =
 		let step4_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_story
 			~post_params: (Forms.Triatomic.param ** (Eliom_parameters.set Eliom_parameters.file "files"))
-			(step4_handler ~token ~story ~login ~bitmaps) in
+			(step4_handler ~token ~story ~login ~images) in
 		Forms.Triatomic.make_form
 			~service: step4_service
 			~sp
-			~content: (Story_io.form_for_images ~sp ~path:(Uploader.get_path token) ~status:(Uploader.get_status bitmaps token))
+			~content: (Story_io.form_for_images ~sp ~path:(Uploader.get_path token) ~status:(Uploader.get_status images token))
 			() >>= fun form ->
 		Lwt.return (Stat_nothing, Some [form])
 	in Page.login_enforced_handler
@@ -81,19 +81,19 @@ and step3 ~token ~story ~login ~sp ~bitmaps =
 		()
 
 
-and step4_handler ~token ~story ~login ~bitmaps sp () (action, files) =
+and step4_handler ~token ~story ~login ~images sp () (action, files) =
 	match action with
 		| `Cancel ->
 			Uploader.discard token >>= fun () ->
 			let output_core login sp = Lwt.return (Stat_warning [p [pcdata "You have cancelled!"]], None)
 			in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 		| `Continue ->
-			Uploader.add_files bitmaps files token >>= fun _ ->
+			Uploader.add_files images files token >>= fun _ ->
 			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
-			Uploader.add_files bitmaps files token >>= function
+			Uploader.add_files images files token >>= function
 				| true  -> step5 ?token ~story ~login ~sp
-				| false -> step3 ?token ~story ~login ~sp ~bitmaps
+				| false -> step3 ?token ~story ~login ~sp ~images
 
 
 and step5 ~token ~story ~login ~sp =
@@ -125,14 +125,8 @@ and step6_handler ~token ~story sp () (action, ()) =
 			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src ~status:Stat_nothing sp () ()
 		| `Conclude ->
 			try_lwt
-				let path_maker sid = [!Config.story_dir; Story.Id.to_string sid] in
-				let output_maker sid =
-					let path = path_maker sid in
-					let intro_out = Document.string_of_output (Document.output_of_composition ~sp ~path story#intro_doc)
-					and body_out = Document.string_of_output (Document.output_of_manuscript ~sp ~path story#body_doc)
-					in (intro_out, body_out) in
-				Database.add_story ~output_maker story >>= fun sid ->
-				Uploader.commit ~path:(path_maker sid) token >>= fun () ->
+				Database.add_story story >>= fun sid ->
+				Uploader.commit ~path:[!Config.story_dir; Story.Id.to_string sid] token >>= fun () ->
 				let output_core _ _ = Lwt.return (Stat_success [p [pcdata "Story has been added!"]], None)
 				in Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ~output_core ()
 			with

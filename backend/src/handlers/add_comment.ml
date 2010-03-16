@@ -19,7 +19,7 @@ open Page
 
 let rec step1_handler ~status sp () (sid, (title, body_src)) =
 	let output_core login sp =
-		Comment_io.parse ~sp ~path:[] body_src >>= fun (body_doc, body_out) ->
+		Comment_io.parse body_src >>= fun (body_doc, body_out) ->
 		let author = Login.to_user login in
 		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
@@ -49,9 +49,7 @@ and step2_handler comment sp () (action, (sid, (title, body))) =
 			in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
 		| `Finish ->
 			try_lwt
-				let output_maker cid =
-					Document.string_of_output comment#body_out in
-				Database.add_comment ~output_maker comment >>= fun _ ->
+				Database.add_comment comment >>= fun _ ->
 				let output_core login sp = Lwt.return (Stat_success [p [pcdata "Comment has been added!"]], None)
 				in Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ~output_core ()
 			with

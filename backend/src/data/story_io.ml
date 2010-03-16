@@ -100,14 +100,14 @@ let output_fresh ?localiser login sp story =
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-let parse ~sp ~path intro_src body_src =
+let parse intro_src body_src =
 	Document.parse_composition intro_src >>= fun intro_res ->
 	Document.parse_manuscript body_src >>= fun body_res ->
 	match (intro_res, body_res) with
-		| `Okay (intro_doc, _) , `Okay (body_doc, bitmaps) ->
-			let intro_out = Document.output_of_composition ~sp ~path intro_doc
-			and body_out = Document.output_of_manuscript ~sp ~path body_doc
-			in Lwt.return (intro_doc, intro_out, body_doc, body_out, bitmaps)
+		| `Okay (intro_doc, _), `Okay (body_doc, images) ->
+			let intro_out = Document.output_of_composition intro_doc
+			and body_out = Document.output_of_manuscript body_doc
+			in Lwt.return (intro_doc, intro_out, body_doc, body_out, images)
 		| `Error intro_out, `Okay _ ->
 			Lwt.fail (Invalid_story_intro intro_out)
 		| `Okay _, `Error body_out ->

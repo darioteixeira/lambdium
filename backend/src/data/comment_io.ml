@@ -55,10 +55,10 @@ let output_fresh = output_full
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-let parse ~sp ~path src =
+let parse src =
 	Document.parse_composition src >>= function
 		| `Okay (doc, _) ->
-			let out = Document.output_of_composition ~sp ~path doc
+			let out = Document.output_of_composition doc
 			in Lwt.return (doc, out)
 		| `Error out ->
 			Lwt.fail (Invalid_comment out)

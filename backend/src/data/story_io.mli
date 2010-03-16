@@ -52,8 +52,6 @@ val output_fresh:
 (********************************************************************************)
 
 val parse:
-	sp:Eliom_sessions.server_params ->
-	path:string list ->
 	string ->
 	string ->
 	(Document.composition_t * Document.output_t * Document.manuscript_t * Document.output_t * string list) Lwt.t

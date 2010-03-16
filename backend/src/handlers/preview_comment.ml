@@ -36,7 +36,7 @@ let make_reply ~success fragment_xhtml =
 let handler sp () (sid, (title, body_src)) =
 	try_lwt
 		Session.get_login sp >>= fun login ->
-		Comment_io.parse ~sp ~path:[] body_src >>= fun (body_doc, body_out) ->
+		Comment_io.parse body_src >>= fun (body_doc, body_out) ->
 		let author = Login.to_user login in
 		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
 		let comment_xhtml = Comment_io.output_fresh (Some login) sp comment

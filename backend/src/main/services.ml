@@ -105,9 +105,7 @@ let edit_user_credentials =
 
 let login =
 	lazy (Eliom_services.new_post_coservice'
-		~post_params:  (Eliom_parameters.string "nick" **
-				Eliom_parameters.string "password" **
-				Eliom_parameters.bool "remember")
+		~post_params: (Eliom_parameters.string "nick" ** Eliom_parameters.string "password" ** Eliom_parameters.bool "remember")
 		())
 
 
@@ -136,8 +134,6 @@ let preview_comment_fallback =
 let preview_comment =
 	lazy (Eliom_services.new_post_service
 		~fallback: !!preview_comment_fallback
-		~post_params:  (Story.Id.param "sid" **
-				Eliom_parameters.string "title" **
-				Eliom_parameters.string "body")
+		~post_params: (Story.Id.param "sid" ** Eliom_parameters.string "title" ** Eliom_parameters.string "body")
 		())
 

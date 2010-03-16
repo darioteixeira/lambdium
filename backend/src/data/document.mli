@@ -23,8 +23,8 @@ type composition_t
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-val output_of_manuscript: sp:Eliom_sessions.server_params -> path:string list -> manuscript_t -> [> `Div ] XHTML.M.elt
-val output_of_composition: sp:Eliom_sessions.server_params -> path:string list -> composition_t -> [> `Div ] XHTML.M.elt
+val output_of_manuscript: manuscript_t -> [> `Div ] XHTML.M.elt
+val output_of_composition: composition_t -> [> `Div ] XHTML.M.elt
 
 val output_of_string: string -> [> `Div ] XHTML.M.elt
 val string_of_output: output_t -> string
