@@ -14,6 +14,21 @@ open Lambdoc_proxy
 
 
 (********************************************************************************)
+(**	{1 Private modules}							*)
+(********************************************************************************)
+
+module Socket: Client.SOCKET =
+struct
+	let sockaddr () = !Config.sockaddr
+	let sockdomain () = !Config.sockdomain
+	let socktype () = !Config.socktype
+	let sockproto () = !Config.sockproto
+end
+
+module Proxy_client = Client.Make (Socket)
+
+
+(********************************************************************************)
 (**	{1 Type definitions}							*)
 (********************************************************************************)
 
@@ -55,7 +70,7 @@ let string_of_output raw =
 
 
 let parse_manuscript src =
-	Client.ambivalent_manuscript_from_string Protocol.Lambtex src >>= function
+	Proxy_client.ambivalent_manuscript_from_string Protocol.Lambtex src >>= function
 		| `Valid doc ->
 			Lwt.return (`Okay (doc, doc.Valid.images))
 		| `Invalid doc ->
@@ -65,7 +80,7 @@ let parse_manuscript src =
 
 
 let parse_composition src =
-	Client.ambivalent_composition_from_string Protocol.Lambtex src >>= function
+	Proxy_client.ambivalent_composition_from_string Protocol.Lambtex src >>= function
 		| `Valid doc ->
 			Lwt.return (`Okay (doc, doc.Valid.images))
 		| `Invalid doc ->
