@@ -94,7 +94,7 @@ let output_footer _ sp =
 	Lwt.return
 		[
 		h1 [pcdata "Powered by:"];
-		ul (li [Eliom_predefmod.Xhtml.a External.lambdium_light sp [External.lambdium_light_img sp] ()])
+		ul (li [Eliom_predefmod.Xhtml.a External.lambdium sp [External.lambdium_img sp] ()])
 			[
 			li [Eliom_predefmod.Xhtml.a External.ocsigen sp [External.ocsigen_img sp] ()];
 			li [Eliom_predefmod.Xhtml.a External.ocaml sp [External.ocaml_img sp] ()];

@@ -26,16 +26,16 @@ let link_static path =
 		()
 
 
-let lambdium_light =
+let lambdium =
 	Eliom_services.new_external_service
-		~prefix: "http://dario.dse.nl"
-		~path: ["projects"; "lambdium-light"; ""]
+		~prefix: "http://forge.ocamlcore.org"
+		~path: ["projects"; "lambdium"; ""]
 		~get_params: Eliom_parameters.unit
 		~post_params: Eliom_parameters.unit
 		()
 
 
-let lambdium_light_img sp =
+let lambdium_img sp =
 	img ~src:(Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["images"; "lambdium-banner.png"]) ~alt:"Lambdium-light" ()
 
 

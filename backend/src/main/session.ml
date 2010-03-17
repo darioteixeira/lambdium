@@ -111,7 +111,7 @@ let login_handler sp () (username, (password, remember)) =
 				Lwt.return ()
 			end)
 		| None ->
-			Status.failure ~sp [p [pcdata "Invalid login"]];
+			Status.failure ~sp [p [pcdata "Invalid login!"]];
 			Lwt.return ()
 
 
