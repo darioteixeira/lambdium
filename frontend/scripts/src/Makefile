@@ -1,5 +1,5 @@
 SOURCES=jslint-options.js array.js bind.js evt.js dom.js obj.js node.js ajaxer.js previewer.js main.js
-TARGET=../lambdium.js
+TARGET=../main.js
 MIDDLE=../middle.js
 
 all: $(TARGET)
