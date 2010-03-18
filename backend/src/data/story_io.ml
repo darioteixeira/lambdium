@@ -116,7 +116,7 @@ let form_for_images ~sp ~path ~status enter_file =
 			]
 		and show = match is_uploaded with
 			| true  ->
-				let uri = Eliom_predefmod.Xhtml.make_uri ~service:(External.link_static (path @ [alias])) ~sp ()
+				let uri = Eliom_predefmod.Xhtml.make_uri ~service:(External.static (path @ [alias])) ~sp ()
 				in [p [pcdata "Currently uploaded image:"]; XHTML.M.img ~src:uri ~alt:"" ()]
 			| false -> []
 		in enter @ show

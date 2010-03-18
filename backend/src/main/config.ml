@@ -56,9 +56,10 @@ let socktype_of_string = function
 
 let login_table = ref Use_persistent
 
-let static_dir = ref "static"
-let story_dir = ref "sdata"
-let comment_dir = ref "cdata"
+let static_prefix = ref "http://localhost:8080/"
+let static_dir = ref "/tmp/static"
+let story_dir = ref "story"
+let comment_dir = ref "comment"
 let limbo_dir = ref "limbo"
 let global_upload_limit = ref 20
 
@@ -110,6 +111,8 @@ let parse_config () =
 	let parse_top = function
 		| Element ("logintable", [], [PCData s]) ->
 			login_table := login_table_of_string s
+		| Element ("staticprefix", [], [PCData s]) ->
+			static_prefix := s
 		| Element ("staticdir", [], [PCData s]) ->
 			static_dir := s
 		| Element ("storydir", [], [PCData s]) ->

@@ -111,8 +111,8 @@ let output_floatbox (id, header, contents) =
 
 
 let base_page ~sp ~page_title ~page_content ~page_content_id =
-	let css_uri = Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["css"; "main.css"]
-	and js_uri = Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["scripts"; "main.js"]
+	let css_uri = Eliom_predefmod.Xhtml.make_uri ~service:(External.static ["css"; "main.css"]) ~sp ()
+	and js_uri = Eliom_predefmod.Xhtml.make_uri ~service:(External.static ["scripts"; "main.js"]) ~sp ()
 	in (html
 		(head ~a:[a_profile (uri_of_string "http://www.w3.org/2005/11/profile")] (title (pcdata page_title))
 			[

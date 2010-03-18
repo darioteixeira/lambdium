@@ -47,7 +47,7 @@ let socket =
 
 
 let output writer ~sp ~path doc =
-	let image_lookup img = Eliom_predefmod.Xhtml.make_uri ~service:(External.link_static (path @ [img])) ~sp () in
+	let image_lookup img = Eliom_predefmod.Xhtml.make_uri ~service:(External.static (path @ [img])) ~sp () in
 	let settings = Some {Lambdoc_writer.Settings.default with image_lookup = image_lookup} in                     
 	let xhtml = writer ?settings doc                                                                              
 	in (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)                       

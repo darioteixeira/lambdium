@@ -17,9 +17,9 @@ open XHTML.M
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
 
-let link_static path =
+let static path =
 	Eliom_services.new_external_service
-		~prefix: "http://dual:8080"
+		~prefix: !Config.static_prefix
 		~path
 		~get_params: Eliom_parameters.unit
 		~post_params: Eliom_parameters.unit
@@ -36,7 +36,7 @@ let lambdium =
 
 
 let lambdium_img sp =
-	img ~src:(Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["images"; "lambdium-banner.png"]) ~alt:"Lambdium-light" ()
+	img ~src:(Eliom_predefmod.Xhtml.make_uri ~service:(static ["images"; "lambdium-banner.png"]) ~sp ()) ~alt:"Lambdium-light" ()
 
 
 let ocsigen =
@@ -49,7 +49,7 @@ let ocsigen =
 
 
 let ocsigen_img sp =
-	img ~src:(Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["images"; "ocsigen-banner.png"]) ~alt:"Ocsigen" ()
+	img ~src:(Eliom_predefmod.Xhtml.make_uri ~service:(static ["images"; "ocsigen-banner.png"]) ~sp ()) ~alt:"Ocsigen" ()
 
 
 let ocaml =
@@ -62,5 +62,5 @@ let ocaml =
 
 
 let ocaml_img sp =
-	img ~src:(Eliom_predefmod.Xhtml.make_uri (Eliom_services.static_dir sp) sp ["images"; "ocaml-banner.png"]) ~alt:"Ocaml" ()
+	img ~src:(Eliom_predefmod.Xhtml.make_uri ~service:(static ["images"; "ocaml-banner.png"]) ~sp ()) ~alt:"Ocaml" ()
 
