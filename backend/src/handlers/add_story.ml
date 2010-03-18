@@ -46,8 +46,11 @@ and step2_handler ?token ~login sp () (title, (intro_src, body_src)) =
 	Document.parse_manuscript body_src >>= fun body_res ->
 	match (intro_res, body_res) with
 		| (`Okay (intro_doc, _), `Okay (body_doc, images)) ->
+			let path = Uploader.get_path token in
+			let intro_out = Document.output_of_composition ~sp ~path intro_doc in
+			let body_out = Document.output_of_manuscript ~sp ~path body_doc in
 			let author = Login.to_user login in
-			let story = Story.make_fresh author title intro_src intro_doc Document.dummy_output body_src body_doc Document.dummy_output in
+			let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
 			if List.length images <> 0
 			then step3 ~token ~story ~login ~sp ~images
 			else step5 ~token ~story ~login ~sp
@@ -130,9 +133,9 @@ and step6_handler ~token ~story sp () (action, ()) =
 				let path_maker sid = [!Config.story_dir; Story.Id.to_string sid] in
 				let output_maker sid =
 					let path = path_maker sid in
-					let intro_out = Document.serialise_output (Document.output_of_composition ~sp ~path story#intro_doc)
-					and body_out = Document.serialise_output (Document.output_of_manuscript ~sp ~path story#body_doc)
-					in (intro_out, body_out) in
+					let intro_xout = Document.serialise_output (Document.output_of_composition ~sp ~path story#intro_doc)
+					and body_xout = Document.serialise_output (Document.output_of_manuscript ~sp ~path story#body_doc)
+					in (intro_xout, body_xout) in
 				Database.add_story ~output_maker story >>= fun sid ->
 				Uploader.commit ~path:(path_maker sid) token >>= fun () ->
 				Status.success ~sp [p [pcdata "Story has been added!"]];

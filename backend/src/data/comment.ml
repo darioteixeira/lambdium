@@ -109,7 +109,7 @@ let full_of_tuple (cid, sid, author_uid, author_nick, title, timestamp, body_xou
 	in make_full cid sid author title timestamp body_out
 
 let tuple_of_fresh comment =
-	let body_pickle = Document.serialise_composition comment#body_doc
+	let body_xdoc = Document.serialise_composition comment#body_doc
 	and body_xout = Document.serialise_output comment#body_out
-	in (comment#sid, comment#author#uid, comment#title, comment#body_src, body_pickle, body_xout)
+	in (comment#sid, comment#author#uid, comment#title, comment#body_src, body_xdoc, body_xout)
 

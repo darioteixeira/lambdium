@@ -20,8 +20,9 @@ open Page
 let rec step1_handler sp () (sid, (title, body_src)) =
 	let output_core login sp =
 		Document.parse_composition_exc body_src >>= fun (body_doc, _) ->
+		let body_out = Document.output_of_composition ~sp ~path:[] body_doc in
 		let author = Login.to_user login in
-		let comment = Comment.make_fresh sid author title body_src body_doc Document.dummy_output in
+		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_comment_fallback

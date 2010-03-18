@@ -152,9 +152,9 @@ let full_of_tuple (sid, author_uid, author_nick, title, timestamp, num_comments,
 
 
 let tuple_of_fresh story =
-	let intro_pickle = Document.serialise_composition story#intro_doc
+	let intro_xdoc = Document.serialise_composition story#intro_doc
 	and intro_xout = Document.serialise_output story#intro_out
-	and body_pickle = Document.serialise_manuscript story#body_doc
+	and body_xdoc = Document.serialise_manuscript story#body_doc
 	and body_xout = Document.serialise_output story#body_out
-	in (story#author#uid, story#title, story#intro_src, intro_pickle, intro_xout, story#body_src, body_pickle, body_xout)
+	in (story#author#uid, story#title, story#intro_src, intro_xdoc, intro_xout, story#body_src, body_xdoc, body_xout)
 
