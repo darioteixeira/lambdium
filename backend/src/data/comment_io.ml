@@ -13,13 +13,6 @@ open Prelude
 
 
 (********************************************************************************)
-(**	{1 Exceptions}								*)
-(********************************************************************************)
-
-exception Invalid_comment of Document.output_t
-
-
-(********************************************************************************)
 (**	{1 Output-related functions}						*)
 (********************************************************************************)
 
@@ -54,15 +47,6 @@ let output_fresh = output_full
 (********************************************************************************)
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
-
-let parse src =
-	Document.parse_composition src >>= function
-		| `Okay (doc, _) ->
-			let out = Document.output_of_composition doc
-			in Lwt.return (doc, out)
-		| `Error out ->
-			Lwt.fail (Invalid_comment out)
-
 
 let form_for_fresh ~sid ~title ~body_src (enter_sid, (enter_title, enter_body)) =
 	Lwt.return

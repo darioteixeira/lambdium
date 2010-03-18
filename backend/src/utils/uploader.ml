@@ -133,7 +133,7 @@ let request ~sp ~uid ~limit =
 		else
 			let now = Unix.gettimeofday () in
 			let uuid = Printf.sprintf "%ld-%Lx-%Lx" uid (Int64.bits_of_float now) (Random.int64 Int64.max_int) in
-			let tmp_dir = (Unix.getcwd ()) ^ "/" ^ !Config.static_dir ^ "/" ^ !Config.limbo_dir ^ "/" ^ uuid in
+			let tmp_dir = !Config.static_dir ^ "/" ^ !Config.limbo_dir ^ "/" ^ uuid in
 			let () = Unix.mkdir tmp_dir 0o750 in
 			let token =
 				{
@@ -154,7 +154,7 @@ let commit ~path token =
 	if Uuidset.mem token.uuid !!pool.uuids
 	then begin
 		Ocsigen_messages.warning (Printf.sprintf "Actually committing token %s" token.uuid);
-		let full_path = [Unix.getcwd (); !Config.static_dir] @ path in
+		let full_path = !Config.static_dir :: path in
 		let dst_dir = (List.hd full_path) ^ (List.fold_left (fun acc x -> acc ^ "/" ^ x) "" (List.tl full_path)) in
 		Ocsigen_messages.warning (Printf.sprintf "Destination dir: %s" dst_dir);
 		Unix.mkdir dst_dir 0o750;

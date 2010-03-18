@@ -6,13 +6,7 @@
 *)
 (********************************************************************************)
 
-(********************************************************************************)
-(**	{1 Exceptions}								*)
-(********************************************************************************)
-
-exception Invalid_story_intro of Document.output_t
-exception Invalid_story_body of Document.output_t
-exception Invalid_story_intro_and_body of Document.output_t * Document.output_t
+open Prelude
 
 
 (********************************************************************************)
@@ -50,11 +44,6 @@ val output_fresh:
 (********************************************************************************)
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
-
-val parse:
-	string ->
-	string ->
-	(Document.composition_t * Document.output_t * Document.manuscript_t * Document.output_t * string list) Lwt.t
 
 val form_for_fresh:
 	?title:string ->

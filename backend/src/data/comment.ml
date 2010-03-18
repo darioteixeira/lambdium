@@ -103,13 +103,13 @@ let make_changed cid sid author title body_src body_doc body_out =
 let handle_of_tuple (cid, title) =
 	make_handle cid title
 
-let full_of_tuple (cid, sid, author_uid, author_nick, title, timestamp, body_out) =
+let full_of_tuple (cid, sid, author_uid, author_nick, title, timestamp, body_xout) =
 	let author = User.make_handle author_uid author_nick
-	and body_out = Document.output_of_string body_out
+	and body_out = Document.deserialise_output body_xout
 	in make_full cid sid author title timestamp body_out
 
 let tuple_of_fresh comment =
 	let body_pickle = Document.serialise_composition comment#body_doc
-	and body_out = Document.string_of_output comment#body_out
-	in (comment#sid, comment#author#uid, comment#title, comment#body_src, body_pickle, body_out)
+	and body_xout = Document.serialise_output comment#body_out
+	in (comment#sid, comment#author#uid, comment#title, comment#body_src, body_pickle, body_xout)
 

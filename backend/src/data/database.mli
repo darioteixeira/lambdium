@@ -95,8 +95,8 @@ val get_story_with_comments: Story.Id.t -> (Story.full_t * Comment.full_t list) 
 (********************************************************************************)
 
 val add_user: User.fresh_t -> User.Id.t Lwt.t
-val add_story: Story.fresh_t -> Story.Id.t Lwt.t
-val add_comment: Comment.fresh_t -> Comment.Id.t Lwt.t
+val add_story: output_maker:(Story.Id.t -> string * string) -> Story.fresh_t -> Story.Id.t Lwt.t
+val add_comment: output_maker:(Comment.Id.t -> string) -> Comment.fresh_t -> Comment.Id.t Lwt.t
 
 
 (********************************************************************************)

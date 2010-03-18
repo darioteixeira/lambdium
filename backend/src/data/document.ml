@@ -11,21 +11,16 @@ open Prelude
 open Lambdoc_core
 open Lambdoc_writer.Settings
 open Lambdoc_proxy
+open Lambdoc_proxy.Protocol
+open Lambdoc_proxy.Client
 
 
 (********************************************************************************)
-(**	{1 Private modules}							*)
+(**	{1 Exceptions}								*)
 (********************************************************************************)
 
-module Socket: Client.SOCKET =
-struct
-	let sockaddr () = !Config.sockaddr
-	let sockdomain () = !Config.sockdomain
-	let socktype () = !Config.socktype
-	let sockproto () = !Config.sockproto
-end
-
-module Proxy_client = Client.Make (Socket)
+exception Invalid_manuscript of [ `Div ] XHTML.M.elt
+exception Invalid_composition of [ `Div ] XHTML.M.elt
 
 
 (********************************************************************************)
@@ -42,16 +37,29 @@ type composition_t = Valid.composition_t
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let output writer doc =
-	let image_lookup img = XHTML.M.uri_of_string img in
-	let settings = Some {Lambdoc_writer.Settings.default with image_lookup = image_lookup} in
-	let xhtml = writer ?settings doc
-	in (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)
+let socket =
+	{
+	sockaddr = !Config.sockaddr;
+	sockdomain = !Config.sockdomain;
+	socktype = !Config.socktype;
+	sockproto = !Config.sockproto;
+	}
+
+
+let output writer ~sp ~path doc =
+	let image_lookup img = Eliom_predefmod.Xhtml.make_uri ~service:(External.link_static (path @ [img])) ~sp () in
+	let settings = Some {Lambdoc_writer.Settings.default with image_lookup = image_lookup} in                     
+	let xhtml = writer ?settings doc                                                                              
+	in (XHTML.M.unsafe_data (Xhtmlpretty.xhtml_list_print [xhtml]) : [> `Div ] XHTML.M.elt)                       
 
 
 (********************************************************************************)
 (**	{1 Public functions and values}						*)
 (********************************************************************************)
+
+let dummy_output =
+	XHTML.M.div []
+
 
 let output_of_manuscript =
 	output Lambdoc_write_xhtml.Main.write_valid_manuscript
@@ -61,16 +69,8 @@ let output_of_composition =
 	output Lambdoc_write_xhtml.Main.write_valid_composition
 
 
-let output_of_string str =
-	(XHTML.M.unsafe_data str : [> `Div ] XHTML.M.elt)
-
-
-let string_of_output raw =
-	Xhtmlpretty.xhtml_list_print [raw]
-
-
 let parse_manuscript src =
-	Proxy_client.ambivalent_manuscript_from_string Protocol.Lambtex src >>= function
+	ambivalent_manuscript_from_string ~socket ~markup:Lambtex src >>= function
 		| `Valid doc ->
 			Lwt.return (`Okay (doc, doc.Valid.images))
 		| `Invalid doc ->
@@ -80,7 +80,7 @@ let parse_manuscript src =
 
 
 let parse_composition src =
-	Proxy_client.ambivalent_composition_from_string Protocol.Lambtex src >>= function
+	ambivalent_composition_from_string ~socket ~markup:Lambtex src >>= function
 		| `Valid doc ->
 			Lwt.return (`Okay (doc, doc.Valid.images))
 		| `Invalid doc ->
@@ -89,8 +89,28 @@ let parse_composition src =
 			in Lwt.return (`Error out)
 
 
+let parse_manuscript_exc src =
+	parse_manuscript src >>= function
+		| `Okay x  -> Lwt.return x
+		| `Error x -> Lwt.fail (Invalid_manuscript x)
+
+
+let parse_composition_exc src =
+	parse_composition src >>= function
+		| `Okay x  -> Lwt.return x
+		| `Error x -> Lwt.fail (Invalid_composition x)
+
+
 let serialise_manuscript = Valid.serialize_manuscript
 
 
 let serialise_composition = Valid.serialize_composition
+
+
+let serialise_output raw =
+	Xhtmlpretty.xhtml_list_print [raw]
+
+
+let deserialise_output str =
+	(XHTML.M.unsafe_data str : [> `Div ] XHTML.M.elt)
 

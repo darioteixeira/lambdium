@@ -42,22 +42,23 @@ and step2_handler ?token ~login sp () (title, (intro_src, body_src)) =
 	(match token with
 		| Some t -> Lwt.return t
 		| None	 -> Uploader.request ~sp ~uid:(Login.uid login) ~limit:3) >>= fun token ->
-	try_lwt
-		Story_io.parse intro_src body_src >>= fun (intro_doc, intro_out, body_doc, body_out, images) ->
-		let author = Login.to_user login in
-		let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
-		if List.length images <> 0
-		then step3 ~token ~story ~login ~sp ~images
-		else step5 ~token ~story ~login ~sp
-	with
-		| Story_io.Invalid_story_intro intro_out ->
-			Status.failure ~sp ([intro_out] :> XHTML.M.block XHTML.M.elt list);
+	Document.parse_composition intro_src >>= fun intro_res ->
+	Document.parse_manuscript body_src >>= fun body_res ->
+	match (intro_res, body_res) with
+		| (`Okay (intro_doc, _), `Okay (body_doc, images)) ->
+			let author = Login.to_user login in
+			let story = Story.make_fresh author title intro_src intro_doc Document.dummy_output body_src body_doc Document.dummy_output in
+			if List.length images <> 0
+			then step3 ~token ~story ~login ~sp ~images
+			else step5 ~token ~story ~login ~sp
+		| (`Error intro_err, `Error body_err) ->
+			Status.failure ~sp ([intro_err; body_err] :> XHTML.M.block XHTML.M.elt list);
 			step1_handler ~title ~intro_src ~body_src sp () ()
-		| Story_io.Invalid_story_body body_out ->
-			Status.failure ~sp ([body_out] :> XHTML.M.block XHTML.M.elt list);
+		| (`Error intro_err, _) ->
+			Status.failure ~sp ([intro_err] :> XHTML.M.block XHTML.M.elt list);
 			step1_handler ~title ~intro_src ~body_src sp () ()
-		| Story_io.Invalid_story_intro_and_body (intro_out, body_out) ->
-			Status.failure ~sp ([intro_out; body_out] :> XHTML.M.block XHTML.M.elt list);
+		| (_, `Error body_err) ->
+			Status.failure ~sp ([body_err] :> XHTML.M.block XHTML.M.elt list);
 			step1_handler ~title ~intro_src ~body_src sp () ()
 
 
@@ -125,8 +126,15 @@ and step6_handler ~token ~story sp () (action, ()) =
 			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src sp () ()
 		| `Conclude ->
 			try_lwt
-				Database.add_story story >>= fun sid ->
-				Uploader.commit ~path:[!Config.story_dir; Story.Id.to_string sid] token >>= fun () ->
+
+				let path_maker sid = [!Config.story_dir; Story.Id.to_string sid] in
+				let output_maker sid =
+					let path = path_maker sid in
+					let intro_out = Document.serialise_output (Document.output_of_composition ~sp ~path story#intro_doc)
+					and body_out = Document.serialise_output (Document.output_of_manuscript ~sp ~path story#body_doc)
+					in (intro_out, body_out) in
+				Database.add_story ~output_maker story >>= fun sid ->
+				Uploader.commit ~path:(path_maker sid) token >>= fun () ->
 				Status.success ~sp [p [pcdata "Story has been added!"]];
 				Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 			with

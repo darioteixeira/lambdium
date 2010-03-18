@@ -138,23 +138,23 @@ let handle_of_tuple (sid, title) =
 	make_handle sid title
 
 
-let blurb_of_tuple (sid, author_uid, author_nick, title, timestamp, num_comments, intro_out) =
+let blurb_of_tuple (sid, author_uid, author_nick, title, timestamp, num_comments, intro_xout) =
 	let author = User.make_handle author_uid author_nick
-	and intro_out = Document.output_of_string intro_out
+	and intro_out = Document.deserialise_output intro_xout
 	in make_blurb sid author title timestamp num_comments intro_out
 
 
-let full_of_tuple (sid, author_uid, author_nick, title, timestamp, num_comments, intro_out, body_out) =
+let full_of_tuple (sid, author_uid, author_nick, title, timestamp, num_comments, intro_xout, body_xout) =
 	let author = User.make_handle author_uid author_nick
-	and intro_out = Document.output_of_string intro_out
-	and body_out = Document.output_of_string body_out
+	and intro_out = Document.deserialise_output intro_xout
+	and body_out = Document.deserialise_output body_xout
 	in make_full sid author title timestamp num_comments intro_out body_out
 
 
 let tuple_of_fresh story =
 	let intro_pickle = Document.serialise_composition story#intro_doc
-	and intro_out = Document.string_of_output story#intro_out
+	and intro_xout = Document.serialise_output story#intro_out
 	and body_pickle = Document.serialise_manuscript story#body_doc
-	and body_out = Document.string_of_output story#body_out
-	in (story#author#uid, story#title, story#intro_src, intro_pickle, intro_out, story#body_src, body_pickle, body_out)
+	and body_xout = Document.serialise_output story#body_out
+	in (story#author#uid, story#title, story#intro_src, intro_pickle, intro_xout, story#body_src, body_pickle, body_xout)
 
