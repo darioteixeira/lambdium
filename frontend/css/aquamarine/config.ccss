@@ -53,7 +53,7 @@ Color_footer_back: Color_key;
 
 Core_fore: #fff;
 Core_back_success: #007f00;
-Core_back_warning: #3f3f00;
+Core_back_warning: #9f7f00;
 Core_back_failure: #7f0000;
 
 

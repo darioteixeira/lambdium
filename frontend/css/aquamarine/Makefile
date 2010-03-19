@@ -1,11 +1,10 @@
 IMAGES=images/lambdium-logo.png
-SOURCES=reset.ccss config.ccss global.ccss header.ccss footer.ccss margins.ccss core.ccss
+SOURCES=reset.ccss config.ccss global.ccss header.ccss footer.ccss margins.ccss core.ccss unreset_lambdoc.css
 
 all: main.css $(IMAGES)
 
 main.css: $(SOURCES)
-	cat $(SOURCES) | ccss > $@
-	#csstidy tmp.css $@ --silent=true
+	cat $+ | ccss > $@
 
 images/lambdium-logo.png: images/src/lambdium-logo.svg
 	inkscape -f $< -e $@ -w 120
