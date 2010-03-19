@@ -126,8 +126,14 @@ let base_page ~sp ~page_title ~page_content ~page_content_id =
 
 let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
 	let core_status = match Status.get sp with
-		| Some (stat, msg) -> [div ~a:[a_id "core_status"; a_class ["core_" ^ (Status.string_of_stat stat)]] msg]
-		| None -> [] in
+		| Some (stat, head, body) ->
+			let head' = h1 ~a:[a_id "core_status_head"] head
+			and body' = match body with
+				| [] -> []
+				| xs -> [div ~a:[a_id "core_status_body"] xs]
+			in [div ~a:[a_id "core_status"; a_class ["core_" ^ (Status.string_of_stat stat)]] (head' :: body')]
+		| None ->
+			[] in
 	let page_content =
 		[
 		div ~a:[a_id "header"] header;
@@ -180,7 +186,7 @@ let login_enforced_handler ~sp ~page_title ?output_core ?output_context () =
 	Session.get_maybe_login sp >>= fun maybe_login ->
 	let output_core = match maybe_login with
 		| Some login -> (match output_core with Some f -> Some (f login) | None -> None)
-		| None	     -> (Status.failure ~sp [p [pcdata "You are not logged in!"]]; None)
+		| None	     -> (Status.failure ~sp [pcdata "You are not logged in!"] []; None)
 	in regular_handler ~maybe_login ~sp ~page_title ?output_core ?output_context ()
 
 

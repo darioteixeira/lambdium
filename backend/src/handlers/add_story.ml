@@ -55,13 +55,13 @@ and step2_handler ?token ~login sp () (title, (intro_src, body_src)) =
 			then step3 ~token ~story ~login ~sp ~images
 			else step5 ~token ~story ~login ~sp
 		| (`Error intro_err, `Error body_err) ->
-			Status.failure ~sp ([intro_err; body_err] :> XHTML.M.block XHTML.M.elt list);
+			Status.failure ~sp [pcdata "Error in story intro and body:"] ([intro_err; body_err] :> XHTML.M.block XHTML.M.elt list);
 			step1_handler ~title ~intro_src ~body_src sp () ()
 		| (`Error intro_err, _) ->
-			Status.failure ~sp ([intro_err] :> XHTML.M.block XHTML.M.elt list);
+			Status.failure ~sp [pcdata "Error in story intro:"] ([intro_err] :> XHTML.M.block XHTML.M.elt list);
 			step1_handler ~title ~intro_src ~body_src sp () ()
 		| (_, `Error body_err) ->
-			Status.failure ~sp ([body_err] :> XHTML.M.block XHTML.M.elt list);
+			Status.failure ~sp [pcdata "Error in story body:"] ([body_err] :> XHTML.M.block XHTML.M.elt list);
 			step1_handler ~title ~intro_src ~body_src sp () ()
 
 
@@ -89,7 +89,7 @@ and step4_handler ~token ~story ~login ~images sp () (action, files) =
 	match action with
 		| `Cancel ->
 			Uploader.discard token >>= fun () ->
-			Status.warning ~sp [p [pcdata "You have cancelled!"]];
+			Status.warning ~sp [pcdata "You have cancelled!"] [];
 			Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 		| `Continue ->
 			Uploader.add_files images files token >>= fun _ ->
@@ -123,7 +123,7 @@ and step6_handler ~token ~story sp () (action, ()) =
 	match action with
 		| `Cancel ->
 			Uploader.discard token >>= fun () ->
-			Status.warning ~sp [p [pcdata "You have cancelled!"]];
+			Status.warning ~sp [pcdata "You have cancelled!"] [];
 			Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 		| `Continue ->
 			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src sp () ()
@@ -138,11 +138,11 @@ and step6_handler ~token ~story sp () (action, ()) =
 					in (intro_xout, body_xout) in
 				Database.add_story ~output_maker story >>= fun sid ->
 				Uploader.commit ~path:(path_maker sid) token >>= fun () ->
-				Status.success ~sp [p [pcdata "Story has been added!"]];
+				Status.success ~sp [pcdata "Story has been added!"] [];
 				Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 			with
 				| Database.Cannot_add_story ->
-					Status.failure ~sp [p [pcdata "Cannot add story!"]];
+					Status.failure ~sp [pcdata "Cannot add story!"] [];
 					Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 
 

@@ -41,18 +41,18 @@ let rec step1_handler ?nick ?fullname ?timezone sp () () =
 and step2_handler sp () (nick, (fullname, (password, (password2, timezone)))) =
 	if password <> password2
 	then begin
-		Status.failure ~sp [p [pcdata "Passwords do not match!"]];
+		Status.failure ~sp [pcdata "Passwords do not match!"] [];
 		step1_handler ~nick ~fullname ~timezone sp () ()
 	end
 	else
 		try_lwt
 			let user = User.make_fresh nick fullname password timezone in
 			Database.add_user user >>= fun _ ->
-			Status.success ~sp [p [pcdata "User has been added"]];
+			Status.success ~sp [pcdata "User has been added"] [];
 			Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ()
 		with
 			| Database.Cannot_add_user ->
-				Status.failure ~sp [p [pcdata "Cannot add user!"]];
+				Status.failure ~sp [pcdata "Cannot add user!"] [];
 				Page.login_agnostic_handler ~sp ~page_title: "Add User - Step 2/2" ()
 
 

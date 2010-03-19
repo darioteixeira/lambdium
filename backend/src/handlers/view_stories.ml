@@ -24,7 +24,7 @@ let output_core maybe_login sp =
 			and tl' = List.map (Story_io.output_blurb ~localiser maybe_login sp) tl
 			in Lwt.return [ul ~a:[a_class ["list_of_stories"]] hd' tl']
 		| [] ->
-			Status.warning ~sp [p [pcdata "There are no stories in the system!"]];
+			Status.warning ~sp [pcdata "There are no stories in the system!"] [];
 			Lwt.return []
 
 

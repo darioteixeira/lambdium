@@ -46,11 +46,11 @@ and step2_handler ~login sp () (fullname, timezone) =
 		let settings = User.make_changed_settings (Login.uid login) fullname timezone in
 		Database.edit_user_settings settings >>= fun () ->
 		Session.update_login sp login >>= fun () ->
-		Status.success ~sp [p [pcdata "User settings have been changed"]];
+		Status.success ~sp [pcdata "User settings have been changed"] [];
 		Page.login_enforced_handler ~sp ~page_title:"Edit settings - Step 2/2" ()
 	with
 		| Database.Cannot_edit_user_settings ->
-			Status.failure ~sp [p [pcdata "Error!"]];
+			Status.failure ~sp [pcdata "Error!"] [];
 			step1_handler sp () ()
 
 

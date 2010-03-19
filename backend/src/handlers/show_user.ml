@@ -27,7 +27,7 @@ let output_core uid maybe_login sp =
 		Lwt.return [User_io.output_full sp user timezone stories comments]
 	with
 		| Database.Cannot_get_user ->
-			Status.failure ~sp [p [pcdata "Cannot find specified user!"]];
+			Status.failure ~sp [pcdata "Cannot find specified user!"] [];
 			Lwt.return []
 
 

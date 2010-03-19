@@ -46,7 +46,7 @@ and step2_handler comment sp () (action, (sid, (title, body))) =
 		| `Preview ->
 			step1_handler sp () (sid, (title, body))
 		| `Cancel ->
-			Status.warning ~sp [p [pcdata "You have cancelled!"]];
+			Status.warning ~sp [pcdata "You have cancelled!"] [];
 			Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ()
 		| `Finish ->
 			try_lwt
@@ -55,11 +55,11 @@ and step2_handler comment sp () (action, (sid, (title, body))) =
 					let path = path_maker cid
 					in Document.serialise_output (Document.output_of_composition ~sp ~path comment#body_doc) in
 				Database.add_comment ~output_maker comment >>= fun _ ->
-				Status.success ~sp [p [pcdata "Comment has been added!"]];
+				Status.success ~sp [pcdata "Comment has been added!"] [];
 				Page.login_enforced_handler ~sp ~page_title:"Add Comment - Step 2/2" ()
 			with
 				| Database.Cannot_add_comment ->
-					Status.failure ~sp [p [pcdata "Error!"]];
+					Status.failure ~sp [pcdata "Error!"] [];
 					step1_handler sp () (sid, (title, body))
 
 

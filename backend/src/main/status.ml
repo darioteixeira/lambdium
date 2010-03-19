@@ -15,9 +15,8 @@ type stat_t =
 	| Warning
 	| Failure
 
-type msg_t = XHTML.M.block XHTML.M.elt list
 
-type t = stat_t * msg_t
+type t = stat_t * [XHTML.M.inline | `PCDATA ] XHTML.M.elt list * XHTML.M.block XHTML.M.elt list
 
 
 (********************************************************************************)
@@ -45,7 +44,7 @@ let get sp =
 	with Not_found -> None
 
 
-let success ~sp msg = set ~sp (Success, msg)
-let warning ~sp msg = set ~sp (Warning, msg)
-let failure ~sp msg = set ~sp (Failure, msg)
+let success ~sp head body = set ~sp (Success, head, body)
+let warning ~sp head body = set ~sp (Warning, head, body)
+let failure ~sp head body = set ~sp (Failure, head, body)
 

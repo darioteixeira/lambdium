@@ -41,18 +41,18 @@ let rec step1_handler sp () () =
 and step2_handler login sp () (old_password, (new_password, new_password2)) =
 	if new_password <> new_password2
 	then begin
-		Status.failure ~sp [p [pcdata "Passwords do not match!"]];
+		Status.failure ~sp [pcdata "Passwords do not match!"] [];
 		step1_handler sp () ()
 	end
 	else
 		try_lwt
 			let credentials = User.make_changed_credentials (Login.uid login) old_password new_password in
 			Database.edit_user_credentials credentials >>= fun () ->
-			Status.success ~sp [p [pcdata "Password has been changed!"]];
+			Status.success ~sp [pcdata "Password has been changed!"] [];
 			Page.login_enforced_handler ~sp ~page_title:"Change password - Step 2/2" ()
 		with
 			| Database.Cannot_edit_user_credentials ->
-				Status.failure ~sp [p [pcdata "Error!"]];
+				Status.failure ~sp [pcdata "Error!"] [];
 				step1_handler sp () ()
 
 
