@@ -1,20 +1,19 @@
-#footer > h1
+/********************************************************************************/
+/* Footer.ccss: footer configuration.						*/
+/********************************************************************************/
+
+#footer > .box
 	{
 	margin-left: Fullwidth_LC;
 	margin-right: Fullwidth_RC;
-	text-align: center;
-	font: Font_headline;
-	color: Colour_footer_fore;
-	background: Colour_footer_back;
 	}
 
-#footer > ul
+#footer .box_body > ul
 	{
 	text-align: center;
-	margin: 1em auto 0;
 	}
 
-#footer > ul > li
+#footer .box_body > ul > li
 	{
 	display: inline;
 	margin: 0 1em;

@@ -42,42 +42,43 @@ caption, th, td
 
 body
 	{
-	margin: 10px;
 	font: 0.625em sans-serif;
+	margin: 10px;
 	line-height: 1.5;
+	color: #111;
 	background: #fff;
 	}
 
 #root
 	{
 	margin: 0 auto;
-	padding-left: 190px;
-	padding-right: 210px;
-	min-width: 190px;
-	max-width: 700px;
+	padding-left: 200px;
+	padding-right: 220px;
+	min-width: 200px;
+	max-width: 720px;
 	}
 
 #header, #footer
 	{
-	margin-left: -190px;
-	margin-right: -210px;
+	margin-left: -200px;
+	margin-right: -220px;
 	}
 
 #header
 	{
-	padding-bottom: 40px;
+	margin-bottom: 40px;
 	}
 
 #footer
 	{
 	clear: both;
-	padding-top: 20px;
 	}
 
 #core
 	{
 	position: relative;
 	float: left;
+	margin-bottom: 30px;
 	padding: 0 0px 0 0px;
 	width: 100%;
 	}
@@ -87,8 +88,8 @@ body
 	position: relative;
 	float: left;
 	width: 160px;
-	padding: 0 30px 0 0px;
-	right: 190px;
+	padding: 0 40px 0 0px;
+	right: 200px;
 	margin-left: -100%;
 	}
 
@@ -97,144 +98,107 @@ body
 	position: relative;
 	float: left;
 	width: 180px;
-	padding: 0 0px 0 30px;
+	padding: 0 0px 0 40px;
 	margin-right: -100%;
+	}
+
+.box
+	{
+	margin-bottom: 30px;
+	border: 1px solid #666;
+	-moz-box-shadow: 1px 1px 3px #666;
+	-moz-border-radius: 4px;
+	}
+
+.box_head
+	{
+	font: bold 1.3em sans-serif;
+	text-align: center;
+	padding: 0.2em 0.5em;
+	color: #fff;
+	background: #5b8ba6;
+	}
+
+.box_body
+	{
+	font: 1.3em sans-serif;
+	padding: 1em;
+	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomright: 4px;
+	color: #000;
+	background: #f9f9f9;
+	}
+
+.box_head + .box_body
+	{
+	border-top: 1px solid #666;
 	}
 
 #header > h1
 	{
 	font: bold 1.8em sans-serif;
-	margin-left: 190px;
-	margin-right: 210px;
+	margin-left: 200px;
+	margin-right: 220px;
 	padding-left: 120px;
 	line-height: 120px;
 	color: #5b8ba6;
 	background: #fff url("images/lambdium-logo.png") no-repeat;
 	}
 
-#footer > h1
+#footer > .box
 	{
-	margin-left: 190px;
-	margin-right: 210px;
-	text-align: center;
-	font: bold 1.4em sans-serif;
-	color: #fff;
-	background: #5b8ba6;
+	margin-left: 200px;
+	margin-right: 220px;
 	}
 
-#footer > ul
+#footer .box_body > ul
 	{
 	text-align: center;
-	margin: 1em auto 0;
 	}
 
-#footer > ul > li
+#footer .box_body > ul > li
 	{
 	display: inline;
 	margin: 0 1em;
 	}
 
-.floatbox
-	{
-	margin-bottom: 2em;
-	border: 1px solid #666;
-	-moz-box-shadow: 2px 2px 3px #666;
-	-moz-border-radius: 5px;
-	}
-
-.floatbox_head
-	{
-	padding: 0.125em 0.5em;
-	text-align: center;
-	font: bold 1.4em sans-serif;
-	color: #fff;
-	background: #5b8ba6;
-	}
-
-.floatbox_body
-	{
-	padding: 1em;
-	border-top: 1px solid #666;
-	-moz-border-radius-bottomleft: 5px;
-	-moz-border-radius-bottomright: 5px;
-	color: #000;
-	background: #f9f9f9;
-	}
-
-.floatbox input[type="text"], .floatbox input[type="password"], .floatbox input[type="submit"]
+.box input[type="text"], .box input[type="password"], .box input[type="submit"]
 	{
 	width: 100%;
 	margin-bottom: 0.5em;
 	}
 
-.floatbox input[type="submit"]
+.box input[type="submit"]
 	{
 	margin-top: 0.5em;
 	}
 
-#core_status
-	{
-	margin-bottom: 2em;
-	-moz-box-shadow: 2px 2px 3px #666;
-	-moz-border-radius: 5px;
-	}
-
-#core_status_head
-	{
-	padding: 0.125em 0.5em;
-	text-align: center;
-	font: bold 1.4em sans-serif;
-	color: #fff;
-	}
-
-#core_status_body
-	{
-	padding: 1em;
-	-moz-border-radius-bottomleft: 5px;
-	-moz-border-radius-bottomright: 5px;
-	}
-
-.core_success
-	{
-	border: 2px solid #007f00;
-	}
-
-.core_success > #core_status_head
+#status_success > .box_head
 	{
 	background: #007f00;
 	}
 
-.core_success > #core_status_body
+#status_success > .box_body
 	{
 	background: #afefaf;
 	}
 
-.core_warning
-	{
-	border: 2px solid #9f5f00;
-	}
-
-.core_warning > #core_status_head
+#status_warning > .box_head
 	{
 	background: #9f5f00;
 	}
 
-.core_warning > #core_status_body
+#status_warning > .box_body
 	{
 	background: #ffef9f;
 	}
 
-.core_failure
-	{
-	border: 2px solid #7f0000;
-	}
-
-.core_failure > #core_status_head
+#status_failure > .box_head
 	{
 	background: #7f0000;
 	}
 
-.core_failure > #core_status_body
+#status_failure > .box_body
 	{
 	background: #efafaf;
 	}

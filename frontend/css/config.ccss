@@ -1,19 +1,19 @@
 /********************************************************************************/
-/* General stylesheet configuration.						*/
+/* Config.ccss: general stylesheet configuration.				*/
 /********************************************************************************/
 
 /********************************************************************************/
 /* Layout configuration.							*/
 /********************************************************************************/
 
-Margin_body: 10px;
+Margin_root: 10px;
 
 Width_LC: 160px;
 Padding_LCL: 0px;
-Padding_LCR: 30px;
+Padding_LCR: 40px;
 
 Width_RC: 180px;
-Padding_RCL: 30px;
+Padding_RCL: 40px;
 Padding_RCR: 0px;
 
 Maxwidth_CC: 300px;
@@ -21,7 +21,7 @@ Padding_CCL: 0px;
 Padding_CCR: 0px;
 
 Vmargin_header: 40px;
-Vmargin_footer: 20px;
+Vmargin_footer: 30px;
 
 
 /********************************************************************************/
@@ -40,16 +40,19 @@ Fullwidth_RC: (Width_RC + Padding_RCL + Padding_RCR);
 /* Colour scheme configuration.							*/
 /********************************************************************************/
 
-Colour_fancy: #5b8ba6;
-Colour_body: #fff;
+Colour_root: #111;
+Back_root: #fff;
+
 Colour_shadow: #666;
+Colour_fancy: #5b8ba6;
 
-Colour_header_fore: Colour_fancy;
-Colour_header_back: Colour_body;
-Colour_footer_fore: Colour_body;
-Colour_footer_back: Colour_fancy;
+Colour_header: Colour_fancy;
+Back_header: Back_root;
 
-Colour_status_head: #fff;
+Colour_box_head: #fff;
+Colour_box_body: #000;
+Back_box_head: Colour_fancy;
+Back_box_body: #f9f9f9;
 
 Back_success_head: #007f00;
 Back_success_body: #afefaf;
@@ -58,44 +61,28 @@ Back_warning_body: #ffef9f;
 Back_failure_head: #7f0000;
 Back_failure_body: #efafaf;
 
-Colour_floatbox_head: #fff;
-Colour_floatbox_body: #000;
-
-Back_floatbox_head: Colour_fancy;
-Back_floatbox_body: #f9f9f9;
-
-
-/********************************************************************************/
-/* Border configuration.							*/
-/********************************************************************************/
-
-Border_status_thickness: 2px;
-
-Border_success: Border_status_thickness solid Back_success_head;
-Border_warning: Border_status_thickness solid Back_warning_head;
-Border_failure: Border_status_thickness solid Back_failure_head;
-
-Border_floatbox: 1px solid #666;
-
 
 /********************************************************************************/
 /* Font configuration.								*/
 /********************************************************************************/
 
 Font_root:	0.625em sans-serif;
-Font_headline:	bold 1.4em sans-serif;
 Font_title:	bold 1.8em sans-serif;
-Font_bodytext:	inherit serif;
+
+Font_box_head:	bold 1.3em sans-serif;
+Font_box_body:	1.3em sans-serif;
 
 
 /********************************************************************************/
 /* Box configuration.								*/
 /********************************************************************************/
 
-Vmargin_box:	2em;
-Radius_box:	5px;
-Shadow_box:	2px 2px 3px Colour_shadow;
+Vmargin_box:	30px;
+Radius_box:	4px;
+Shadow_box:	1px 1px 3px Colour_shadow;
 
-Padding_box_head: 0.125em 0.5em;
+Padding_box_head: 0.2em 0.5em;
 Padding_box_body: 1em;
+
+Border_box: 1px solid #666;
 

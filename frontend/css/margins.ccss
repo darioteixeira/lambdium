@@ -1,39 +1,16 @@
-.floatbox
-	{
-	margin-bottom: Vmargin_box;
-	border: Border_floatbox;
-	-moz-box-shadow: Shadow_box;
-	-moz-border-radius: Radius_box;
-	}
+/********************************************************************************/
+/* Margins.ccss: configuration of the boxes on the margin (nav and context)	*/
+/********************************************************************************/
 
-.floatbox_head
-	{
-	padding: Padding_box_head;
-	text-align: center;
-	font: Font_headline;
-	color: Colour_floatbox_head;
-	background: Back_floatbox_head;
-	}
-
-.floatbox_body
-	{
-	padding: Padding_box_body;
-	border-top: Border_floatbox;
-	-moz-border-radius-bottomleft: Radius_box;
-	-moz-border-radius-bottomright: Radius_box;
-	color: Colour_floatbox_body;
-	background: Back_floatbox_body;
-	}
-
-.floatbox input[type="text"],
-.floatbox input[type="password"],
-.floatbox input[type="submit"]
+.box input[type="text"],
+.box input[type="password"],
+.box input[type="submit"]
 	{
 	width: 100%;
 	margin-bottom: 0.5em;
 	}
 
-.floatbox input[type="submit"]
+.box input[type="submit"]
 	{
 	margin-top: 0.5em;
 	}

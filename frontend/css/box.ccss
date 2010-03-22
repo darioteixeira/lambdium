@@ -1,0 +1,36 @@
+/********************************************************************************/
+/* Box.ccss: generic configuration of boxes.					*/
+/********************************************************************************/
+
+.box
+	{
+	margin-bottom: Vmargin_box;
+	border: Border_box;
+	-moz-box-shadow: Shadow_box;
+	-moz-border-radius: Radius_box;
+	}
+
+.box_head
+	{
+	font: Font_box_head;
+	text-align: center;
+	padding: Padding_box_head;
+	color: Colour_box_head;
+	background: Back_box_head;
+	}
+
+.box_body
+	{
+	font: Font_box_body;
+	padding: Padding_box_body;
+	-moz-border-radius-bottomleft: Radius_box;
+	-moz-border-radius-bottomright: Radius_box;
+	color: Colour_box_body;
+	background: Back_box_body;
+	}
+
+.box_head + .box_body
+	{
+	border-top: Border_box;
+	}
+

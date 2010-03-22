@@ -1,3 +1,7 @@
+/********************************************************************************/
+/* Header.ccss: header configuration.						*/
+/********************************************************************************/
+
 #header > h1
 	{
 	font: Font_title;
@@ -5,7 +9,7 @@
 	margin-right: Fullwidth_RC;
 	padding-left: 120px;		// Width of logo
 	line-height: 120px;		// Height of logo
-	color: Colour_header_fore;
-	background: Colour_header_back url('images/lambdium-logo.png') no-repeat;
+	color: Colour_header;
+	background: Back_header url('images/lambdium-logo.png') no-repeat;
 	}
 

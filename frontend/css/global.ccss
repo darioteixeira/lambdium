@@ -1,11 +1,14 @@
-/* Layout */
+/********************************************************************************/
+/* Global.ccss: global configuration and overall layout.			*/
+/********************************************************************************/
 
 body
 	{
-	margin: Margin_body;
 	font: Font_root;
+	margin: Margin_root;
 	line-height: 1.5;
-	background: Colour_body;
+	color: Colour_root;
+	background: Back_root;
 	}
 
 #root
@@ -25,19 +28,19 @@ body
 
 #header
 	{
-	padding-bottom: Vmargin_header;
+	margin-bottom: Vmargin_header;
 	}
 
 #footer
 	{
 	clear: both;
-	padding-top: Vmargin_footer;
 	}
 
 #core
 	{
 	position: relative;
 	float: left;
+	margin-bottom: Vmargin_footer;
 	padding: 0 Padding_CCR 0 Padding_CCL;
 	width: 100%;
 	}

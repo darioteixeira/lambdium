@@ -1,34 +1,13 @@
-#core_status
-	{
-	margin-bottom: Vmargin_box;
-	-moz-box-shadow: Shadow_box;
-	-moz-border-radius: Radius_box;
-	}
+/********************************************************************************/
+/* Core.ccss: configuration of the core area.					*/
+/********************************************************************************/
 
-#core_status_head
-	{
-	padding: Padding_box_head;
-	text-align: center;
-	font: Font_headline;
-	color: Colour_status_head;
-	}
+#status_success > .box_head {background: Back_success_head;}
+#status_success > .box_body {background: Back_success_body;}
 
-#core_status_body
-	{
-	padding: Padding_box_body;
-	-moz-border-radius-bottomleft: Radius_box;
-	-moz-border-radius-bottomright: Radius_box;
-	}
+#status_warning > .box_head {background: Back_warning_head;}
+#status_warning > .box_body {background: Back_warning_body;}
 
-.core_success {border: Border_success;}
-.core_success > #core_status_head {background: Back_success_head;}
-.core_success > #core_status_body {background: Back_success_body;}
-
-.core_warning {border: Border_warning;}
-.core_warning > #core_status_head {background: Back_warning_head;}
-.core_warning > #core_status_body {background: Back_warning_body;}
-
-.core_failure {border: Border_failure;}
-.core_failure > #core_status_head {background: Back_failure_head;}
-.core_failure > #core_status_body {background: Back_failure_body;}
+#status_failure > .box_head {background: Back_failure_head;}
+#status_failure > .box_body {background: Back_failure_body;}
 
