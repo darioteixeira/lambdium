@@ -15,6 +15,16 @@ open Prelude
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
 
+let output_box (id, head, body) =
+	let head' = match head with
+		| [] -> []
+		| xs -> [h1 ~a:[a_class ["box_head"]] xs]
+	and body' = match body with
+		| [] -> []
+		| xs -> [div ~a:[a_class ["box_body"]] xs]
+	in div ~a:[a_id id; a_class ["box"]] (head' @ body')
+
+
 let login_form (username, (password, remember)) =
 	[
 	fieldset
@@ -42,12 +52,12 @@ let logout_form enter_global =
 
 
 let output_credits _ _ =
-	let contents = [p [pcdata "Welcome to the Lambdium forum!"]]
-	in Lwt.return ("credits_box", "About", contents)
+	let body = [p [pcdata "Welcome to the Lambdium forum!"]]
+	in Lwt.return ("credits_box", [pcdata "About"], body)
 
 
 let output_main_menu _ sp =
-	let contents =
+	let body =
 		[
 		ul ~a:[a_class ["menu"]]
 			(li [Eliom_predefmod.Xhtml.a !!Services.view_stories sp [pcdata "View all stories"] ()])
@@ -57,7 +67,7 @@ let output_main_menu _ sp =
 			li [Eliom_predefmod.Xhtml.a !!Services.add_user sp [pcdata "Create new account"] ()]
 			]
 		]
-	in Lwt.return ("main_menu", "Main Menu", contents)
+	in Lwt.return ("main_menu", [pcdata "Main Menu"], body)
 
 
 let output_user_menu maybe_login sp =
@@ -81,9 +91,8 @@ let output_user_menu maybe_login sp =
 		and public_fragment () = []
 		in match maybe_login with
 			| Some login	-> personal_fragment login
-			| None		-> public_fragment () in
-	let contents = session_fragment @ varying_fragment
-	in Lwt.return ("user_menu", "User Menu", contents)
+			| None		-> public_fragment ()
+	in Lwt.return ("user_menu", [pcdata "User Menu"], session_fragment @ varying_fragment)
 
 
 let output_header _ _ =
@@ -91,23 +100,15 @@ let output_header _ _ =
 
 
 let output_footer _ sp =
-	Lwt.return
+	let body =
 		[
-		h1 [pcdata "Powered by:"];
 		ul (li [Eliom_predefmod.Xhtml.a External.lambdium sp [External.lambdium_img sp] ()])
 			[
 			li [Eliom_predefmod.Xhtml.a External.ocsigen sp [External.ocsigen_img sp] ()];
 			li [Eliom_predefmod.Xhtml.a External.ocaml sp [External.ocaml_img sp] ()];
 			]
 		]
-
-
-let output_floatbox (id, header, contents) =
-	div ~a:[a_id id; a_class ["floatbox"]]
-		[
-		h1 ~a:[a_class ["floatbox_header"]] [pcdata header];
-		div ~a:[a_class ["floatbox_body"]] contents
-		]
+	in Lwt.return [output_box ("footer", [pcdata "Powered by:"], body)]
 
 
 let base_page ~sp ~page_title ~page_content ~page_content_id =
@@ -126,20 +127,14 @@ let base_page ~sp ~page_title ~page_content ~page_content_id =
 
 let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
 	let core_status = match Status.get sp with
-		| Some (stat, head, body) ->
-			let head' = h1 ~a:[a_id "core_status_head"] head
-			and body' = match body with
-				| [] -> []
-				| xs -> [div ~a:[a_id "core_status_body"] xs]
-			in [div ~a:[a_id "core_status"; a_class ["core_" ^ (Status.string_of_stat stat)]] (head' :: body')]
-		| None ->
-			[] in
+		| Some (stat, head, body) -> [output_box ("status_" ^ (Status.string_of_stat stat), head, body)]
+		| None -> [] in
 	let page_content =
 		[
 		div ~a:[a_id "header"] header;
 		div ~a:[a_id "core"] (core_status @ core);
-		div ~a:[a_id "nav"] (List.map output_floatbox nav);
-		div ~a:[a_id "context"] (List.map output_floatbox context);
+		div ~a:[a_id "nav"] (List.map output_box nav);
+		div ~a:[a_id "context"] (List.map output_box context);
 		div ~a:[a_id "footer"] footer;
 		]
 	in base_page ~sp ~page_title ~page_content ~page_content_id:"root"
