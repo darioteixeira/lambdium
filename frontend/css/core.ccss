@@ -1,27 +1,34 @@
 #core_status
 	{
-	padding: 0.5em;
-	margin-bottom: 1em;
+	margin-bottom: Vmargin_box;
+	-moz-box-shadow: Shadow_box;
+	-moz-border-radius: Radius_box;
+	}
+
+#core_status_head
+	{
+	padding: Padding_box_head;
 	text-align: center;
 	font: Font_headline;
-	color: Core_fore;
+	color: Colour_status_head;
 	}
 
-.core_success
+#core_status_body
 	{
-	background: Core_back_success;
-	border: Border_success;
+	padding: Padding_box_body;
+	-moz-border-radius-bottomleft: Radius_box;
+	-moz-border-radius-bottomright: Radius_box;
 	}
 
-.core_warning
-	{
-	background: Core_back_warning;
-	border: Border_warning;
-	}
+.core_success {border: Border_success;}
+.core_success > #core_status_head {background: Back_success_head;}
+.core_success > #core_status_body {background: Back_success_body;}
 
-.core_failure
-	{
-	background: Core_back_failure;
-	border: Border_failure;
-	}
+.core_warning {border: Border_warning;}
+.core_warning > #core_status_head {background: Back_warning_head;}
+.core_warning > #core_status_body {background: Back_warning_body;}
+
+.core_failure {border: Border_failure;}
+.core_failure > #core_status_head {background: Back_failure_head;}
+.core_failure > #core_status_body {background: Back_failure_body;}
 

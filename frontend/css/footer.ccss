@@ -1,11 +1,11 @@
 #footer > h1
 	{
-	margin-left: LC_fullwidth;
-	margin-right: RC_fullwidth;
+	margin-left: Fullwidth_LC;
+	margin-right: Fullwidth_RC;
 	text-align: center;
 	font: Font_headline;
-	color: Color_footer_fore;
-	background: Color_footer_back;
+	color: Colour_footer_fore;
+	background: Colour_footer_back;
 	}
 
 #footer > ul

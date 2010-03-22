@@ -6,72 +6,96 @@
 /* Layout configuration.							*/
 /********************************************************************************/
 
-Body_margin: 10px;
+Margin_body: 10px;
 
-LC_width: 160px;
-LCL_padding: 0px;
-LCR_padding: 30px;
+Width_LC: 160px;
+Padding_LCL: 0px;
+Padding_LCR: 30px;
 
-RC_width: 180px;
-RCL_padding: 30px;
-RCR_padding: 0px;
+Width_RC: 180px;
+Padding_RCL: 30px;
+Padding_RCR: 0px;
 
-CC_maxwidth: 300px;
-CCL_padding: 0px;
-CCR_padding: 0px;
+Maxwidth_CC: 300px;
+Padding_CCL: 0px;
+Padding_CCR: 0px;
 
-Header_separation: 20px;
-Footer_separation: 20px;
-Floatbox_separation: 20px;
+Vmargin_header: 40px;
+Vmargin_footer: 20px;
 
 
 /********************************************************************************/
-/* Computed values.								*/
+/* Layout configuration: computed values.					*/
 /********************************************************************************/
 
-LC_padding: (LCL_padding + LCR_padding);
-RC_padding: (RCL_padding + RCR_padding);
-CC_padding: (CCL_padding + CCR_padding);
+Padding_LC: (Padding_LCL + Padding_LCR);
+Padding_RC: (Padding_RCL + Padding_RCR);
+Padding_CC: (Padding_CCL + Padding_CCR);
 
-LC_fullwidth: (LC_width + LCL_padding + LCR_padding);
-RC_fullwidth: (RC_width + RCL_padding + RCR_padding);
+Fullwidth_LC: (Width_LC + Padding_LCL + Padding_LCR);
+Fullwidth_RC: (Width_RC + Padding_RCL + Padding_RCR);
 
 
 /********************************************************************************/
 /* Colour scheme configuration.							*/
 /********************************************************************************/
 
-Color_page: #fff;
-Color_key: #5b8ba6;
-Color_floatbox: #eee;
+Colour_fancy: #5b8ba6;
+Colour_body: #fff;
+Colour_shadow: #666;
 
-Color_header_fore: Color_key;
-Color_header_back: Color_page;
+Colour_header_fore: Colour_fancy;
+Colour_header_back: Colour_body;
+Colour_footer_fore: Colour_body;
+Colour_footer_back: Colour_fancy;
 
-Color_footer_fore: Color_page;
-Color_footer_back: Color_key;
+Colour_status_head: #fff;
 
-Core_fore: #fff;
-Core_back_success: #007f00;
-Core_back_warning: #9f7f00;
-Core_back_failure: #7f0000;
+Back_success_head: #007f00;
+Back_success_body: #afefaf;
+Back_warning_head: #9f5f00;
+Back_warning_body: #ffef9f;
+Back_failure_head: #7f0000;
+Back_failure_body: #efafaf;
+
+Colour_floatbox_head: #fff;
+Colour_floatbox_body: #000;
+
+Back_floatbox_head: Colour_fancy;
+Back_floatbox_body: #f9f9f9;
 
 
 /********************************************************************************/
 /* Border configuration.							*/
 /********************************************************************************/
 
-Border_success: none;
-Border_warning: none;
-Border_failure: none;
+Border_status_thickness: 2px;
+
+Border_success: Border_status_thickness solid Back_success_head;
+Border_warning: Border_status_thickness solid Back_warning_head;
+Border_failure: Border_status_thickness solid Back_failure_head;
+
+Border_floatbox: 1px solid #666;
 
 
 /********************************************************************************/
 /* Font configuration.								*/
 /********************************************************************************/
 
-Font_root: 0.625em sans-serif;
-Font_headline: bold 1.4em sans-serif;
-Font_title: bold 1.8em sans-serif;
-Font_bodytext: inherit serif;
+Font_root:	0.625em sans-serif;
+Font_headline:	bold 1.4em sans-serif;
+Font_title:	bold 1.8em sans-serif;
+Font_bodytext:	inherit serif;
+
+
+/********************************************************************************/
+/* Box configuration.								*/
+/********************************************************************************/
+
+Vmargin_box:	2em;
+Radius_box:	5px;
+Shadow_box:	2px 2px 3px Colour_shadow;
+
+Padding_box_head: 0.125em 0.5em;
+Padding_box_body: 1em;
 

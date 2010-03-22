@@ -1,11 +1,11 @@
 #header > h1
 	{
 	font: Font_title;
-	margin-left: LC_fullwidth;
-	margin-right: RC_fullwidth;
+	margin-left: Fullwidth_LC;
+	margin-right: Fullwidth_RC;
 	padding-left: 120px;		// Width of logo
 	line-height: 120px;		// Height of logo
-	color: Color_header_fore;
-	background: Color_header_back url('images/lambdium-logo.png') no-repeat;
+	color: Colour_header_fore;
+	background: Colour_header_back url('images/lambdium-logo.png') no-repeat;
 	}
 

@@ -2,43 +2,43 @@
 
 body
 	{
-	margin: Body_margin;
+	margin: Margin_body;
 	font: Font_root;
 	line-height: 1.5;
-	background: Color_page;
+	background: Colour_body;
 	}
 
 #root
 	{
 	margin: 0 auto;
-	padding-left: LC_fullwidth;
-	padding-right: RC_fullwidth + CC_padding;
-	min-width: LC_fullwidth + CC_padding;
-	max-width: LC_fullwidth + RC_fullwidth + CC_padding + CC_maxwidth;
+	padding-left: Fullwidth_LC;
+	padding-right: Fullwidth_RC + Padding_CC;
+	min-width: Fullwidth_LC + Padding_CC;
+	max-width: Fullwidth_LC + Fullwidth_RC + Padding_CC + Maxwidth_CC;
 	}
 
 #header, #footer
 	{
-	margin-left: -1 * (LC_fullwidth);
-	margin-right: -1 * (RC_fullwidth + CC_padding);
+	margin-left: -1 * (Fullwidth_LC);
+	margin-right: -1 * (Fullwidth_RC + Padding_CC);
 	}
 
 #header
 	{
-	padding-bottom: Header_separation;
+	padding-bottom: Vmargin_header;
 	}
 
 #footer
 	{
 	clear: both;
-	padding-top: Footer_separation;
+	padding-top: Vmargin_footer;
 	}
 
 #core
 	{
 	position: relative;
 	float: left;
-	padding: 0 CCR_padding 0 CCL_padding;
+	padding: 0 Padding_CCR 0 Padding_CCL;
 	width: 100%;
 	}
 
@@ -46,9 +46,9 @@ body
 	{
 	position: relative;
 	float: left;
-	width: LC_width;
-	padding: 0 LCR_padding 0 LCL_padding;	
-	right: LC_fullwidth + CC_padding;
+	width: Width_LC;
+	padding: 0 Padding_LCR 0 Padding_LCL;	
+	right: Fullwidth_LC + Padding_CC;
 	margin-left: -100%;
 	}
 
@@ -56,8 +56,8 @@ body
 	{
 	position: relative;
 	float: left;
-	width: RC_width;
-	padding: 0 RCR_padding 0 RCL_padding;
+	width: Width_RC;
+	padding: 0 Padding_RCR 0 Padding_RCL;
 	margin-right: -100%;
 	}
 

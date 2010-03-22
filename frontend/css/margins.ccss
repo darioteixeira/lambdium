@@ -1,21 +1,28 @@
 .floatbox
 	{
-	margin-bottom: Floatbox_separation;
-	background: Color_floatbox;
+	margin-bottom: Vmargin_box;
+	border: Border_floatbox;
+	-moz-box-shadow: Shadow_box;
+	-moz-border-radius: Radius_box;
 	}
 
-.floatbox_header
+.floatbox_head
 	{
-	margin-bottom: 0.5em;
+	padding: Padding_box_head;
 	text-align: center;
 	font: Font_headline;
-	color: Color_floatbox;
-	background: Color_key;
+	color: Colour_floatbox_head;
+	background: Back_floatbox_head;
 	}
 
 .floatbox_body
 	{
-	padding: 0 0.5em 0.5em;
+	padding: Padding_box_body;
+	border-top: Border_floatbox;
+	-moz-border-radius-bottomleft: Radius_box;
+	-moz-border-radius-bottomright: Radius_box;
+	color: Colour_floatbox_body;
+	background: Back_floatbox_body;
 	}
 
 .floatbox input[type="text"],
