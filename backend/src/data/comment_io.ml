@@ -10,6 +10,7 @@ open Lwt
 open XHTML.M
 open Eliom_parameters
 open Prelude
+open Document
 
 
 (********************************************************************************)
@@ -48,16 +49,24 @@ let output_fresh = output_full
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-let form_for_fresh ~sid ~title ~body_src (enter_sid, (enter_title, enter_body)) =
-	Lwt.return
+let form_for_incipient ~sid ?comment (enter_sid, (enter_title, (enter_body_mrk, (enter_body_src)))) =
+	let (title, body_mrk, body_src) = match comment with
+		| Some c -> (Some c#title, Some c#body_mrk, Some c#body_src)
+		| None	 -> (None, None, None)
+	in Lwt.return
 		[fieldset
 			[
 			legend [pcdata "Enter comment:"];
 
 			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:sid Story.Id.to_string ();
-			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Enter title:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_title"] ~name:enter_title ~value:title ~rows:1 ~cols:80 ();
-			label ~a:[a_class ["textarea_label"]; a_for "enter_body"] [pcdata "Enter body:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body"] ~name:enter_body ~value:body_src ~rows:10 ~cols:80 ();
+
+			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Comment title:"];
+			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_title"] ~input_type:`Text ~name:enter_title ?value:title ();
+
+			label ~a:[a_class ["textarea_label"]; a_for "enter_body_mrk"] [pcdata "Markup:"];
+			Markup.select ~a:[a_id "enter_body_mrk"] ~name:enter_body_mrk ?value:body_mrk ();
+
+			label ~a:[a_class ["textarea_label"]; a_for "enter_body_src"] [pcdata "Comment body:"];
+			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body_src"] ~name:enter_body_src ?value:body_src ~rows:10 ~cols:80 ();
 			]]
 

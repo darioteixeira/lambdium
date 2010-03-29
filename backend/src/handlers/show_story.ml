@@ -18,9 +18,10 @@ open Page
 let output_core sid maybe_login sp =
 	try_lwt
 		Database.get_story_with_comments sid >>= fun (story, comments) ->
-		Lwt.return [Story_io.output_full maybe_login sp story comments]
+		Story_io.output_full maybe_login sp story comments >>= fun story_out ->
+		Lwt.return [story_out]
 	with
-		| Database.Cannot_get_story ->
+		Database.Cannot_get_story ->
 			Status.failure ~sp [pcdata "Cannot find specified story!"] [];
 			Lwt.return []
 

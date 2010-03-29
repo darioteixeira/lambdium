@@ -35,12 +35,12 @@ val output_fresh:
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-val form_for_fresh:
+val form_for_incipient:
 	sid:Story.Id.t ->
-	title:string ->
-	body_src: string ->
+	?comment:Comment.incipient_t ->
 	[< Story.Id.t Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
-	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name) ->
+	([< `One of Document.Markup.t ] Eliom_parameters.param_name *
+	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name)) ->
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
 

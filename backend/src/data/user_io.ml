@@ -38,7 +38,7 @@ let output_full sp user timezone stories comments =
 
 		h1 [pcdata "User timezone:"];
 
-		Timezone_io.output_full timezone;
+		Timezone.output_full timezone;
 
 		h1 [pcdata "List of stories:"];
 		(match stories with
@@ -60,14 +60,10 @@ let output_full sp user timezone stories comments =
 (**	{1 Input-related function}						*)
 (********************************************************************************)
 
-let option_of_tz default tz =
-	let correct_tz tz = match default with
-		| Some x -> tz#tid = x#tid
-		| None	 -> tz#tid = Timezone.utc#tid
-	in Eliom_predefmod.Xhtml.Option ([], Timezone.make_handle tz#tid, Some (Timezone_io.describe tz), correct_tz tz)
-
-
-let form_for_fresh ?nick ?fullname ?timezone (enter_nick, (enter_fullname, (enter_password, (enter_password2, enter_timezone)))) =
+let form_for_incipient ?user (enter_nick, (enter_fullname, (enter_password, (enter_password2, enter_timezone)))) =
+	let (nick, fullname, timezone) = match user with
+		| Some u -> (Some u#nick, Some u#fullname, Some u#timezone)
+		| None	 -> (None, None, None) in
 	Database.get_timezones () >>= fun timezones ->
 	Lwt.return
 		[fieldset
@@ -83,12 +79,7 @@ let form_for_fresh ?nick ?fullname ?timezone (enter_nick, (enter_fullname, (ente
 			label ~a:[a_class ["input_label"]; a_for "enter_password2"] [pcdata "Confirm password:"];
 			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_password2"] ~input_type:`Password ~name:enter_password2 ();
 			label ~a:[a_class ["input_label"]; a_for "enter_timezone"] [pcdata "Choose timezone:"];
-			Eliom_predefmod.Xhtml.user_type_select
-				Timezone.to_string
-				~a:[a_id "enter_timezone"]
-				~name:enter_timezone
-				(option_of_tz timezone Timezone.utc)
-				(List.map (option_of_tz timezone) timezones)
+			Timezone.select ~a:[a_id "enter_timezone"] ~name:enter_timezone ?value:timezone timezones;
 			]]
 
 
@@ -117,11 +108,6 @@ let form_for_changed_settings ~user (enter_fullname, enter_timezone) =
 			label ~a:[a_class ["input_label"]; a_for "enter_fullname"] [pcdata "Enter full name:"];
 			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_fullname"] ~input_type:`Text ~name:enter_fullname ~value:user#fullname ();
 			label ~a:[a_class ["input_label"]; a_for "enter_timezone"] [pcdata "Choose timezone:"];
-			Eliom_predefmod.Xhtml.user_type_select
-				Timezone.to_string
-				~a:[a_id "enter_timezone"]
-				~name:enter_timezone
-				(option_of_tz (Some user#timezone) Timezone.utc)
-				(List.map (option_of_tz (Some user#timezone)) timezones)
+			Timezone.select ~a:[a_id "enter_timezone"] ~name:enter_timezone ~value:user#timezone timezones;
 			]]
 

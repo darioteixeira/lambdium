@@ -51,20 +51,30 @@ let logout_form enter_global =
 	]
 
 
-let output_credits _ _ =
-	let body = [p [pcdata "Welcome to the Lambdium forum!"]]
-	in Lwt.return ("credits_box", [pcdata "About"], body)
+let output_credits _ sp =
+	let body =
+		[
+		p [pcdata "The Lambdium forum is powered by:"];
+		ul (li [Eliom_predefmod.Xhtml.a External.lambdium sp [External.lambdium_img sp] ()])
+			[
+			li [Eliom_predefmod.Xhtml.a External.ocsigen sp [External.ocsigen_img sp] ()];
+			li [Eliom_predefmod.Xhtml.a External.ocaml sp [External.ocaml_img sp] ()];
+			]
+		]
+	in Lwt.return ("credits", [pcdata "About"], body)
 
 
 let output_main_menu _ sp =
+	let item svc txt =
+		li ~a:[a_class ["menu_item"]] [Eliom_predefmod.Xhtml.a svc sp [pcdata txt] ()] in
 	let body =
 		[
 		ul ~a:[a_class ["menu"]]
-			(li [Eliom_predefmod.Xhtml.a !!Services.view_stories sp [pcdata "View all stories"] ()])
+			(item !!Services.view_stories "View all stories")
 			[
-			li [Eliom_predefmod.Xhtml.a !!Services.view_users sp [pcdata "View all users"] ()];
-			li [Eliom_predefmod.Xhtml.a !!Services.add_story sp [pcdata "Submit new story"] ()];
-			li [Eliom_predefmod.Xhtml.a !!Services.add_user sp [pcdata "Create new account"] ()]
+			item !!Services.view_users "View all users";
+			item !!Services.add_story "Submit new story";
+			item !!Services.add_user "Create new account";
 			]
 		]
 	in Lwt.return ("main_menu", [pcdata "Main Menu"], body)
@@ -100,15 +110,7 @@ let output_header _ _ =
 
 
 let output_footer _ sp =
-	let body =
-		[
-		ul (li [Eliom_predefmod.Xhtml.a External.lambdium sp [External.lambdium_img sp] ()])
-			[
-			li [Eliom_predefmod.Xhtml.a External.ocsigen sp [External.ocsigen_img sp] ()];
-			li [Eliom_predefmod.Xhtml.a External.ocaml sp [External.ocaml_img sp] ()];
-			]
-		]
-	in Lwt.return [output_box ("footer", [pcdata "Powered by:"], body)]
+	Lwt.return [h1 [pcdata "Footer"]]
 
 
 let base_page ~sp ~page_title ~page_content ~page_content_id =
@@ -125,14 +127,22 @@ let base_page ~sp ~page_title ~page_content ~page_content_id =
 		(body [div ~a:[a_id page_content_id] page_content]))
 
 
-let regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer =
-	let core_status = match Status.get sp with
+let regular_page ~sp ~page_title ~header ~core_body ~nav ~context ~footer =
+	let status = match Status.get sp with
 		| Some (stat, head, body) -> [output_box ("status_" ^ (Status.string_of_stat stat), head, body)]
-		| None -> [] in
+		| None -> []
+	and core = match core_body with
+		| [] ->
+			[]
+		| xs ->
+			[
+			h1 ~a:[a_id "core_head"] [pcdata page_title];
+			div ~a:[a_id "core_body"] core_body;
+			] in
 	let page_content =
 		[
 		div ~a:[a_id "header"] header;
-		div ~a:[a_id "core"] (core_status @ core);
+		div ~a:[a_id "core"] (status @ core);
 		div ~a:[a_id "nav"] (List.map output_box nav);
 		div ~a:[a_id "context"] (List.map output_box context);
 		div ~a:[a_id "footer"] footer;
@@ -158,15 +168,19 @@ let regular_handler ~maybe_login ~sp ~page_title ?(output_core = fun _ -> Lwt.re
 	credits_thread >>= fun credits ->
 	main_menu_thread >>= fun main_menu ->
 	user_menu_thread >>= fun user_menu ->
-	core_thread >>= fun core ->
+	core_thread >>= fun core_body ->
 	context_thread >>= fun custom_context ->
 	let nav = [main_menu; user_menu]
 	and context = [credits] @ custom_context
-	in Lwt.return (regular_page ~sp ~page_title ~header ~core ~nav ~context ~footer)
+	in Lwt.return (regular_page ~sp ~page_title ~header ~core_body ~nav ~context ~footer)
 
 
 (********************************************************************************)
-(**	{2 Public functions and values}						*)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
+(********************************************************************************)
+(**	{2 Handlers}								*)
 (********************************************************************************)
 
 let login_agnostic_handler ~sp ~page_title ?output_core ?output_context () =

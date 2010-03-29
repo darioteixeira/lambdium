@@ -10,6 +10,7 @@ open Lwt
 open XHTML.M
 open Eliom_parameters
 open Prelude
+open Document
 open Page
 
 
@@ -17,12 +18,12 @@ open Page
 (**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let rec step1_handler sp () (sid, (title, body_src)) =
+let rec step1_handler sp () (sid, (title, (body_mrk, body_src))) =
 	let output_core login sp =
-		Document.parse_composition_exc body_src >>= fun (body_doc, _) ->
+		Document.parse_composition_exc ~markup:body_mrk body_src >>= fun (body_doc, _) ->
 		let body_out = Document.output_of_composition ~sp ~path:[] body_doc in
 		let author = Login.to_user login in
-		let comment = Comment.make_fresh sid author title body_src body_doc body_out in
+		let comment = Comment.make_fresh sid author title body_mrk body_src body_doc body_out in
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_comment_fallback
@@ -31,7 +32,7 @@ let rec step1_handler sp () (sid, (title, body_src)) =
 		Forms.Previewable.make_form
 			~service: step2_service
 			~sp
-			~content: (Comment_io.form_for_fresh ~sid ~title ~body_src)
+			~content: (Comment_io.form_for_incipient ~sid ~comment:(comment :> Comment.incipient_t))
 			() >>= fun form ->
 		Lwt.return [Comment_io.output_fresh (Some login) sp comment; form]
 	in Page.login_enforced_handler

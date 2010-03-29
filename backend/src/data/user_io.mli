@@ -28,10 +28,8 @@ val output_handle:
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-val form_for_fresh:
-	?nick:string ->
-	?fullname:string ->
-	?timezone:Timezone.handle_t ->
+val form_for_incipient:
+	?user:User.incipient_t ->
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
@@ -46,7 +44,7 @@ val form_for_changed_credentials:
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
 
 val form_for_changed_settings:
-	user: < fullname: string; timezone: Timezone.handle_t; .. > ->
+	user:< fullname: string; timezone: Timezone.handle_t; .. > ->
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
 	[< `One of Timezone.handle_t ] Eliom_parameters.param_name ->
 	[> `Fieldset ] XHTML.M.elt list Lwt.t

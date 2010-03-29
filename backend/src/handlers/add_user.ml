@@ -17,7 +17,7 @@ open Page
 (**	{1 Wizard steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ?nick ?fullname ?timezone sp () () =
+let rec step1_handler ?user sp () () =
 	let output_core maybe_login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -28,7 +28,7 @@ let rec step1_handler ?nick ?fullname ?timezone sp () () =
 			~label: "Add user"
 			~service: step2_service
 			~sp
-			~content: (User_io.form_for_fresh ?nick ?fullname ?timezone)
+			~content: (User_io.form_for_incipient ?user)
 			() >>= fun form ->
 		Lwt.return [form]
 	in Page.login_agnostic_handler
@@ -42,7 +42,8 @@ and step2_handler sp () (nick, (fullname, (password, (password2, timezone)))) =
 	if password <> password2
 	then begin
 		Status.failure ~sp [pcdata "Passwords do not match!"] [];
-		step1_handler ~nick ~fullname ~timezone sp () ()
+		let user = User.make_incipient nick fullname timezone
+		in step1_handler ~user sp () ()
 	end
 	else
 		try_lwt

@@ -10,6 +10,7 @@ open Lwt
 open XHTML.M
 open Eliom_parameters
 open Prelude
+open Document
 open Page
 
 
@@ -17,7 +18,7 @@ open Page
 (**	{1 Wizards steps}							*)
 (********************************************************************************)
 
-let rec step1_handler ?token ?title ?intro_src ?body_src sp () () =
+let rec step1_handler ?token ?story sp () () =
 	let output_core login sp =
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
@@ -28,7 +29,7 @@ let rec step1_handler ?token ?title ?intro_src ?body_src sp () () =
 			~label: "Preview"
 			~service: step2_service
 			~sp
-			~content: (Story_io.form_for_fresh ?title ?intro_src ?body_src)
+			~content: (Story_io.form_for_incipient ?story)
 			() >>= fun form ->
 		Lwt.return [form]
 	in Page.login_enforced_handler
@@ -38,31 +39,32 @@ let rec step1_handler ?token ?title ?intro_src ?body_src sp () () =
 		()
 
 
-and step2_handler ?token ~login sp () (title, (intro_src, body_src)) =
+and step2_handler ?token ~login sp () (title, (intro_mrk, (intro_src, (body_mrk, body_src)))) =
+	let make_incipient () = Story.make_incipient title intro_mrk intro_src body_mrk body_src in
 	(match token with
 		| Some t -> Lwt.return t
 		| None	 -> Uploader.request ~sp ~uid:(Login.uid login) ~limit:3) >>= fun token ->
-	Document.parse_composition intro_src >>= fun intro_res ->
-	Document.parse_manuscript body_src >>= fun body_res ->
+	Document.parse_composition ~markup:intro_mrk intro_src >>= fun intro_res ->
+	Document.parse_manuscript ~markup:body_mrk body_src >>= fun body_res ->
 	match (intro_res, body_res) with
 		| (`Okay (intro_doc, _), `Okay (body_doc, images)) ->
 			let path = Uploader.get_path token in
 			let intro_out = Document.output_of_composition ~sp ~path intro_doc in
 			let body_out = Document.output_of_manuscript ~sp ~path body_doc in
 			let author = Login.to_user login in
-			let story = Story.make_fresh author title intro_src intro_doc intro_out body_src body_doc body_out in
+			let story = Story.make_fresh author title intro_mrk intro_src intro_doc intro_out body_mrk body_src body_doc body_out in
 			if List.length images <> 0
 			then step3 ~token ~story ~login ~sp ~images
 			else step5 ~token ~story ~login ~sp
 		| (`Error intro_err, `Error body_err) ->
 			Status.failure ~sp [pcdata "Error in story intro and body:"] ([intro_err; body_err] :> XHTML.M.block XHTML.M.elt list);
-			step1_handler ~title ~intro_src ~body_src sp () ()
+			step1_handler ~token ~story:(make_incipient ()) sp () ()
 		| (`Error intro_err, _) ->
 			Status.failure ~sp [pcdata "Error in story intro:"] ([intro_err] :> XHTML.M.block XHTML.M.elt list);
-			step1_handler ~title ~intro_src ~body_src sp () ()
+			step1_handler ~token ~story:(make_incipient ()) sp () ()
 		| (_, `Error body_err) ->
 			Status.failure ~sp [pcdata "Error in story body:"] ([body_err] :> XHTML.M.block XHTML.M.elt list);
-			step1_handler ~title ~intro_src ~body_src sp () ()
+			step1_handler ~token ~story:(make_incipient ()) sp () ()
 
 
 and step3 ~token ~story ~login ~sp ~images =
@@ -93,7 +95,7 @@ and step4_handler ~token ~story ~login ~images sp () (action, files) =
 			Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 		| `Continue ->
 			Uploader.add_files images files token >>= fun _ ->
-			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src sp () ()
+			step1_handler ~token ~story:(story :> Story.incipient_t) sp () ()
 		| `Conclude ->
 			Uploader.add_files images files token >>= function
 				| true  -> step5 ?token ~story ~login ~sp
@@ -126,7 +128,7 @@ and step6_handler ~token ~story sp () (action, ()) =
 			Status.warning ~sp [pcdata "You have cancelled!"] [];
 			Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 		| `Continue ->
-			step1_handler ~token ~title:story#title ~intro_src:story#intro_src ~body_src:story#body_src sp () ()
+			step1_handler ~token ~story:(story :> Story.incipient_t) sp () ()
 		| `Conclude ->
 			try_lwt
 

@@ -7,6 +7,7 @@
 (********************************************************************************)
 
 open Prelude
+open Document
 
 
 (********************************************************************************)
@@ -31,7 +32,7 @@ val output_full:
 	Eliom_sessions.server_params ->
 	Story.full_t ->
 	Comment.full_t list ->
-	[> `Div ] XHTML.M.elt
+	[> `Div ] XHTML.M.elt Lwt.t
 
 val output_fresh:
 	?localiser:(Timestamp.t -> string) ->
@@ -45,14 +46,15 @@ val output_fresh:
 (**	{1 Input-related functions}						*)
 (********************************************************************************)
 
-val form_for_fresh:
-	?title:string ->
-	?intro_src:string ->
-	?body_src:string ->
+val form_for_incipient:
+	?story:Story.incipient_t ->
 	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
+	([< `One of Document.Markup.t ] Eliom_parameters.param_name *
 	([< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name *
-	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name) ->
+	([< `One of Document.Markup.t ] Eliom_parameters.param_name *
+	[< string Eliom_parameters.setoneradio ] Eliom_parameters.param_name))) ->
 	[> `Fieldset ] XHTML.M.elt list Lwt.t
+
 
 val form_for_images:
 	sp:Eliom_sessions.server_params ->

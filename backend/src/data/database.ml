@@ -219,10 +219,10 @@ let add_user user =
 let add_story ~output_maker story =
 	assert (Ocsigen_messages.warning "Database.add_story ()"; true);
 	let add dbh =
-		let (uid, title, intro_src, intro_xdoc, _intro_xout, body_src, body_xdoc, _body_xout) = Story.tuple_of_fresh story
+		let (uid, title, intro_xmrk, intro_src, intro_xdoc, _intro_xout, body_xmrk, body_src, body_xdoc, _body_xout) = Story.tuple_of_fresh story
 		and intro_xout = ""
 		and body_xout = ""
-		in PGSQL(dbh) "SELECT add_story ($uid, $title, $intro_src, $intro_xdoc, $intro_xout, $body_src, $body_xdoc, $body_xout)" >>= function
+		in PGSQL(dbh) "SELECT add_story ($uid, $title, $intro_xmrk, $intro_src, $intro_xdoc, $intro_xout, $body_xmrk, $body_src, $body_xdoc, $body_xout)" >>= function
 			| [Some sid] -> Lwt.return sid
 			| _	     -> Lwt.fail Cannot_add_story in
 	let edit dbh sid intro_xout body_xout =
@@ -244,9 +244,9 @@ let add_story ~output_maker story =
 let add_comment ~output_maker comment =
 	assert (Ocsigen_messages.warning "Database.add_comment ()"; true);
 	let add dbh =
-		let (sid, uid, title, body_src, body_xdoc, _body_xout) = Comment.tuple_of_fresh comment
+		let (sid, uid, title, body_xmrk, body_src, body_xdoc, _body_xout) = Comment.tuple_of_fresh comment
 		and body_xout = ""
-		in PGSQL(dbh) "SELECT add_comment ($sid, $uid, $title, $body_src, $body_xdoc, $body_xout)" >>= function
+		in PGSQL(dbh) "SELECT add_comment ($sid, $uid, $title, $body_xmrk, $body_src, $body_xdoc, $body_xout)" >>= function
 			| [Some cid] -> Lwt.return cid
 			| _	     -> Lwt.fail Cannot_add_comment in
 	let edit dbh cid body_xout =

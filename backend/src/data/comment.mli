@@ -8,6 +8,11 @@
 
 open Document
 
+
+(********************************************************************************)
+(**	{1 Type definitions}							*)
+(********************************************************************************)
+
 module Id : Id.ID32
 
 type handle_t =
@@ -28,6 +33,7 @@ type editable_t =
 	author: User.handle_t;
 	title: string;
 	timestamp: Timestamp.t;
+	body_mrk: Markup.t;
 	body_src: source_t;
 	body_out: output_t >
 
@@ -36,6 +42,7 @@ type fresh_t =
 	author: User.handle_t;
 	title: string;
 	timestamp: Timestamp.t;
+	body_mrk: Markup.t;
 	body_src: source_t;
 	body_doc: composition_t;
 	body_out: output_t >
@@ -45,9 +52,20 @@ type changed_t =
 	sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
+	body_mrk: Markup.t;
 	body_src: source_t;
 	body_doc: composition_t;
 	body_out: output_t >
+
+type incipient_t =
+	< title: string;
+	body_mrk: Markup.t;
+	body_src: source_t >
+
+
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
 
 val make_handle:
 	Id.t -> string ->
@@ -58,16 +76,20 @@ val make_full:
 	full_t
 
 val make_editable:
-	Id.t -> Story.Id.t -> User.handle_t -> string -> Timestamp.t -> source_t -> output_t ->
+	Id.t -> Story.Id.t -> User.handle_t -> string -> Timestamp.t -> Markup.t -> source_t -> output_t ->
 	editable_t
 
 val make_fresh:
-	Story.Id.t -> User.handle_t -> string -> source_t -> composition_t -> output_t ->
+	Story.Id.t -> User.handle_t -> string -> Markup.t -> source_t -> composition_t -> output_t ->
 	fresh_t
 
 val make_changed:
-	Id.t -> Story.Id.t -> User.handle_t -> string -> source_t -> composition_t -> output_t ->
+	Id.t -> Story.Id.t -> User.handle_t -> string -> Markup.t -> source_t -> composition_t -> output_t ->
 	changed_t
+
+val make_incipient:
+	string -> Markup.t -> source_t ->
+	incipient_t
 
 val handle_of_tuple:
 	(Id.t * string) ->
@@ -79,5 +101,5 @@ val full_of_tuple:
 
 val tuple_of_fresh:
 	fresh_t ->
-	(Story.Id.t * User.Id.t * string * string * string * string)
+	(Story.Id.t * User.Id.t * string * string * string * string * string)
 

@@ -6,6 +6,10 @@
 *)
 (********************************************************************************)
 
+(********************************************************************************)
+(**	{1 Type definitions}							*)
+(********************************************************************************)
+
 module Id : Id.ID32
 
 type handle_t =
@@ -34,6 +38,16 @@ type changed_settings_t =
 	fullname: string;
 	timezone: Timezone.handle_t >
 
+type incipient_t =
+	< nick: string;
+	fullname: string;
+	timezone: Timezone.handle_t >
+
+
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
 val make_handle:
 	Id.t -> string ->
 	handle_t
@@ -53,6 +67,10 @@ val make_changed_credentials:
 val make_changed_settings:
 	Id.t -> string -> Timezone.handle_t ->
 	changed_settings_t
+
+val make_incipient:
+	string -> string -> Timezone.handle_t ->
+	incipient_t
 
 val handle_of_tuple:
 	(Id.t * string) ->

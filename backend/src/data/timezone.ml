@@ -6,15 +6,26 @@
 *)
 (********************************************************************************)
 
+open XHTML.M
+
+
+(********************************************************************************)
+(**	{1 Type definitions}							*)
+(********************************************************************************)
+
 module Id = Id.Id32
 
-type handle_t =
-	< tid: Id.t option >
+type handle_t = < tid: Id.t option >
+type full_t = < tid: Id.t option; name: string >
 
-type full_t =
-	< tid: Id.t option;
-	name: string >
 
+(********************************************************************************)
+(**	{1 Public functions and values}						*)
+(********************************************************************************)
+
+(********************************************************************************)
+(**	{2 Constructors}							*)
+(********************************************************************************)
 
 let utc =
 	object
@@ -40,6 +51,10 @@ let full_of_tuple (tid, name) =
 	make_full tid name
 
 
+(********************************************************************************)
+(**	{2 (De)serialisers}							*)
+(********************************************************************************)
+
 let to_string tz = match tz#tid with
 	| None		-> "UTC"
 	| Some tz	-> Id.to_string tz
@@ -50,5 +65,35 @@ let of_string = function
 	| x		-> make_handle (Some (Id.of_string x))
 
 
+(********************************************************************************)
+(**	{2 Output-related functions}						*)
+(********************************************************************************)
+
+let output_full tz =
+	dl ~a:[a_class ["timezone_info"]]
+		(dt [pcdata "Name:"])
+		[
+		dd [pcdata tz#name];
+		]
+
+
+(********************************************************************************)
+(**	{2 Input-related functions}						*)
+(********************************************************************************)
+
 let param = Eliom_parameters.user_type ~of_string ~to_string
+
+
+let select ?a ~name ?value timezones =
+	let option_of_tz tz =
+		let is_selected = match value with
+			| Some v -> tz#tid = v#tid
+			| None	 -> tz#tid = utc#tid
+		in Eliom_predefmod.Xhtml.Option ([], make_handle tz#tid, Some (pcdata tz#name), is_selected)
+	in Eliom_predefmod.Xhtml.user_type_select
+		to_string
+		?a
+		~name
+		(option_of_tz utc)
+		(List.map option_of_tz timezones)
 

@@ -12,12 +12,15 @@ open Eliom_parameters
 let add_comment =
 	Story.Id.param "sid" **
 	Eliom_parameters.string "title" **
-	Eliom_parameters.string "body"
+	Document.Markup.param "body_mrk" **
+	Eliom_parameters.string "body_src"
 
 let add_story =
 	Eliom_parameters.string "title" **
-	Eliom_parameters.string "intro" **
-	Eliom_parameters.string "body"
+	Document.Markup.param "intro_mrk" **
+	Eliom_parameters.string "intro_src" **
+	Document.Markup.param "body_mrk" **
+	Eliom_parameters.string "body_src"
 
 let add_user =
 	Eliom_parameters.string "nick" **
