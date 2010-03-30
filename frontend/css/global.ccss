@@ -47,12 +47,13 @@ body
 
 #nav
 	{
-	position: relative;
 	float: left;
-	width: Width_LC;
-	padding: 0 Padding_LCR 0 Padding_LCL;	
+	position: relative;
 	right: Fullwidth_LC + Padding_CC;
+	width: Width_LC;
+	margin-bottom: Vmargin_footer;
 	margin-left: -100%;
+	padding: 0 Padding_LCR 0 Padding_LCL;	
 	}
 
 #context

@@ -53,15 +53,15 @@ let output_full ?localiser maybe_login sp story comments =
 				~sp
 				~content: (Comment_io.form_for_incipient ~sid:story#sid)
 				() >>= fun form ->
-			Lwt.return [form]
+			Lwt.return [div ~a:[a_id "comment_form"] [form]]
 		| None ->
 			Lwt.return [] in
 	form_maker () >>= fun form ->
 	Lwt.return (div ~a:[a_class ["story"; "story_full"]]
 		([
 		output_metadata maybe_login sp story;
-		(story#intro_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt);
-		(story#body_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt);
+		story#intro_out;
+		story#body_out;
 		div ~a:[a_class ["story_comments"]] (List.map (Comment_io.output_full ?localiser maybe_login sp) comments);
 		] @ form))
 
@@ -86,20 +86,33 @@ let form_for_incipient ?story (enter_title, (enter_intro_mrk, (enter_intro_src, 
 			[
 			legend [pcdata "Story contents:"];
 
-			label ~a:[a_class ["textarea_label"]; a_for "enter_title"] [pcdata "Story title:"];
-			Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_title"] ~input_type:`Text ~name:enter_title ?value:title ();
+			div ~a:[a_class ["field"; "area_field"]]
+				[
+				label ~a:[a_for "enter_title"] [pcdata "Story title:"];
+				Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_title"] ~input_type:`Text ~name:enter_title ?value:title ();
+				];
 
-			label ~a:[a_class ["textarea_label"]; a_for "enter_intro_mrk"] [pcdata "Markup:"];
-			Markup.select ~a:[a_id "enter_intro_mrk"] ~name:enter_intro_mrk ?value:intro_mrk ();
+			div ~a:[a_class ["field"; "area_field"]]
+				[
+				div ~a:[a_class ["markup_field"]]
+					[
+					label ~a:[a_for "enter_intro_mrk"] [pcdata "Markup:"];
+					Markup.select ~a:[a_id "enter_intro_mrk"] ~name:enter_intro_mrk ?value:intro_mrk ();
+					];
+				label ~a:[a_for "enter_intro_src"] [pcdata "Story introduction:"];
+				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro_src"] ~name:enter_intro_src ?value:intro_src ~rows:8 ~cols:80 ();
+				];
 
-			label ~a:[a_class ["textarea_label"]; a_for "enter_intro_src"] [pcdata "Story introduction:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro_src"] ~name:enter_intro_src ?value:intro_src ~rows:8 ~cols:80 ();
-
-			label ~a:[a_class ["textarea_label"]; a_for "enter_body_mrk"] [pcdata "Markup:"];
-			Markup.select ~a:[a_id "enter_body_mrk"] ~name:enter_body_mrk ?value:body_mrk ();
-
-			label ~a:[a_class ["textarea_label"]; a_for "enter_body_src"] [pcdata "Story body:"];
-			Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body_src"] ~name:enter_body_src ?value:body_src ~rows:16 ~cols:80 ()
+			div ~a:[a_class ["field"; "area_field"]]
+				[
+				div ~a:[a_class ["markup_field"]]
+					[
+					label ~a:[a_for "enter_body_mrk"] [pcdata "Markup:"];
+					Markup.select ~a:[a_id "enter_body_mrk"] ~name:enter_body_mrk ?value:body_mrk ();
+					];
+				label ~a:[a_for "enter_body_src"] [pcdata "Story body:"];
+				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body_src"] ~name:enter_body_src ?value:body_src ~rows:16 ~cols:80 ();
+				];
 			]]
 
 

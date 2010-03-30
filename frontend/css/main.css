@@ -85,12 +85,13 @@ body
 
 #nav
 	{
-	position: relative;
 	float: left;
-	width: 160px;
-	padding: 0 40px 0 0px;
+	position: relative;
 	right: 200px;
+	width: 160px;
+	margin-bottom: 30px;
 	margin-left: -100%;
+	padding: 0 40px 0 0px;
 	}
 
 #context
@@ -106,7 +107,7 @@ body
 	{
 	margin-bottom: 30px;
 	border: 1px solid #666;
-	-moz-box-shadow: 1px 1px 3px #666;
+	-moz-box-shadow: 1px 1px 2px #666;
 	-moz-border-radius: 4px;
 	}
 
@@ -145,21 +146,43 @@ body
 	background: #fff url("images/lambdium-logo.png") no-repeat;
 	}
 
-#footer > .box
+#footer > h1
 	{
 	margin-left: 200px;
 	margin-right: 220px;
+	border-top: 2px solid #5b8ba6;
 	}
 
-#footer .box_body > ul
+#main_menu > .box_body
 	{
-	text-align: center;
+	padding: 0;
 	}
 
-#footer .box_body > ul > li
+.menu_item
 	{
-	display: inline;
-	margin: 0 1em;
+	padding: 0.5em;
+	}
+
+.menu_item > a
+	{
+	text-decoration: none;
+	color: #111;
+	}
+
+.menu_item + .menu_item
+	{
+	border-top: 1px solid #ddd;
+	}
+
+.menu_item:hover
+	{
+	background: yellow;
+	}
+
+.menu_item:last-child:hover
+	{
+	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomright: 4px;
 	}
 
 .box input[type="text"], .box input[type="password"], .box input[type="submit"]
@@ -171,6 +194,12 @@ body
 .box input[type="submit"]
 	{
 	margin-top: 0.5em;
+	}
+
+#credits > .box_body > ul > li
+	{
+	text-align: center;
+	margin-top: 1em;
 	}
 
 #status_success > .box_head
@@ -203,6 +232,141 @@ body
 	background: #efafaf;
 	}
 
+#core_head
+	{
+	font: bold 1.3em sans-serif;
+	margin-bottom: 20px;
+	padding: 0.2em 0.5em;
+	border: 1px solid #666;
+	-moz-box-shadow: 1px 1px 2px #666;
+	-moz-border-radius: 4px;
+	color: #fff;
+	background: #5b8ba6;
+	}
+
+.story_meta
+	{
+	font: 1.3em sans-serif;
+	}
+
+.story_title
+	{
+	font: bold 1.3em sans-serif;
+	color: #444;
+	text-transform: capitalize;
+	}
+
+.story_author, .story_timestamp
+	{
+	display: inline;
+	color: #444;
+	}
+
+.story > .doc_composition
+	{
+	margin-top: 10px;
+	}
+
+.story > .doc_manuscript
+	{
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 2px solid #5b8ba6;
+	}
+
+.story_comments
+	{
+	padding: 1em;
+	border-top: 2px solid #5b8ba6;
+	}
+
+.comment_full
+	{
+	margin-top: 2em;
+	}
+
+.comment_meta
+	{
+	margin-bottom: 0.5em;
+	padding: 0.2em 0.5em;
+	border: 1px solid #666;
+	-moz-border-radius: 4px;
+	background: #f9f9f9;
+	}
+
+.comment_title
+	{
+	font: bold 1.3em sans-serif;
+	}
+
+.comment_author
+	{
+	display: inline;
+	}
+
+.comment_author:before
+	{
+	content: "by ";
+	}
+
+.comment_timestamp
+	{
+	display: inline;
+	}
+
+.comment_timestamp:before
+	{
+	content: "on ";
+	}
+
+#comment_form
+	{
+	border-top: 2px solid #5b8ba6;
+	padding: 2em 2em 0 2em;
+	}
+
+.core_form
+	{
+	padding: 1em 2em;
+	border: 1px solid #666;
+	-moz-box-shadow: 1px 1px 2px #666;
+	-moz-border-radius: 4px;
+	background: #f9f9f9;
+	}
+
+.core_form > fieldset > legend
+	{
+	font-weight: bold;
+	color: #444;
+	border-bottom: 1px solid #333;
+	}
+
+.control_fieldset
+	{
+	margin: 2em auto;
+	text-align: center;
+	}
+
+.field
+	{
+	margin-top: 2em;
+	}
+
+.markup_field
+	{
+	float: right;
+	}
+
+.markup_field > label
+	{
+	margin-right: 0.25em;
+	}
+
+.area_field > textarea, .area_field > input
+	{
+	width: 99.9%;
+	}
+
 .doc_bold
 	{
 	font-weight: bold;
@@ -215,7 +379,7 @@ body
 
 .doc_code
 	{
-	font-family: "Courier New", "Courier", "DejaVu Mono", monospace;
+	font-family: "Courier New", "Courier", "Liberation Mono", monospace;
 	font-weight: bold;
 	color: #444;
 	}
@@ -516,7 +680,7 @@ body
 	clear: both;
 	margin: 0 1em;
 	font-size: 1.2em;
-	font-family: "Courier New", "Courier", "DejaVu Mono", monospace;
+	font-family: "Courier New", "Courier", "Liberation Mono", monospace;
 	line-height: 1.8em;
 	overflow: auto;
 	color: #000;
@@ -971,7 +1135,7 @@ tbody.doc_tgroup + tbody.doc_tgroup
 	white-space: pre;
 	line-height: 1em;
 	text-align: left;
-	font-family: "Courier New", "Courier", "DejaVu Mono", monospace;
+	font-family: "Courier New", "Courier", "Liberation Mono", monospace;
 	}
 
 .doc_mult0
@@ -1161,7 +1325,7 @@ tbody.doc_tgroup + tbody.doc_tgroup
 	-moz-border-radius-topleft: 6px;
 	-moz-border-radius-topright: 6px;
 	text-align: center;
-	font-family: "Georgia", "DejaVu Serif", serif;
+	font-family: "Arial", "Helvetica", "Liberation Sans", sans-serif;
 	font-size: 1.5em;
 	font-variant: small-caps;
 	font-weight: bold;
@@ -1296,7 +1460,7 @@ tbody.doc_tgroup + tbody.doc_tgroup
 .doc_title
 	{
 	clear: both;
-	font-family: "Georgia", "DejaVu Serif", serif;
+	font-family: "Arial", "Helvetica", "Liberation Sans", sans-serif;
 	font-weight: bold;
 	font-variant: small-caps;
 	text-transform: capitalize;
@@ -1320,7 +1484,7 @@ h2.doc_title
 	padding: 0.25em 0;
 	border-top: 1px solid #501;
 	border-bottom: 1px solid #501;
-	font-family: "Georgia", "DejaVu Serif", serif;
+	font-family: "Arial", "Helvetica", "Liberation Sans", sans-serif;
 	font-weight: bold;
 	font-size: 1.8em;
 	text-transform: capitalize;
@@ -1333,7 +1497,7 @@ h2.doc_title
 .doc_sec
 	{
 	clear: both;
-	font-family: "Georgia", "DejaVu Serif", serif;
+	font-family: "Arial", "Helvetica", "Liberation Sans", sans-serif;
 	font-weight: bold;
 	word-spacing: 0.1em;
 	letter-spacing: 0;

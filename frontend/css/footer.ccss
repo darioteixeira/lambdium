@@ -2,20 +2,10 @@
 /* Footer.ccss: footer configuration.						*/
 /********************************************************************************/
 
-#footer > .box
+#footer > h1
 	{
 	margin-left: Fullwidth_LC;
 	margin-right: Fullwidth_RC;
-	}
-
-#footer .box_body > ul
-	{
-	text-align: center;
-	}
-
-#footer .box_body > ul > li
-	{
-	display: inline;
-	margin: 0 1em;
+	border-top: 2px solid Colour_fancy;
 	}
 

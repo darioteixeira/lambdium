@@ -278,19 +278,21 @@ $$;
  * Adds a new story.
  */
 
-CREATE FUNCTION add_story (user_id_t, text, text, bytea, bytea, text, bytea, bytea)
+CREATE FUNCTION add_story (user_id_t, text, text, text, bytea, bytea, text, text, bytea, bytea)
 RETURNS story_id_t
 LANGUAGE plpgsql VOLATILE AS
 $$
 DECLARE
 	_story_author_id	ALIAS FOR $1;
 	_story_title		ALIAS FOR $2;
-	_story_intro_src	ALIAS FOR $3;
-	_story_intro_doc	ALIAS FOR $4;
-	_story_intro_out	ALIAS FOR $5;
-	_story_body_src		ALIAS FOR $6;
-	_story_body_doc		ALIAS FOR $7;
-	_story_body_out	ALIAS FOR $8;
+	_story_intro_mrk	ALIAS FOR $3;
+	_story_intro_src	ALIAS FOR $4;
+	_story_intro_doc	ALIAS FOR $5;
+	_story_intro_out	ALIAS FOR $6;
+	_story_body_mrk		ALIAS FOR $7;
+	_story_body_src		ALIAS FOR $8;
+	_story_body_doc		ALIAS FOR $9;
+	_story_body_out		ALIAS FOR $10;
 
 BEGIN
 	INSERT	INTO stories
@@ -299,9 +301,11 @@ BEGIN
 			story_title,
 			story_timestamp,
 			story_num_comments,
+			story_intro_mrk,
 			story_intro_src,
 			story_intro_doc,
 			story_intro_out,
+			story_body_mrk,
 			story_body_src,
 			story_body_doc,
 			story_body_out
@@ -312,9 +316,11 @@ BEGIN
 			_story_title,
 			now () AT TIME ZONE 'UTC',
 			0,
+			_story_intro_mrk,
 			_story_intro_src,
 			_story_intro_doc,
 			_story_intro_out,
+			_story_body_mrk,
 			_story_body_src,
 			_story_body_doc,
 			_story_body_out
@@ -329,7 +335,7 @@ $$;
  * Adds a new comment.
  */
 
-CREATE FUNCTION add_comment (story_id_t, user_id_t, text, text, bytea, bytea)
+CREATE FUNCTION add_comment (story_id_t, user_id_t, text, text, text, bytea, bytea)
 RETURNS comment_id_t
 LANGUAGE plpgsql VOLATILE AS
 $$
@@ -337,9 +343,10 @@ DECLARE
 	_comment_story_id	ALIAS FOR $1;
 	_comment_author_id	ALIAS FOR $2;
 	_comment_title		ALIAS FOR $3;
-	_comment_body_src	ALIAS FOR $4;
-	_comment_body_doc	ALIAS FOR $5;
-	_comment_body_out	ALIAS FOR $6;
+	_comment_body_mrk	ALIAS FOR $4;
+	_comment_body_src	ALIAS FOR $5;
+	_comment_body_doc	ALIAS FOR $6;
+	_comment_body_out	ALIAS FOR $7;
 
 BEGIN
 	INSERT	INTO comments
@@ -348,6 +355,7 @@ BEGIN
 			comment_author_id,
 			comment_title,
 			comment_timestamp,
+			comment_body_mrk,
 			comment_body_src,
 			comment_body_doc,
 			comment_body_out
@@ -358,6 +366,7 @@ BEGIN
 			_comment_author_id,
 			_comment_title,
 			now () AT TIME ZONE 'UTC',
+			_comment_body_mrk,
 			_comment_body_src,
 			_comment_body_doc,
 			_comment_body_out

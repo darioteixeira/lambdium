@@ -2,6 +2,47 @@
 /* Margins.ccss: configuration of the boxes on the margin (nav and context)	*/
 /********************************************************************************/
 
+/********************************************************************************/
+/* Main menu.									*/
+/********************************************************************************/
+
+#main_menu > .box_body
+	{
+	padding: 0;
+	}
+
+.menu_item
+	{
+	padding: 0.5em;
+	}
+
+.menu_item > a
+	{
+	text-decoration: none;
+	color: Colour_root;
+	}
+
+.menu_item + .menu_item
+	{
+	border-top: 1px solid #ddd;
+	}
+
+.menu_item:hover
+	{
+	background: yellow;
+	}
+
+.menu_item:last-child:hover
+	{
+	-moz-border-radius-bottomleft: Radius_box;
+	-moz-border-radius-bottomright: Radius_box;
+	}
+
+
+/********************************************************************************/
+/*										*/
+/********************************************************************************/
+
 .box input[type="text"],
 .box input[type="password"],
 .box input[type="submit"]
@@ -13,5 +54,15 @@
 .box input[type="submit"]
 	{
 	margin-top: 0.5em;
+	}
+
+
+/********************************************************************************/
+/********************************************************************************/
+
+#credits > .box_body > ul > li
+	{
+	text-align: center;
+	margin-top: 1em;
 	}
 

@@ -71,12 +71,14 @@ CREATE TABLE stories
 	story_title		text NOT NULL,
 	story_timestamp 	timestamp NOT NULL,
 	story_num_comments	comment_id_t NOT NULL,
+	story_intro_mrk		text NOT NULL,
 	story_intro_src		text NOT NULL,
 	story_intro_doc		bytea NOT NULL,
-	story_intro_out	bytea NOT NULL,
+	story_intro_out		bytea NOT NULL,
+	story_body_mrk		text NOT NULL,
 	story_body_src		text NOT NULL,
 	story_body_doc		bytea NOT NULL,
-	story_body_out	bytea NOT NULL,
+	story_body_out		bytea NOT NULL,
 	PRIMARY KEY (story_id)
 	);
 
@@ -85,6 +87,7 @@ CREATE SEQUENCE story_id_seq START 1 OWNED BY stories.story_id;
 ALTER TABLE stories ALTER COLUMN story_id SET DEFAULT nextval ('story_id_seq');
 
 CREATE INDEX stories_story_author_id_idx ON stories (story_author_id);
+
 
 /************************************************************************/
 /* Comments.								*/
@@ -103,6 +106,7 @@ CREATE TABLE comments
 	comment_author_id	user_id_t REFERENCES users (user_id) NOT NULL,
 	comment_title		text NOT NULL,
 	comment_timestamp	timestamp NOT NULL,
+	comment_body_mrk	text NOT NULL,
 	comment_body_src	text NOT NULL,
 	comment_body_doc	bytea NOT NULL,
 	comment_body_out	bytea NOT NULL,

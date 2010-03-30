@@ -2,6 +2,11 @@
 /* Core.ccss: configuration of the core area.					*/
 /********************************************************************************/
 
+
+/********************************************************************************/
+/* Status.									*/
+/********************************************************************************/
+
 #status_success > .box_head {background: Back_success_head;}
 #status_success > .box_body {background: Back_success_body;}
 
@@ -10,4 +15,90 @@
 
 #status_failure > .box_head {background: Back_failure_head;}
 #status_failure > .box_body {background: Back_failure_body;}
+
+
+/********************************************************************************/
+/* General core definitions.							*/
+/********************************************************************************/
+
+#core_head
+	{
+	font: Font_box_head;
+	margin-bottom: Vmargin_core_head;
+	padding: Padding_box_head;
+	border: Border_box;
+	-moz-box-shadow: Shadow_box;
+	-moz-border-radius: Radius_box;
+	color: Colour_box_head;
+	background: Back_box_head;
+	}
+
+
+/********************************************************************************/
+/* Stories.									*/
+/********************************************************************************/
+
+.story_meta
+	{
+	font: Font_core;
+	}
+
+.story_title
+	{
+	font: Font_title;
+	color: Colour_title;
+	text-transform: capitalize;
+	}
+
+.story_author,
+.story_timestamp
+	{
+	display: inline;
+	color: Colour_watery;
+	}
+
+.story > .doc_composition
+	{
+	margin-top: Vmargin_story_sep;
+	}
+
+.story > .doc_manuscript
+	{
+	margin-top: Vmargin_story_sep;
+	padding-top: Vmargin_story_sep;
+	border-top: Border_story_sep;
+	}
+
+
+/********************************************************************************/
+/* Comments.									*/
+/********************************************************************************/
+
+.story_comments
+	{
+	padding: 1em;
+	border-top: Border_story_sep;
+	}
+
+.comment_full
+	{
+	margin-top: 2em;
+	}
+
+.comment_meta
+	{
+	margin-bottom: Vmargin_small;
+	padding: Padding_box_head;
+	border: Border_box;
+	-moz-border-radius: Radius_box;
+	background: Back_box_body;
+	}
+
+.comment_title {font: Font_comment_title;}
+
+.comment_author {display: inline;}
+.comment_author:before {content: "by ";}
+
+.comment_timestamp {display: inline;}
+.comment_timestamp:before {content: "on ";}
 

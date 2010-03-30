@@ -48,7 +48,7 @@ struct
 			let is_selected = match value with
 				| Some v -> markup = v
 				| None   -> markup = Lambtex
-			in Eliom_predefmod.Xhtml.Option ([], markup, Some (XHTML.M.pcdata (to_string markup)), is_selected)
+			in Eliom_predefmod.Xhtml.Option ([], markup, Some (XHTML.M.pcdata (String.capitalize (to_string markup))), is_selected)
 		in Eliom_predefmod.Xhtml.user_type_select
 			to_string
 			?a

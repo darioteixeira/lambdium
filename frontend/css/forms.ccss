@@ -1,0 +1,43 @@
+/********************************************************************************/
+/* Forms.ccss: configuration of forms.						*/
+/********************************************************************************/
+
+#comment_form
+	{
+	border-top: Border_story_sep;
+	padding: 2em 2em 0 2em;
+	}
+
+.core_form
+	{
+	padding: Padding_form;
+	border: Border_box;
+	-moz-box-shadow: Shadow_box;
+	-moz-border-radius: Radius_box;
+	background: Back_box_body;
+	}
+
+.core_form > fieldset > legend
+	{
+	font-weight: bold;
+	color: Colour_watery;
+	border-bottom: 1px solid #333;
+	}
+
+.control_fieldset
+	{
+	margin: Vmargin_field auto;
+	text-align: center;
+	}
+
+.field {margin-top: Vmargin_field;}
+
+.markup_field {float:right;}
+.markup_field > label {margin-right: Hmargin_small;}
+
+.area_field > textarea,
+.area_field > input
+	{
+	width: 99.9%;
+	}
+

@@ -23,6 +23,9 @@ Padding_CCR: 0px;
 Vmargin_header: 40px;
 Vmargin_footer: 30px;
 
+Vmargin_core_head: 20px;
+Vmargin_story_sep: 10px;
+
 
 /********************************************************************************/
 /* Layout configuration: computed values.					*/
@@ -45,6 +48,8 @@ Back_root: #fff;
 
 Colour_shadow: #666;
 Colour_fancy: #5b8ba6;
+Colour_watery: #444;
+Colour_title: Colour_watery;
 
 Colour_header: Colour_fancy;
 Back_header: Back_root;
@@ -63,26 +68,52 @@ Back_failure_body: #efafaf;
 
 
 /********************************************************************************/
+/* Border configuration.							*/
+/********************************************************************************/
+
+Border_story_sep: 2px solid Colour_fancy;
+
+
+/********************************************************************************/
 /* Font configuration.								*/
 /********************************************************************************/
 
 Font_root:	0.625em sans-serif;
-Font_title:	bold 1.8em sans-serif;
+Font_header:	bold 1.8em sans-serif;
+Font_title:	bold 1.3em sans-serif;
+Font_core:	1.3em sans-serif;
 
 Font_box_head:	bold 1.3em sans-serif;
 Font_box_body:	1.3em sans-serif;
+
+Font_comment_title: bold 1.3em sans-serif;
 
 
 /********************************************************************************/
 /* Box configuration.								*/
 /********************************************************************************/
 
+Border_box: 	1px solid #666;
 Vmargin_box:	30px;
 Radius_box:	4px;
-Shadow_box:	1px 1px 3px Colour_shadow;
+Shadow_box:	1px 1px 2px Colour_shadow;
 
 Padding_box_head: 0.2em 0.5em;
 Padding_box_body: 1em;
 
-Border_box: 1px solid #666;
+
+/********************************************************************************/
+/* Form configuration.								*/
+/********************************************************************************/
+
+Padding_form: 1em 2em;
+Vmargin_field: 2em;
+
+
+/********************************************************************************/
+/* Generic values.								*/
+/********************************************************************************/
+
+Hmargin_small: 0.25em;
+Vmargin_small: 0.5em;
 
