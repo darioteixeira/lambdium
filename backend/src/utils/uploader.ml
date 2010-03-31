@@ -144,7 +144,7 @@ let request ~sp ~uid ~limit =
 				}
 			in	Hashtbl.replace !!pool.usage uid (current + 1);
 				!!pool.uuids <- Uuidset.add uuid !!pool.uuids;
-				Lwt_gc.finalise (discard_aux ~manual:false) token;
+				Lwt_gc.finalise_or_exit (discard_aux ~manual:false) token;
 				Ocsigen_messages.warning (Printf.sprintf "Called request for token %s" token.uuid);
 				Lwt.return token
 
