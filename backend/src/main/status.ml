@@ -15,8 +15,9 @@ type stat_t =
 	| Warning
 	| Failure
 
+type entry_t = stat_t * [XHTML.M.inline | `PCDATA ] XHTML.M.elt list * XHTML.M.block XHTML.M.elt list
 
-type t = stat_t * [XHTML.M.inline | `PCDATA ] XHTML.M.elt list * XHTML.M.block XHTML.M.elt list
+type t = entry_t list
 
 
 (********************************************************************************)
@@ -25,8 +26,10 @@ type t = stat_t * [XHTML.M.inline | `PCDATA ] XHTML.M.elt list * XHTML.M.block X
 
 let key = Polytables.make_key ()
 
-let set ~sp (value : t) =
-	Polytables.set ~table:(Eliom_sessions.get_request_cache sp) ~key ~value
+let set ~sp (entry : entry_t) =
+	let table = Eliom_sessions.get_request_cache sp in
+	let current = try Polytables.get ~table ~key with Not_found -> []
+	in Polytables.set ~table ~key ~value:(entry :: current)
 
 
 (********************************************************************************)
@@ -40,8 +43,8 @@ let string_of_stat = function
 
 
 let get sp =
-	try Some (Polytables.get ~table:(Eliom_sessions.get_request_cache sp) ~key)
-	with Not_found -> None
+	try Polytables.get ~table:(Eliom_sessions.get_request_cache sp) ~key
+	with Not_found -> []
 
 
 let success ~sp head body = set ~sp (Success, head, body)

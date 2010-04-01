@@ -202,32 +202,32 @@ body
 	margin-top: 1em;
 	}
 
-#status_success > .box_head
+.status_success > .box_head
 	{
 	background: #007f00;
 	}
 
-#status_success > .box_body
+.status_success > .box_body
 	{
 	background: #afefaf;
 	}
 
-#status_warning > .box_head
+.status_warning > .box_head
 	{
 	background: #9f5f00;
 	}
 
-#status_warning > .box_body
+.status_warning > .box_body
 	{
 	background: #ffef9f;
 	}
 
-#status_failure > .box_head
+.status_failure > .box_head
 	{
 	background: #7f0000;
 	}
 
-#status_failure > .box_body
+.status_failure > .box_body
 	{
 	background: #efafaf;
 	}
@@ -358,16 +358,6 @@ body
 	text-align: right;
 	}
 
-.markup_field
-	{
-	float: right;
-	}
-
-.markup_field > label
-	{
-	margin-right: 0.5em;
-	}
-
 .blk_field:not(:first-of-type)
 	{
 	margin-top: 2em;
@@ -376,6 +366,16 @@ body
 .blk_field > textarea, .blk_field > input
 	{
 	width: 99.9%;
+	}
+
+.markup_field
+	{
+	float: right;
+	}
+
+.markup_field > label
+	{
+	margin-right: 0.5em;
 	}
 
 #user_set > .inl_field > label

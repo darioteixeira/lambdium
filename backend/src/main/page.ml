@@ -15,14 +15,21 @@ open Prelude
 (**	{1 Private functions and values}					*)
 (********************************************************************************)
 
-let output_box (id, head, body) =
-	let head' = match head with
+let output_box (maybe_id, classes, head, body) =
+	let id' = match maybe_id with
+		| Some id -> [a_id id]
+		| None	  -> []
+	and head' = match head with
 		| [] -> []
 		| xs -> [h1 ~a:[a_class ["box_head"]] xs]
 	and body' = match body with
 		| [] -> []
 		| xs -> [div ~a:[a_class ["box_body"]] xs]
-	in div ~a:[a_id id; a_class ["box"]] (head' @ body')
+	in div ~a:(a_class ("box" :: classes) :: id') (head' @ body')
+
+
+let output_floatbox (id, head, body) =
+	output_box (Some id, [], head, body)
 
 
 let login_form (username, (password, remember)) =
@@ -128,9 +135,10 @@ let base_page ~sp ~page_title ~page_content ~page_content_id =
 
 
 let regular_page ~sp ~page_title ~header ~core_body ~nav ~context ~footer =
+	let output_status (stat, head, body) = output_box (None, ["status_" ^ (Status.string_of_stat stat)], head, body) in
 	let status = match Status.get sp with
-		| Some (stat, head, body) -> [output_box ("status_" ^ (Status.string_of_stat stat), head, body)]
-		| None -> []
+		| [] -> []
+		| xs -> List.map output_status xs
 	and core = match core_body with
 		| [] ->
 			[]
@@ -143,8 +151,8 @@ let regular_page ~sp ~page_title ~header ~core_body ~nav ~context ~footer =
 		[
 		div ~a:[a_id "header"] header;
 		div ~a:[a_id "core"] (status @ core);
-		div ~a:[a_id "nav"] (List.map output_box nav);
-		div ~a:[a_id "context"] (List.map output_box context);
+		div ~a:[a_id "nav"] (List.map output_floatbox nav);
+		div ~a:[a_id "context"] (List.map output_floatbox context);
 		div ~a:[a_id "footer"] footer;
 		]
 	in base_page ~sp ~page_title ~page_content ~page_content_id:"root"

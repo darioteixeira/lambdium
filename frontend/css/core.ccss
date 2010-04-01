@@ -7,14 +7,14 @@
 /* Status.									*/
 /********************************************************************************/
 
-#status_success > .box_head {background: Back_success_head;}
-#status_success > .box_body {background: Back_success_body;}
+.status_success > .box_head {background: Back_success_head;}
+.status_success > .box_body {background: Back_success_body;}
 
-#status_warning > .box_head {background: Back_warning_head;}
-#status_warning > .box_body {background: Back_warning_body;}
+.status_warning > .box_head {background: Back_warning_head;}
+.status_warning > .box_body {background: Back_warning_body;}
 
-#status_failure > .box_head {background: Back_failure_head;}
-#status_failure > .box_body {background: Back_failure_body;}
+.status_failure > .box_head {background: Back_failure_head;}
+.status_failure > .box_body {background: Back_failure_body;}
 
 
 /********************************************************************************/
