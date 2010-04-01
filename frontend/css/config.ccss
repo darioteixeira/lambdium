@@ -71,7 +71,9 @@ Back_failure_body: #efafaf;
 /* Border configuration.							*/
 /********************************************************************************/
 
-Border_story_sep: 2px solid Colour_fancy;
+Border_story_sep:	2px solid Colour_fancy;
+Border_legend:		1px solid #666;
+Border_control_set:	1px dotted #666;
 
 
 /********************************************************************************/
@@ -106,14 +108,20 @@ Padding_box_body: 1em;
 /* Form configuration.								*/
 /********************************************************************************/
 
-Padding_form: 1em 2em;
-Vmargin_field: 2em;
+Padding_form: 1em 2em 2em;
+
+Vmargin_legend: 1.5em;
+Vmargin_blk_field: 2em;
+Vmargin_inl_field: 1em;
+
+Vmargin_control_set: 3em;
+Padding_control_set: 1em 0 0;
 
 
 /********************************************************************************/
 /* Generic values.								*/
 /********************************************************************************/
 
-Hmargin_small: 0.25em;
+Hmargin_small: 0.5em;
 Vmargin_small: 0.5em;
 

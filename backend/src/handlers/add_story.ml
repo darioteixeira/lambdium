@@ -141,7 +141,7 @@ and step6_handler ~token ~story sp () (action, ()) =
 				Database.add_story ~output_maker story >>= fun sid ->
 				Uploader.commit ~path:(path_maker sid) token >>= fun () ->
 				Status.success ~sp [pcdata "Story has been added!"] [];
-				Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
+				Show_story.handler sp sid ()
 			with
 				| Database.Cannot_add_story ->
 					Status.failure ~sp [pcdata "Cannot add story!"] [];

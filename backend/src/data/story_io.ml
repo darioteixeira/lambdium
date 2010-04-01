@@ -89,13 +89,13 @@ let form_for_incipient ?story (enter_title, (enter_intro_mrk, (enter_intro_src, 
 			[
 			legend [pcdata "Story contents:"];
 
-			div ~a:[a_class ["field"; "area_field"]]
+			div ~a:[a_class ["blk_field"]]
 				[
 				label ~a:[a_for "enter_title"] [pcdata "Story title:"];
 				Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_title"] ~input_type:`Text ~name:enter_title ?value:title ();
 				];
 
-			div ~a:[a_class ["field"; "area_field"]]
+			div ~a:[a_class ["blk_field"]]
 				[
 				div ~a:[a_class ["markup_field"]]
 					[
@@ -106,7 +106,7 @@ let form_for_incipient ?story (enter_title, (enter_intro_mrk, (enter_intro_src, 
 				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_intro_src"] ~name:enter_intro_src ?value:intro_src ~rows:8 ~cols:80 ();
 				];
 
-			div ~a:[a_class ["field"; "area_field"]]
+			div ~a:[a_class ["blk_field"]]
 				[
 				div ~a:[a_class ["markup_field"]]
 					[
@@ -134,5 +134,8 @@ let form_for_images ~sp ~path ~status enter_file =
 				in [p [pcdata "Currently uploaded image:"]; XHTML.M.img ~src:uri ~alt:"" ()]
 			| false -> []
 		in enter @ show
-	in Lwt.return [fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input status)))]
+	in Lwt.return
+		[
+		fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input status)))
+		]
 

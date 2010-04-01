@@ -319,15 +319,9 @@ body
 	content: "on ";
 	}
 
-#comment_form
-	{
-	border-top: 2px solid #5b8ba6;
-	padding: 2em 2em 0 2em;
-	}
-
 .core_form
 	{
-	padding: 1em 2em;
+	padding: 1em 2em 2em;
 	border: 1px solid #666;
 	-moz-box-shadow: 1px 1px 2px #666;
 	-moz-border-radius: 4px;
@@ -338,18 +332,30 @@ body
 	{
 	font-weight: bold;
 	color: #444;
-	border-bottom: 1px solid #333;
+	margin-bottom: 1.5em;
+	border-bottom: 1px solid #666;
 	}
 
-.control_fieldset
+.control_set
 	{
-	margin: 2em auto;
+	margin: 3em auto 0;
+	padding: 1em 0 0;
+	border-top: 1px dotted #666;
 	text-align: center;
 	}
 
-.field
+.inl_field:not(:first-of-type)
 	{
-	margin-top: 2em;
+	margin-top: 1em;
+	}
+
+.inl_field > label
+	{
+	display: block;
+	float: left;
+	clear: left;
+	margin-right: 0.5em;
+	text-align: right;
 	}
 
 .markup_field
@@ -359,12 +365,22 @@ body
 
 .markup_field > label
 	{
-	margin-right: 0.25em;
+	margin-right: 0.5em;
 	}
 
-.area_field > textarea, .area_field > input
+.blk_field:not(:first-of-type)
+	{
+	margin-top: 2em;
+	}
+
+.blk_field > textarea, .blk_field > input
 	{
 	width: 99.9%;
+	}
+
+#user_set > .inl_field > label
+	{
+	width: 10em;
 	}
 
 .doc_bold

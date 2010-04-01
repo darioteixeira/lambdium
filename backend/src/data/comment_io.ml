@@ -61,13 +61,13 @@ let form_for_incipient ~sid ?comment (enter_sid, (enter_title, (enter_body_mrk, 
 
 			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Hidden ~name:enter_sid ~value:sid Story.Id.to_string ();
 
-			div ~a:[a_class ["field"; "area_field"]]
+			div ~a:[a_class ["blk_field"]]
 				[
 				label ~a:[a_for "enter_title"] [pcdata "Comment title:"];
 				Eliom_predefmod.Xhtml.string_input ~a:[a_id "enter_title"] ~input_type:`Text ~name:enter_title ?value:title ();
 				];
 
-			div ~a:[a_class ["field"; "area_field"]]
+			div ~a:[a_class ["blk_field"]]
 				[
 				div ~a:[a_class ["markup_field"]]
 					[

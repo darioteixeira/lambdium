@@ -2,11 +2,9 @@
 /* Forms.ccss: configuration of forms.						*/
 /********************************************************************************/
 
-#comment_form
-	{
-	border-top: Border_story_sep;
-	padding: 2em 2em 0 2em;
-	}
+/********************************************************************************/
+/* Configuration common to all forms.						*/
+/********************************************************************************/
 
 .core_form
 	{
@@ -21,23 +19,42 @@
 	{
 	font-weight: bold;
 	color: Colour_watery;
-	border-bottom: 1px solid #333;
+	margin-bottom: Vmargin_legend;
+	border-bottom: Border_legend;
 	}
 
-.control_fieldset
+.control_set
 	{
-	margin: Vmargin_field auto;
+	margin: Vmargin_control_set auto 0;
+	padding: Padding_control_set;
+	border-top: Border_control_set;
 	text-align: center;
 	}
 
-.field {margin-top: Vmargin_field;}
+.inl_field:not(:first-of-type) {margin-top: Vmargin_inl_field;}
+.inl_field > label
+	{
+	display: block;
+	float: left;
+	clear: left;
+	margin-right: Hmargin_small;
+	text-align: right;
+	}
+
+.blk_field:not(:first-of-type) {margin-top: Vmargin_blk_field;}
+.blk_field > textarea,
+.blk_field > input
+	{
+	width: 99.9%;
+	}
 
 .markup_field {float:right;}
 .markup_field > label {margin-right: Hmargin_small;}
 
-.area_field > textarea,
-.area_field > input
-	{
-	width: 99.9%;
-	}
+
+/********************************************************************************/
+/* Form-specific configuration.							*/
+/********************************************************************************/
+
+#user_set > .inl_field > label {width: 10em;}
 

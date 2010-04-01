@@ -13,15 +13,15 @@ open XHTML.M
 module Monatomic =
 struct
 	let make_button value =
-		fieldset ~a:[a_class ["control_fieldset"]]
+		fieldset ~a:[a_class ["control_set"]]
 			[
 			Eliom_predefmod.Xhtml.string_input ~input_type:`Submit ~value ();
 			]
 
 	let make_form ~label ~service ~sp ?content () =
 		let form_maker enter_content =
-			(match content with | Some c -> c enter_content | None -> Lwt.return []) >>= fun form ->
-			Lwt.return (form @ [make_button label]) in
+			(match content with | Some c -> c enter_content | None -> Lwt.return []) >>= fun fieldsets ->
+			Lwt.return (fieldsets @ [make_button label]) in
 		Eliom_predefmod.Xhtml.lwt_post_form ~a:[a_class ["core_form"]] ~service ~sp form_maker () >>= fun form ->
 		let form = (form : Xhtmltypes.form XHTML.M.elt :> [> Xhtmltypes.form ] XHTML.M.elt)
 		in Lwt.return form
@@ -46,7 +46,7 @@ struct
 	let param = Eliom_parameters.user_type of_string to_string "action"
 
 	let make_buttons enter_action =
-		fieldset ~a:[a_class ["control_fieldset"]]
+		fieldset ~a:[a_class ["control_set"]]
 			[
 			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Cancel to_string ();
 			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Continue to_string ();
@@ -81,7 +81,7 @@ struct
 	let param = Eliom_parameters.user_type of_string to_string "action"
 
 	let make_buttons enter_action =
-		fieldset ~a:[a_class ["control_fieldset"]]
+		fieldset ~a:[a_class ["control_set"]]
 			[
 			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Cancel to_string ();
 			Eliom_predefmod.Xhtml.user_type_input ~input_type:`Submit ~name:enter_action ~value:`Preview to_string ();
