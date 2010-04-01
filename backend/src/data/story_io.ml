@@ -53,17 +53,19 @@ let output_full ?localiser maybe_login sp story comments =
 				~sp
 				~content: (Comment_io.form_for_incipient ~sid:story#sid)
 				() >>= fun form ->
-			Lwt.return [div ~a:[a_id "comment_form"] [form]]
+			Lwt.return [form]
 		| None ->
 			Lwt.return [] in
 	form_maker () >>= fun form ->
-	Lwt.return (div ~a:[a_class ["story"; "story_full"]]
+	let story_comments = match comments with
+		| [] -> []
+		| xs -> [div ~a:[a_class ["story_comments"]] (List.map (Comment_io.output_full ?localiser maybe_login sp) xs)]
+	in Lwt.return (div ~a:[a_class ["story"; "story_full"]]
 		([
 		output_metadata maybe_login sp story;
-		story#intro_out;
-		story#body_out;
-		div ~a:[a_class ["story_comments"]] (List.map (Comment_io.output_full ?localiser maybe_login sp) comments);
-		] @ form))
+		(story#intro_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt);
+		(story#body_out : [ `Div ] XHTML.M.elt :> [> `Div ] XHTML.M.elt);
+		] @ story_comments @ form))
 
 
 let output_fresh ?localiser login sp story =
@@ -80,9 +82,10 @@ let output_fresh ?localiser login sp story =
 let form_for_incipient ?story (enter_title, (enter_intro_mrk, (enter_intro_src, (enter_body_mrk, enter_body_src)))) =
 	let (title, intro_mrk, intro_src, body_mrk, body_src) = match story with
 		| Some s -> (Some s#title, Some s#intro_mrk, Some s#intro_src, Some s#body_mrk, Some s#body_src)
-		| None   -> (None, None, None, None, None)
-	in Lwt.return
-		[fieldset
+		| None   -> (None, None, None, None, None) in
+	Lwt.return
+		[
+		fieldset ~a:[a_id "story_set"]
 			[
 			legend [pcdata "Story contents:"];
 
@@ -113,7 +116,8 @@ let form_for_incipient ?story (enter_title, (enter_intro_mrk, (enter_intro_src, 
 				label ~a:[a_for "enter_body_src"] [pcdata "Story body:"];
 				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body_src"] ~name:enter_body_src ?value:body_src ~rows:16 ~cols:80 ();
 				];
-			]]
+			]
+		]
 
 
 let form_for_images ~sp ~path ~status enter_file =

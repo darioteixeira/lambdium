@@ -54,7 +54,8 @@ let form_for_incipient ~sid ?comment (enter_sid, (enter_title, (enter_body_mrk, 
 		| Some c -> (Some c#title, Some c#body_mrk, Some c#body_src)
 		| None	 -> (None, None, None)
 	in Lwt.return
-		[fieldset
+		[
+		fieldset ~a:[a_id "comment_set"]
 			[
 			legend [pcdata "Enter comment:"];
 
@@ -76,5 +77,6 @@ let form_for_incipient ~sid ?comment (enter_sid, (enter_title, (enter_body_mrk, 
 				label ~a:[a_for "enter_body_src"] [pcdata "Comment body:"];
 				Eliom_predefmod.Xhtml.textarea ~a:[a_id "enter_body_src"] ~name:enter_body_src ?value:body_src ~rows:8 ~cols:80 ();
 				];
-			]]
+			]
+		]
 
