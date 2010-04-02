@@ -25,6 +25,8 @@ exception Unique_violation
 exception Unknown_uid
 exception Unknown_sid
 exception Unknown_cid
+exception Unknown_nick
+exception Invalid_password
 exception Error of string
 
 
@@ -47,7 +49,7 @@ val get_timezone: Timezone.Id.t option -> Timezone.full_t Lwt.t
 val get_users: unit -> User.handle_t list Lwt.t
 val get_user: User.Id.t -> User.full_t Lwt.t
 
-val get_login_from_credentials: string -> string -> Login.t option Lwt.t
+val get_login_from_credentials: string -> string -> Login.t Lwt.t
 val get_login_update: User.Id.t -> Login.t Lwt.t
 
 

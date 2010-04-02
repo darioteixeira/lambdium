@@ -85,33 +85,33 @@ let get_login sp =
 
 (**	Handler for login action.
 *)
-let login_handler sp () (username, (password, remember)) =
+let login_handler sp () (nick, (password, remember)) =
 	Eliom_sessions.close_session ~sp () >>= fun () ->
-	Database.get_login_from_credentials username password >>= function
-		| Some login ->
-			let login_group = User.Id.to_string (Login.uid login) in
-			Eliom_sessions.set_service_session_group ~sp login_group;
+	try_lwt
+		Database.get_login_from_credentials nick password >>= fun login ->
+		let login_group = User.Id.to_string (Login.uid login) in
+		Eliom_sessions.set_service_session_group ~sp login_group;
 
-			(match !!login_table with
-				| Persistent table ->
-					Eliom_sessions.set_persistent_session_data ~table ~sp login >>= fun () ->
-					Eliom_sessions.set_persistent_data_session_group ~sp login_group
-				| Volatile table ->
-					Eliom_sessions.set_volatile_session_data ~table ~sp login;
-					Eliom_sessions.set_volatile_data_session_group ~sp login_group;
-					Lwt.return ()) >>= fun () ->
-	
-			(if remember
-			then begin
-				Eliom_sessions.set_service_session_timeout ~sp None;
-				Eliom_sessions.set_persistent_data_session_timeout ~sp None >>= fun () ->
-				Eliom_sessions.set_persistent_data_session_cookie_exp_date ~sp (Some 3153600000.0)
-			end
-			else begin
-				Lwt.return ()
-			end)
-		| None ->
-			Status.failure ~sp [pcdata "Invalid login!"] [];
+		(match !!login_table with
+			| Persistent table ->
+				Eliom_sessions.set_persistent_session_data ~table ~sp login >>= fun () ->
+				Eliom_sessions.set_persistent_data_session_group ~sp login_group
+			| Volatile table ->
+				Eliom_sessions.set_volatile_session_data ~table ~sp login;
+				Eliom_sessions.set_volatile_data_session_group ~sp login_group;
+				Lwt.return ()) >>= fun () ->
+
+		if remember
+		then begin
+			Eliom_sessions.set_service_session_timeout ~sp None;
+			Eliom_sessions.set_persistent_data_session_timeout ~sp None >>= fun () ->
+			Eliom_sessions.set_persistent_data_session_cookie_exp_date ~sp (Some 3153600000.0)
+		end else
+			Lwt.return ()
+	with
+		| Database.Unknown_nick
+		| Database.Invalid_password ->
+			Status.failure ~sp [pcdata "Invalid login/password combination!"] [];
 			Lwt.return ()
 
 

@@ -87,8 +87,7 @@ DECLARE
 	_timezone		timezones%ROWTYPE;
 
 BEGIN
-	SELECT	INTO _actual_user
-		*
+	SELECT	INTO _actual_user *
 		FROM users
 		WHERE user_nick = _target_nick;
 
@@ -425,11 +424,11 @@ BEGIN
                                 WHERE user_id = _user_id;
                         RETURN;
                 ELSE
-                        RAISE EXCEPTION 'Wrong password';
+                        RAISE EXCEPTION 'invalid_password';
                         RETURN;
                 END IF;
         ELSE
-                RAISE EXCEPTION 'Non-existent user ID';
+                RAISE EXCEPTION 'unknown_uid';
                 RETURN;
         END IF;
 END

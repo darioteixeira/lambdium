@@ -37,6 +37,8 @@ exception Unknown_tid
 exception Unknown_uid
 exception Unknown_sid
 exception Unknown_cid
+exception Unknown_nick
+exception Invalid_password
 exception Error of string
 
 
@@ -47,6 +49,13 @@ exception Error of string
 let process_error = function
 	| PGOCaml.PostgreSQL_Error (_, fields) ->
 		let exc = match List.assoc 'C' fields with
+			| "P0001" ->
+				begin match List.assoc 'M' fields with
+					| "unknown_uid"      -> Unknown_uid
+					| "unknown_nick"     -> Unknown_nick
+					| "invalid_password" -> Invalid_password
+					| x		     -> Error x
+				end
 			| "23505" -> Unique_violation
 			| x	  -> Error x
 		in Lwt.fail exc
@@ -123,8 +132,7 @@ let get_login_from_credentials nick password =
 	let get_data dbh =
 		try_lwt
 			PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login_from_credentials ($nick, $password)" >>= function
-				| [u] -> Lwt.return (Some (Login.of_tuple u))
-				| []  -> Lwt.return None
+				| [u] -> Lwt.return (Login.of_tuple u)
 				| _   -> Lwt.fail Unexpected_result
 		with
 			exc -> process_error exc
