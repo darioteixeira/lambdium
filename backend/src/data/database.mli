@@ -20,20 +20,12 @@
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Database_error
-
-exception Cannot_get_timezone
-exception Cannot_get_user
-exception Cannot_get_story
-exception Cannot_get_comment
-
-exception Cannot_add_user
-exception Cannot_add_story
-exception Cannot_add_comment
-
-exception Cannot_edit_user_credentials
-exception Cannot_edit_user_settings
-exception Cannot_get_nick_availability
+exception Unexpected_result
+exception Unique_violation
+exception Unknown_uid
+exception Unknown_sid
+exception Unknown_cid
+exception Error of string
 
 
 (********************************************************************************)
@@ -95,7 +87,7 @@ val get_story_with_comments: Story.Id.t -> (Story.full_t * Comment.full_t list) 
 (********************************************************************************)
 
 val add_user: User.fresh_t -> User.Id.t Lwt.t
-val add_story: output_maker:(Story.Id.t -> string * string) -> Story.fresh_t -> Story.Id.t Lwt.t
+val add_story: output_maker:(Story.Id.t -> string * string) -> side_action:(Story.Id.t -> unit Lwt.t) -> Story.fresh_t -> Story.Id.t Lwt.t
 val add_comment: output_maker:(Comment.Id.t -> string) -> Comment.fresh_t -> Comment.Id.t Lwt.t
 
 

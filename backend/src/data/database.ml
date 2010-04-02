@@ -31,21 +31,27 @@ let pool =
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Database_error
+exception Unexpected_result
+exception Unique_violation
+exception Unknown_tid
+exception Unknown_uid
+exception Unknown_sid
+exception Unknown_cid
+exception Error of string
 
-exception Cannot_get_timezone
-exception Cannot_get_user
-exception Cannot_get_story
-exception Cannot_get_comment
 
-exception Cannot_add_user
-exception Cannot_add_story
-exception Cannot_add_comment
+(********************************************************************************)
+(**	{1 Private functions and values}					*)
+(********************************************************************************)
 
-exception Cannot_edit_user_credentials
-exception Cannot_edit_user_settings
-
-exception Cannot_get_nick_availability
+let process_error = function
+	| PGOCaml.PostgreSQL_Error (_, fields) ->
+		let exc = match List.assoc 'C' fields with
+			| "23505" -> Unique_violation
+			| x	  -> Error x
+		in Lwt.fail exc
+	| exc ->
+		Lwt.fail exc
 
 
 (********************************************************************************)
@@ -59,8 +65,11 @@ exception Cannot_get_nick_availability
 let get_timezones () =
 	assert (Ocsigen_messages.warning "Database.get_timezones ()"; true);
 	let get_data dbh =
-		PGSQL (dbh) "nullres=none" "SELECT * FROM get_timezones ()" >>= fun timezones ->
-		Lwt.return (List.map Timezone.full_of_tuple timezones)
+		try_lwt
+			PGSQL (dbh) "nullres=none" "SELECT * FROM get_timezones ()" >>= fun timezones ->
+			Lwt.return (List.map Timezone.full_of_tuple timezones)
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -71,9 +80,13 @@ let get_timezone = function
 	| Some tid ->
 		assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_timezone %ld" tid); true);
 		let get_data dbh =
-			PGSQL (dbh) "nullres=none" "SELECT * FROM get_timezone ($tid)" >>= function
-				| [tz]	-> Lwt.return (Timezone.full_of_tuple tz)
-				| _	-> Lwt.fail Cannot_get_timezone
+			try_lwt
+				PGSQL (dbh) "nullres=none" "SELECT * FROM get_timezone ($tid)" >>= function
+					| [tz] -> Lwt.return (Timezone.full_of_tuple tz)
+					| []   -> Lwt.fail Unknown_tid
+					| _    -> Lwt.fail Unexpected_result
+			with
+				exc -> process_error exc
 		in Lwt_pool.use !!pool get_data
 
 
@@ -84,17 +97,24 @@ let get_timezone = function
 let get_users () =
 	assert (Ocsigen_messages.warning "Database.get_users ()"; true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_users ()" >>= fun users ->
-		Lwt.return (List.map User.handle_of_tuple users)
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM get_users ()" >>= fun users ->
+			Lwt.return (List.map User.handle_of_tuple users)
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
 let get_user uid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_user %ld" uid); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=f,f,f,t" "SELECT * FROM get_user ($uid)" >>= function
-			| [u]	-> Lwt.return (User.full_of_tuple u)
-			| _	-> Lwt.fail Cannot_get_user
+		try_lwt
+			PGSQL(dbh) "nullres=f,f,f,t" "SELECT * FROM get_user ($uid)" >>= function
+				| [u] -> Lwt.return (User.full_of_tuple u)
+				| []  -> Lwt.fail Unknown_uid
+				| _   -> Lwt.fail Unexpected_result
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -103,19 +123,24 @@ let get_login_from_credentials nick password =
 	let get_data dbh =
 		try_lwt
 			PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login_from_credentials ($nick, $password)" >>= function
-				| [u]	-> Lwt.return (Some (Login.of_tuple u))
-				| _	-> Lwt.fail Database_error
+				| [u] -> Lwt.return (Some (Login.of_tuple u))
+				| []  -> Lwt.return None
+				| _   -> Lwt.fail Unexpected_result
 		with
-			| PGOCaml.PostgreSQL_Error _ -> Lwt.return None
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
 let get_login_update uid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_login_update %ld" uid); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login_update ($uid)" >>= function
-			| [u]	-> Lwt.return (Login.of_tuple u)
-			| _	-> Lwt.fail Database_error
+		try_lwt
+			PGSQL(dbh) "nullres=f,f,t" "SELECT * FROM get_login_update ($uid)" >>= function
+				| [u] -> Lwt.return (Login.of_tuple u)
+				| []  -> Lwt.fail Unknown_uid
+				| _   -> Lwt.fail Unexpected_result
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -126,25 +151,35 @@ let get_login_update uid =
 let get_stories () =
 	assert (Ocsigen_messages.warning "Database.get_stories ()"; true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_stories ()" >>= fun stories ->
-		Lwt.return (List.map Story.blurb_of_tuple stories)
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM get_stories ()" >>= fun stories ->
+			Lwt.return (List.map Story.blurb_of_tuple stories)
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
 let get_user_stories uid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_user_stories %ld" uid); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_user_stories ($uid)" >>= fun stories ->
-		Lwt.return (List.map Story.handle_of_tuple stories)
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM get_user_stories ($uid)" >>= fun stories ->
+			Lwt.return (List.map Story.handle_of_tuple stories)
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
 let get_story sid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_story %ld" sid); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story ($sid)" >>= function
-			| [s]	-> Lwt.return (Story.full_of_tuple s)
-			| _	-> Lwt.fail Cannot_get_story
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM get_story ($sid)" >>= function
+				| [s] -> Lwt.return (Story.full_of_tuple s)
+				| []  -> Lwt.fail Unknown_sid
+				| _   -> Lwt.fail Unexpected_result
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -155,25 +190,35 @@ let get_story sid =
 let get_story_comments sid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_story_comments %ld" sid); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story_comments ($sid)" >>= fun comments ->
-		Lwt.return (List.map Comment.full_of_tuple comments)
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM get_story_comments ($sid)" >>= fun comments ->
+			Lwt.return (List.map Comment.full_of_tuple comments)
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
 let get_user_comments uid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_user_comments %ld" uid); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_user_comments ($uid)" >>= fun comments ->
-		Lwt.return (List.map Comment.handle_of_tuple comments)
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM get_user_comments ($uid)" >>= fun comments ->
+			Lwt.return (List.map Comment.handle_of_tuple comments)
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
 let get_comment cid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_comment %ld" cid); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM get_comment ($cid)" >>= function
-			| [c]	-> Lwt.return (Comment.full_of_tuple c)
-			| _	-> Lwt.fail Cannot_get_comment
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM get_comment ($cid)" >>= function
+				| [c] -> Lwt.return (Comment.full_of_tuple c)
+				| []  -> Lwt.fail Unknown_cid
+				| _   -> Lwt.fail Unexpected_result
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -185,8 +230,9 @@ let get_story_with_comments sid =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.get_story_with_comments %ld" sid); true);
 	let get_story dbh =
 		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story ($sid)" >>= function
-			| [s]	-> Lwt.return (Story.full_of_tuple s)
-			| _	-> Lwt.fail Cannot_get_story in
+			| [s] -> Lwt.return (Story.full_of_tuple s)
+			| []  -> Lwt.fail Unknown_sid
+			| _   -> Lwt.fail Unexpected_result in
 	let get_story_comments dbh =
 		PGSQL(dbh) "nullres=none" "SELECT * FROM get_story_comments ($sid)" >>= fun comments ->
 		Lwt.return (List.map Comment.full_of_tuple comments) in
@@ -198,7 +244,7 @@ let get_story_with_comments sid =
 			PGOCaml.commit dbh >>= fun () ->
 			Lwt.return (story, comments)
 		with
-			| exc -> PGOCaml.rollback dbh >>= fun () -> Lwt.fail exc
+			exc -> PGOCaml.rollback dbh >>= fun () -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -210,13 +256,16 @@ let add_user user =
 	assert (Ocsigen_messages.warning "Database.add_user ()"; true);
 	let (nick, fullname, password, maybe_tid) = User.tuple_of_fresh user in
 	let get_data dbh =
-		PGSQL(dbh) "SELECT add_user ($nick, $fullname, $password, $?maybe_tid)" >>= function
-			| [Some uid] -> Lwt.return uid
-			| _	     -> Lwt.fail Cannot_add_user
+		try_lwt
+			PGSQL(dbh) "SELECT add_user ($nick, $fullname, $password, $?maybe_tid)" >>= function
+				| [Some uid] -> Lwt.return uid
+				| _	     -> Lwt.fail Unexpected_result
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
-let add_story ~output_maker story =
+let add_story ~output_maker ~side_action story =
 	assert (Ocsigen_messages.warning "Database.add_story ()"; true);
 	let add dbh =
 		let (uid, title, intro_xmrk, intro_src, intro_xdoc, _intro_xout, body_xmrk, body_src, body_xdoc, _body_xout) = Story.tuple_of_fresh story
@@ -224,7 +273,7 @@ let add_story ~output_maker story =
 		and body_xout = ""
 		in PGSQL(dbh) "SELECT add_story ($uid, $title, $intro_xmrk, $intro_src, $intro_xdoc, $intro_xout, $body_xmrk, $body_src, $body_xdoc, $body_xout)" >>= function
 			| [Some sid] -> Lwt.return sid
-			| _	     -> Lwt.fail Cannot_add_story in
+			| _	     -> Lwt.fail Unexpected_result in
 	let edit dbh sid intro_xout body_xout =
 		PGSQL(dbh) "SELECT edit_story_output ($sid, $intro_xout, $body_xout)" >>= fun _ ->
 		Lwt.return () in
@@ -234,10 +283,11 @@ let add_story ~output_maker story =
 			add dbh >>= fun sid ->
 			let (intro_xout, body_xout) = output_maker sid in
 			edit dbh sid intro_xout body_xout >>= fun () ->
+			side_action sid >>= fun () ->
 			PGOCaml.commit dbh >>= fun () ->
 			Lwt.return sid
 		with
-			| exc -> PGOCaml.rollback dbh >>= fun () -> Lwt.fail exc
+			exc -> PGOCaml.rollback dbh >>= fun () -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -248,7 +298,7 @@ let add_comment ~output_maker comment =
 		and body_xout = ""
 		in PGSQL(dbh) "SELECT add_comment ($sid, $uid, $title, $body_xmrk, $body_src, $body_xdoc, $body_xout)" >>= function
 			| [Some cid] -> Lwt.return cid
-			| _	     -> Lwt.fail Cannot_add_comment in
+			| _	     -> Lwt.fail Unexpected_result in
 	let edit dbh cid body_xout =
 		PGSQL(dbh) "SELECT edit_comment_output ($cid, $body_xout)" >>= fun _ ->
 		Lwt.return () in
@@ -261,7 +311,7 @@ let add_comment ~output_maker comment =
 			PGOCaml.commit dbh >>= fun () ->
 			Lwt.return cid
 		with
-			| exc -> PGOCaml.rollback dbh >>= fun () -> Lwt.fail exc
+			exc -> PGOCaml.rollback dbh >>= fun () -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -273,8 +323,11 @@ let edit_user_credentials user_credentials =
 	assert (Ocsigen_messages.warning "Database.edit_user_credentials"; true);
 	let (uid, old_password, new_password) = User.tuple_of_changed_credentials user_credentials in
 	let get_data dbh =
-		PGSQL(dbh) "SELECT edit_user_credentials ($uid, $old_password, $new_password)" >>= fun _ ->
-		Lwt.return ()
+		try_lwt
+			PGSQL(dbh) "SELECT edit_user_credentials ($uid, $old_password, $new_password)" >>= fun _ ->
+			Lwt.return ()
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -282,8 +335,11 @@ let edit_user_settings user_settings =
 	assert (Ocsigen_messages.warning "Database.edit_user_settings"; true);
 	let (uid, fullname, maybe_tid) = User.tuple_of_changed_settings user_settings in
 	let get_data dbh =
-		PGSQL(dbh) "SELECT edit_user_settings ($uid, $fullname, $?maybe_tid)" >>= fun _ ->
-		Lwt.return ()
+		try_lwt
+			PGSQL(dbh) "SELECT edit_user_settings ($uid, $fullname, $?maybe_tid)" >>= fun _ ->
+			Lwt.return ()
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 
 
@@ -294,8 +350,11 @@ let edit_user_settings user_settings =
 let is_available_nick nick =
 	assert (Ocsigen_messages.warning (Printf.sprintf "Database.is_available_nick %s" nick); true);
 	let get_data dbh =
-		PGSQL(dbh) "nullres=none" "SELECT * FROM is_available_nick ($nick)" >>= function
-			| [x]	-> Lwt.return x
-			| _	-> Lwt.fail Cannot_get_nick_availability
+		try_lwt
+			PGSQL(dbh) "nullres=none" "SELECT * FROM is_available_nick ($nick)" >>= function
+				| [x]	-> Lwt.return x
+				| _	-> Lwt.fail Unexpected_result
+		with
+			exc -> process_error exc
 	in Lwt_pool.use !!pool get_data
 

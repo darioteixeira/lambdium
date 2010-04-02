@@ -137,13 +137,14 @@ and step6_handler ~token ~story sp () (action, ()) =
 					let path = path_maker sid in
 					let intro_xout = Document.serialise_output (Document.output_of_composition ~sp ~path story#intro_doc)
 					and body_xout = Document.serialise_output (Document.output_of_manuscript ~sp ~path story#body_doc)
-					in (intro_xout, body_xout) in
-				Database.add_story ~output_maker story >>= fun sid ->
-				Uploader.commit ~path:(path_maker sid) token >>= fun () ->
+					in (intro_xout, body_xout)
+				and side_action sid =
+					Uploader.commit ~path:(path_maker sid) token in
+				Database.add_story ~output_maker ~side_action story >>= fun sid ->
 				Status.success ~sp [pcdata "Story has been added!"] [];
 				Show_story.handler sp sid ()
 			with
-				| Database.Cannot_add_story ->
+				exc ->
 					Status.failure ~sp [pcdata "Cannot add story!"] [];
 					Page.login_enforced_handler ~sp ~page_title:"Add Story - Step 6/6" ()
 

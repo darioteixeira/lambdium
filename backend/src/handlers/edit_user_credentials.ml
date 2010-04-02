@@ -46,12 +46,13 @@ and step2_handler login sp () (old_password, (new_password, new_password2)) =
 	end
 	else
 		try_lwt
-			let credentials = User.make_changed_credentials (Login.uid login) old_password new_password in
+			let uid = Login.uid login in
+			let credentials = User.make_changed_credentials uid old_password new_password in
 			Database.edit_user_credentials credentials >>= fun () ->
 			Status.success ~sp [pcdata "Password has been changed!"] [];
-			Page.login_enforced_handler ~sp ~page_title:"Change password - Step 2/2" ()
+			Show_user.handler sp uid ()
 		with
-			| Database.Cannot_edit_user_credentials ->
+			exc ->
 				Status.failure ~sp [pcdata "Error!"] [];
 				step1_handler sp () ()
 

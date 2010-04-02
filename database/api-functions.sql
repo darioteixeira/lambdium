@@ -28,7 +28,7 @@ $$;
  */
 
 CREATE FUNCTION get_timezone (timezone_id_t)
-RETURNS timezone_full_t
+RETURNS SETOF timezone_full_t
 LANGUAGE sql STABLE AS
 $$
 	SELECT	timezone_id, timezone_name
@@ -59,7 +59,7 @@ $$;
  */
 
 CREATE FUNCTION get_user (user_id_t)
-RETURNS user_full_t
+RETURNS SETOF user_full_t
 LANGUAGE sql STABLE AS
 $$
 	SELECT	user_id, user_nick, user_fullname, user_timezone_id
@@ -87,7 +87,8 @@ DECLARE
 	_timezone		timezones%ROWTYPE;
 
 BEGIN
-	SELECT	INTO _actual_user *
+	SELECT	INTO _actual_user
+		*
 		FROM users
 		WHERE user_nick = _target_nick;
 
@@ -100,11 +101,11 @@ BEGIN
 			_login := (_actual_user.user_id, _actual_user.user_nick, _timezone.timezone_name);
 			RETURN _login;
 		ELSE
-			RAISE EXCEPTION 'Non-matching password';
+			RAISE EXCEPTION 'invalid_password';
 			RETURN NULL;
 		END IF;
 	ELSE
-		RAISE EXCEPTION 'Non-existent user name';
+		RAISE EXCEPTION 'unknown_nick';
 		RETURN NULL;
 	END IF;
 END
@@ -125,8 +126,15 @@ DECLARE
 	_login	login_t;
 BEGIN
 	SELECT INTO _user * FROM users WHERE user_id = $1;
-	_login := (_user.user_id, _user.user_nick, (SELECT timezone_name FROM timezones WHERE timezone_id = _user.user_timezone_id));
-	RETURN _login;
+
+	IF FOUND
+	THEN
+		_login := (_user.user_id, _user.user_nick, (SELECT timezone_name FROM timezones WHERE timezone_id = _user.user_timezone_id));
+		RETURN _login;
+	ELSE
+		RAISE EXCEPTION 'unknown_uid';
+		RETURN NULL;
+	END IF;
 END
 $$;
 
@@ -171,7 +179,7 @@ $$;
  */
 
 CREATE FUNCTION get_story (story_id_t)
-RETURNS story_full_t
+RETURNS SETOF story_full_t
 LANGUAGE sql STABLE AS
 $$
 	SELECT	story_id, user_id, user_nick, story_title, story_timestamp, story_num_comments, story_intro_out, story_body_out
@@ -219,7 +227,7 @@ $$;
  */
 
 CREATE FUNCTION get_comment (comment_id_t)
-RETURNS comment_full_t
+RETURNS SETOF comment_full_t
 LANGUAGE sql STABLE AS
 $$
 	SELECT	comment_id, comment_story_id, user_id, user_nick, comment_title, comment_timestamp, comment_body_out

@@ -21,7 +21,7 @@ let output_core sid maybe_login sp =
 		Story_io.output_full maybe_login sp story comments >>= fun story_out ->
 		Lwt.return [story_out]
 	with
-		Database.Cannot_get_story ->
+		Database.Unknown_sid ->
 			Status.failure ~sp [pcdata "Cannot find specified story!"] [];
 			Lwt.return []
 

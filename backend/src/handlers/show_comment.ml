@@ -20,7 +20,7 @@ let output_core cid maybe_login sp =
 		Database.get_comment cid >>= fun comment ->
 		Lwt.return [Comment_io.output_full maybe_login sp comment]
 	with
-		| Database.Cannot_get_comment ->
+		Database.Unknown_cid ->
 			Status.failure ~sp [pcdata "Cannot find specified comment!"] [];
 			Lwt.return []
 
