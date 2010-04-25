@@ -27,7 +27,6 @@ type full_t = < tid: Id.t option; name: string >
 val utc: full_t
 val make_handle: Id.t option -> handle_t
 val make_full: Id.t -> string -> full_t
-val full_of_tuple: Id.t * string -> full_t
 
 
 (********************************************************************************)

@@ -47,10 +47,6 @@ let make_full tid name =
 	end
 
 
-let full_of_tuple (tid, name) =
-	make_full tid name
-
-
 (********************************************************************************)
 (**	{2 (De)serialisers}							*)
 (********************************************************************************)
@@ -70,7 +66,7 @@ let of_string = function
 (********************************************************************************)
 
 let output_full tz =
-	dl ~a:[a_class ["timezone_info"]]
+	dl ~a:[a_class ["timezone"]]
 		(dt [pcdata "Name:"])
 		[
 		dd [pcdata tz#name];

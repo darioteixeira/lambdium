@@ -96,24 +96,3 @@ let make_incipient nick fullname timezone =
 		method timezone = timezone
 	end
 
-
-let handle_of_tuple (uid, nick) =
-        make_handle uid nick
-
-
-let full_of_tuple (uid, nick, fullname, maybe_tid) =
-	let timezone = Timezone.make_handle maybe_tid
-	in make_full uid nick fullname timezone
-
-
-let tuple_of_fresh user =
-	(user#nick, user#fullname, user#new_password, user#timezone#tid)
-
-
-let tuple_of_changed_credentials user =
-	(user#uid, user#old_password, user#new_password)
-
-
-let tuple_of_changed_settings user =
-	(user#uid, user#fullname, user#timezone#tid)
-

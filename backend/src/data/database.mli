@@ -20,7 +20,6 @@
 (**	{1 Exceptions}								*)
 (********************************************************************************)
 
-exception Unexpected_result
 exception Unique_violation
 exception Unknown_uid
 exception Unknown_sid

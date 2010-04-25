@@ -28,7 +28,7 @@ let nick x = x.nick
 
 let tz x = x.tz
 
-let of_tuple (uid, nick, tz) =
+let make uid nick tz =
 	{uid = uid; nick = nick; tz = tz;}
 	
 let to_user x =

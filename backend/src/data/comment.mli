@@ -91,15 +91,3 @@ val make_incipient:
 	string -> Markup.t -> source_t ->
 	incipient_t
 
-val handle_of_tuple:
-	(Id.t * string) ->
-	handle_t
-
-val full_of_tuple:
-	(Id.t * Story.Id.t * User.Id.t * string * string * Timestamp.t * string) ->
-	full_t
-
-val tuple_of_fresh:
-	fresh_t ->
-	(Story.Id.t * User.Id.t * string * string * string * string * string)
-

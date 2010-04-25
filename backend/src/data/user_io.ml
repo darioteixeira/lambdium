@@ -32,27 +32,24 @@ let output_full sp user timezone stories comments =
 			(dt [pcdata "ID:"])
 			[
 			dd [pcdata (User.Id.to_string user#uid)];
-			dt [pcdata "Login name:"]; dd [pcdata user#nick];
-			dt [pcdata "Full name:"]; dd [pcdata user#fullname]
+			dt [pcdata "Login name:"];
+			dd [pcdata user#nick];
+			dt [pcdata "Full name:"];
+			dd [pcdata user#fullname];
 			];
 
-		h1 [pcdata "User timezone:"];
-
+		h2 [pcdata "User timezone:"];
 		Timezone.output_full timezone;
 
-		h1 [pcdata "List of stories:"];
+		h2 [pcdata "List of stories:"];
 		(match stories with
 			| []	 -> p [pcdata "(This user has written no stories)"]
-			| hd::tl -> ul ~a:[a_class ["list_of_stories"]]
-					(Story_io.output_handle sp hd)
-					(List.map (Story_io.output_handle sp) tl));
+			| hd::tl -> ul ~a:[a_class ["list_of_stories"]] (Story_io.output_handle sp hd) (List.map (Story_io.output_handle sp) tl));
 
-		h1 [pcdata "List of comments:"];
+		h2 [pcdata "List of comments:"];
 		match comments with
 			| []	 -> p [pcdata "(This user has written no comments)"]
-			| hd::tl -> ul ~a:[a_class ["list_of_comments"]]
-					(Comment_io.output_handle sp hd)
-					(List.map (Comment_io.output_handle sp) tl);
+			| hd::tl -> ul ~a:[a_class ["list_of_comments"]] (Comment_io.output_handle sp hd) (List.map (Comment_io.output_handle sp) tl);
 		]
 
 

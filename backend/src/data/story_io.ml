@@ -125,17 +125,18 @@ let form_for_images ~sp ~path ~status enter_file =
 		let lbl = "enter_file_" ^ alias in
 		let enter =
 			[
-			label ~a:[a_for lbl] [pcdata (Printf.sprintf "Enter file for bitmap with alias '%s':" alias)];
+			label ~a:[a_for lbl] [pcdata (Printf.sprintf "Specify image for alias '%s':" alias)];
 			Eliom_predefmod.Xhtml.file_input ~a:[a_id lbl] ~name:enter_file ();
 			]
 		and show = match is_uploaded with
 			| true  ->
 				let uri = Eliom_predefmod.Xhtml.make_uri ~service:(External.static (path @ [alias])) ~sp ()
-				in [p [pcdata "Currently uploaded image:"]; XHTML.M.img ~src:uri ~alt:"" ()]
-			| false -> []
-		in enter @ show
+				in [p [pcdata "Image currently associated with this alias:"]; XHTML.M.img ~src:uri ~alt:"" ()]
+			| false ->
+				[p [pcdata "(No image is currently associated with this alias)"]]
+		in div ~a:[a_class ["inl_field"]] (enter @ show)
 	in Lwt.return
 		[
-		fieldset ([legend [pcdata "Images:"]] @ (List.flatten (List.map make_input status)))
+		fieldset ~a:[a_id "image_set"] (legend [pcdata "Images:"] :: (List.map make_input status))
 		]
 

@@ -72,23 +72,3 @@ val make_incipient:
 	string -> string -> Timezone.handle_t ->
 	incipient_t
 
-val handle_of_tuple:
-	(Id.t * string) ->
-	handle_t
-
-val full_of_tuple:
-	(Id.t * string * string * Timezone.Id.t option) ->
-	full_t
-
-val tuple_of_fresh:
-	fresh_t ->
-	(string * string * string * Timezone.Id.t option)
-
-val tuple_of_changed_credentials:
-	changed_credentials_t ->
-	(Id.t * string * string)
-
-val tuple_of_changed_settings:
-	changed_settings_t ->
-	(Id.t * string * Timezone.Id.t option)
-

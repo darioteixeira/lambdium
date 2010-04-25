@@ -78,10 +78,10 @@ type changed_t =
 
 type incipient_t =
 	< title: string;
-	intro_mrk: Document.Markup.t;
-	intro_src:string;
-	body_mrk:Document.Markup.t;
-	body_src:string >
+	intro_mrk: Markup.t;
+	intro_src: string;
+	body_mrk: Markup.t;
+	body_src: string >
 
 
 (********************************************************************************)
@@ -174,31 +174,4 @@ let make_incipient title intro_mrk intro_src body_mrk body_src =
 		method body_mrk = body_mrk
 		method body_src = body_src
 	end
-
-
-let handle_of_tuple (sid, title) =
-	make_handle sid title
-
-
-let blurb_of_tuple (sid, author_uid, author_nick, title, timestamp, num_comments, intro_xout) =
-	let author = User.make_handle author_uid author_nick
-	and intro_out = Document.deserialise_output intro_xout
-	in make_blurb sid author title timestamp num_comments intro_out
-
-
-let full_of_tuple (sid, author_uid, author_nick, title, timestamp, num_comments, intro_xout, body_xout) =
-	let author = User.make_handle author_uid author_nick
-	and intro_out = Document.deserialise_output intro_xout
-	and body_out = Document.deserialise_output body_xout
-	in make_full sid author title timestamp num_comments intro_out body_out
-
-
-let tuple_of_fresh story =
-	let intro_xmrk = Markup.to_string story#intro_mrk
-	and intro_xdoc = Document.serialise_composition story#intro_doc
-	and intro_xout = Document.serialise_output story#intro_out
-	and body_xmrk = Markup.to_string story#body_mrk
-	and body_xdoc = Document.serialise_manuscript story#body_doc
-	and body_xout = Document.serialise_output story#body_out
-	in (story#author#uid, story#title, intro_xmrk, story#intro_src, intro_xdoc, intro_xout, body_xmrk, story#body_src, body_xdoc, body_xout)
 

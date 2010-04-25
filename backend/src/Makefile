@@ -14,7 +14,7 @@ export PGDATABASE=lambdium
 #export UNIX_DOMAIN_SOCKET_DIR=
 
 
-OCAMLBUILD_OPTS=
+#OCAMLBUILD_OPTS=-classic-display
 SRC_DIR=.
 TARGETS=lambdium.native lambdium.byte
 

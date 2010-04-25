@@ -285,7 +285,7 @@ $$;
  * Adds a new story.
  */
 
-CREATE FUNCTION add_story (user_id_t, text, text, text, bytea, bytea, text, text, bytea, bytea)
+CREATE FUNCTION add_story (user_id_t, text, text, text, bytea, text, text, bytea)
 RETURNS story_id_t
 LANGUAGE plpgsql VOLATILE AS
 $$
@@ -295,11 +295,9 @@ DECLARE
 	_story_intro_mrk	ALIAS FOR $3;
 	_story_intro_src	ALIAS FOR $4;
 	_story_intro_doc	ALIAS FOR $5;
-	_story_intro_out	ALIAS FOR $6;
-	_story_body_mrk		ALIAS FOR $7;
-	_story_body_src		ALIAS FOR $8;
-	_story_body_doc		ALIAS FOR $9;
-	_story_body_out		ALIAS FOR $10;
+	_story_body_mrk		ALIAS FOR $6;
+	_story_body_src		ALIAS FOR $7;
+	_story_body_doc		ALIAS FOR $8;
 
 BEGIN
 	INSERT	INTO stories
@@ -326,11 +324,11 @@ BEGIN
 			_story_intro_mrk,
 			_story_intro_src,
 			_story_intro_doc,
-			_story_intro_out,
+			'',
 			_story_body_mrk,
 			_story_body_src,
 			_story_body_doc,
-			_story_body_out
+			''
 			);
 
 	RETURN currval ('story_id_seq');
@@ -342,7 +340,7 @@ $$;
  * Adds a new comment.
  */
 
-CREATE FUNCTION add_comment (story_id_t, user_id_t, text, text, text, bytea, bytea)
+CREATE FUNCTION add_comment (story_id_t, user_id_t, text, text, text, bytea)
 RETURNS comment_id_t
 LANGUAGE plpgsql VOLATILE AS
 $$
@@ -353,7 +351,6 @@ DECLARE
 	_comment_body_mrk	ALIAS FOR $4;
 	_comment_body_src	ALIAS FOR $5;
 	_comment_body_doc	ALIAS FOR $6;
-	_comment_body_out	ALIAS FOR $7;
 
 BEGIN
 	INSERT	INTO comments
@@ -376,7 +373,7 @@ BEGIN
 			_comment_body_mrk,
 			_comment_body_src,
 			_comment_body_doc,
-			_comment_body_out
+			''
 			);
 
 	RETURN currval ('comment_id_seq');

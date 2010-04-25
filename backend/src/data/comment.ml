@@ -132,20 +132,3 @@ let make_incipient title body_mrk body_src =
 		method body_src = body_src
 	end
 
-
-let handle_of_tuple (cid, title) =
-	make_handle cid title
-
-
-let full_of_tuple (cid, sid, author_uid, author_nick, title, timestamp, body_xout) =
-	let author = User.make_handle author_uid author_nick
-	and body_out = Document.deserialise_output body_xout
-	in make_full cid sid author title timestamp body_out
-
-
-let tuple_of_fresh comment =
-	let body_xmrk = Markup.to_string comment#body_mrk
-	and body_xdoc = Document.serialise_composition comment#body_doc
-	and body_xout = Document.serialise_output comment#body_out
-	in (comment#sid, comment#author#uid, comment#title, body_xmrk, comment#body_src, body_xdoc, body_xout)
-

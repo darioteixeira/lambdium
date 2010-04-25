@@ -21,7 +21,7 @@ val uid: t -> User.Id.t
 val nick: t -> string
 val tz: t -> string option
 
-val of_tuple: (User.Id.t * string * string option) -> t
+val make: User.Id.t -> string -> string option -> t
 val to_user: t -> User.handle_t
 val own_element: User.handle_t -> t option -> XHTML.M.nmtoken list
 val maybe_uid: t option -> User.Id.t option
