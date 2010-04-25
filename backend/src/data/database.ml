@@ -145,7 +145,7 @@ let pool =
 		?password:!Config.pgpassword
 		?database:!Config.pgdatabase
 		?unix_domain_socket_dir:!Config.pgsocketdir
-	in lazy (Lwt_pool.create 8 (connect ()))
+	in lazy (Lwt_pool.create !Config.pool_size (connect ()))
 
 
 let process_error = function

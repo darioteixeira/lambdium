@@ -62,6 +62,7 @@ let story_dir = ref "story"
 let comment_dir = ref "comment"
 let limbo_dir = ref "limbo"
 let global_upload_limit = ref 20
+let pool_size = ref 8
 
 let pghost = ref None
 let pgport = ref None
@@ -123,6 +124,8 @@ let parse_config () =
 			limbo_dir := s
 		| Element ("globaluploadlimit", [], [PCData s])	->
 			global_upload_limit := int_of_string s
+		| Element ("poolsize", [], [PCData s]) ->
+			pool_size := int_of_string s
 		| Element ("pgocaml", [], children) ->
 			List.iter parse_pgocaml children
 		| Element ("parserver", [], children) ->
