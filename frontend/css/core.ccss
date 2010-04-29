@@ -35,8 +35,55 @@
 
 
 /********************************************************************************/
+/* Timezones.									*/
+/********************************************************************************/
+
+.timezone > dt
+	{
+	float: left;
+	margin-right: Hmargin_small;
+	}
+
+
+/********************************************************************************/
+/* Users.									*/
+/********************************************************************************/
+
+.user
+	{
+	margin-left: Hmargin_large;
+	}
+
+.user > h1
+	{
+	margin: 0 0 Vmargin_small (-1 * Hmargin_medium);
+	font: Font_box_head;
+	}
+
+.user > h2
+	{
+	margin: Vmargin_medium 0 Vmargin_small (-1 * Hmargin_medium);
+	font: Font_box_head;
+	}
+
+.user_info > dt
+	{
+	float: left;
+	margin-right: Hmargin_small;
+	}
+
+
+
+/********************************************************************************/
 /* Stories.									*/
 /********************************************************************************/
+
+.list_of_stories > .story + .story
+	{
+	margin-top: Vmargin_medium;
+	padding-top: Vmargin_medium;
+	border-top: 1px dotted #666;
+	}
 
 .story_meta
 	{
@@ -45,8 +92,8 @@
 
 .story_title
 	{
-	font: Font_title;
-	color: Colour_title;
+	font: Font_story_title;
+	color: Colour_story_title;
 	text-transform: capitalize;
 	}
 
@@ -59,13 +106,13 @@
 
 .story > .doc_composition
 	{
-	margin-top: Vmargin_story_sep;
+	margin-top: Vmargin_story_head_sep;
 	}
 
 .story > .doc_manuscript
 	{
-	margin-top: Vmargin_story_sep;
-	padding-top: Vmargin_story_sep;
+	margin-top: Vmargin_story_body_sep;
+	padding-top: Vmargin_story_body_sep;
 	border-top: Border_story_sep;
 	}
 

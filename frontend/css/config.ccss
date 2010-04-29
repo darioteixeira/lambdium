@@ -24,7 +24,8 @@ Vmargin_header: 40px;
 Vmargin_footer: 30px;
 
 Vmargin_core_head: 20px;
-Vmargin_story_sep: 10px;
+Vmargin_story_head_sep: 10px;
+Vmargin_story_body_sep: 20px;
 
 
 /********************************************************************************/
@@ -49,7 +50,7 @@ Back_root: #fff;
 Colour_shadow: #666;
 Colour_fancy: #5b8ba6;
 Colour_watery: #444;
-Colour_title: Colour_watery;
+Colour_story_title: #555;
 
 Colour_header: Colour_fancy;
 Back_header: Back_root;
@@ -74,6 +75,7 @@ Back_failure_body: #efafaf;
 Border_story_sep:	2px solid Colour_fancy;
 Border_legend:		1px solid #666;
 Border_control_set:	1px dotted #666;
+Border_image_set:	1px dotted #666;
 
 
 /********************************************************************************/
@@ -82,13 +84,13 @@ Border_control_set:	1px dotted #666;
 
 Font_root:	0.625em sans-serif;
 Font_header:	bold 1.8em sans-serif;
-Font_title:	bold 1.3em sans-serif;
 Font_core:	1.3em sans-serif;
 
 Font_box_head:	bold 1.3em sans-serif;
 Font_box_body:	1.3em sans-serif;
 
-Font_comment_title: bold 1.3em sans-serif;
+Font_story_title: bold 1.1em sans-serif;
+Font_comment_title: bold 1.0em sans-serif;
 
 
 /********************************************************************************/
@@ -123,5 +125,10 @@ Padding_control_set: 1em 0 0;
 /********************************************************************************/
 
 Hmargin_small: 0.5em;
+Hmargin_medium: 1em;
+Hmargin_large: 2em;
+
 Vmargin_small: 0.5em;
+Vmargin_medium: 1em;
+Vmargin_large: 2em;
 

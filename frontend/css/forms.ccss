@@ -31,7 +31,7 @@
 	text-align: center;
 	}
 
-.inl_field:not(:first-of-type) {margin-top: Vmargin_inl_field;}
+.inl_field + .inl_field {margin-top: Vmargin_inl_field;}
 .inl_field > label
 	{
 	display: block;
@@ -41,7 +41,7 @@
 	text-align: right;
 	}
 
-.blk_field:not(:first-of-type) {margin-top: Vmargin_blk_field;}
+.blk_field + .blk_field {margin-top: Vmargin_blk_field;}
 .blk_field > textarea,
 .blk_field > input
 	{
@@ -56,5 +56,27 @@
 /* Form-specific configuration.							*/
 /********************************************************************************/
 
-#user_set > .inl_field > label {width: 10em;}
+#user_set > .inl_field > label
+	{
+	width: 10em;
+	}
+
+#image_set > .inl_field + .inl_field
+	{
+	margin-top: Vmargin_large;
+	padding-top: Vmargin_medium;
+	border-top: Border_image_set;
+	}
+
+#image_set > .inl_field > p
+	{
+	margin-top: Vmargin_small;
+	}
+
+#image_set > .inl_field > img
+	{
+	display: block;
+	margin: Vmargin_medium auto 0;
+	text-align: center;
+	}
 
