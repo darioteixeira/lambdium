@@ -27,31 +27,11 @@ type full_t =
 	timestamp: Timestamp.t;
 	body_out: output_t >
 
-type editable_t =
-	< cid: Id.t;
-	sid: Story.Id.t;
-	author: User.handle_t;
-	title: string;
-	timestamp: Timestamp.t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_out: output_t >
-
 type fresh_t =
 	< sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
 	timestamp: Timestamp.t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_doc: composition_t;
-	body_out: output_t >
-
-type changed_t =
-	< cid: Id.t;
-	sid: Story.Id.t;
-	author: User.handle_t;
-	title: string;
 	body_mrk: Markup.t;
 	body_src: source_t;
 	body_doc: composition_t;
@@ -75,17 +55,9 @@ val make_full:
 	Id.t -> Story.Id.t -> User.handle_t -> string -> Timestamp.t -> output_t ->
 	full_t
 
-val make_editable:
-	Id.t -> Story.Id.t -> User.handle_t -> string -> Timestamp.t -> Markup.t -> source_t -> output_t ->
-	editable_t
-
 val make_fresh:
 	Story.Id.t -> User.handle_t -> string -> Markup.t -> source_t -> composition_t -> output_t ->
 	fresh_t
-
-val make_changed:
-	Id.t -> Story.Id.t -> User.handle_t -> string -> Markup.t -> source_t -> composition_t -> output_t ->
-	changed_t
 
 val make_incipient:
 	string -> Markup.t -> source_t ->

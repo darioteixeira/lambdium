@@ -36,36 +36,10 @@ type full_t =
 	intro_out: output_t;
 	body_out: output_t >
 
-type editable_t =
-	< sid: Id.t;
-	author: User.handle_t;
-	title: string;
-	timestamp: Timestamp.t;
-	num_comments: Id.t;
-	intro_mrk: Markup.t;
-	intro_src: source_t;
-	intro_out: output_t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_out: output_t >
-
 type fresh_t =
 	< author: User.handle_t;
 	title: string;
 	timestamp: Timestamp.t;
-	intro_mrk: Markup.t;
-	intro_src: source_t;
-	intro_doc: composition_t;
-	intro_out: output_t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_doc: manuscript_t;
-	body_out: output_t >
-
-type changed_t =
-	< sid: Id.t;
-	author: User.handle_t;
-	title: string;
 	intro_mrk: Markup.t;
 	intro_src: source_t;
 	intro_doc: composition_t;
@@ -99,17 +73,9 @@ val make_full:
 	Id.t -> User.handle_t -> string -> Timestamp.t -> Id.t -> output_t -> output_t ->
 	full_t
 
-val make_editable:
-	Id.t -> User.handle_t -> string -> Timestamp.t -> Id.t -> Markup.t -> source_t -> output_t -> Markup.t -> source_t -> output_t ->
-	editable_t
-
 val make_fresh:
 	User.handle_t -> string -> Markup.t -> source_t -> composition_t -> output_t -> Markup.t -> source_t -> manuscript_t -> output_t ->
 	fresh_t
-
-val make_changed:
-	Id.t -> User.handle_t -> string -> Markup.t -> source_t -> composition_t -> output_t -> Markup.t -> source_t -> manuscript_t -> output_t ->
-	changed_t
 
 val make_incipient:
 	string -> Markup.t -> source_t -> Markup.t -> source_t ->

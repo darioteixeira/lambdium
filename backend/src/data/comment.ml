@@ -28,31 +28,11 @@ type full_t =
 	timestamp: Timestamp.t;
 	body_out: output_t >
 
-type editable_t =
-	< cid: Id.t;
-	sid: Story.Id.t;
-	author: User.handle_t;
-	title: string;
-	timestamp: Timestamp.t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_out: output_t >
-
 type fresh_t =
 	< sid: Story.Id.t;
 	author: User.handle_t;
 	title: string;
 	timestamp: Timestamp.t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_doc: composition_t;
-	body_out: output_t >
-
-type changed_t =
-	< cid: Id.t;
-	sid: Story.Id.t;
-	author: User.handle_t;
-	title: string;
 	body_mrk: Markup.t;
 	body_src: source_t;
 	body_doc: composition_t;
@@ -86,38 +66,12 @@ let make_full cid sid author title timestamp body_out =
 	end
 
 
-let make_editable cid sid author title timestamp body_mrk body_src body_out =
-	object
-		method cid = cid
-		method sid = sid
-		method author = author
-		method title = title
-		method timestamp = timestamp
-		method body_mrk = body_mrk
-		method body_src = body_src
-		method body_out = body_out
-	end
-
-
 let make_fresh sid author title body_mrk body_src body_doc body_out =
 	object
 		method sid = sid
 		method author = author
 		method title = title
 		method timestamp = Timestamp.soon ()
-		method body_mrk = body_mrk
-		method body_src = body_src
-		method body_doc = body_doc
-		method body_out = body_out
-	end
-
-
-let make_changed cid sid author title body_mrk body_src body_doc body_out =
-	object
-		method cid = cid
-		method sid = sid
-		method author = author
-		method title = title
 		method body_mrk = body_mrk
 		method body_src = body_src
 		method body_doc = body_doc

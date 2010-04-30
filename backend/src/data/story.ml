@@ -37,36 +37,10 @@ type full_t =
 	intro_out: output_t;
 	body_out: output_t >
 
-type editable_t =
-	< sid: Id.t;
-	author: User.handle_t;
-	title: string;
-	timestamp: Timestamp.t;
-	num_comments: Id.t;
-	intro_mrk: Markup.t;
-	intro_src: source_t;
-	intro_out: output_t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_out: output_t >
-
 type fresh_t =
 	< author: User.handle_t;
 	title: string;
 	timestamp: Timestamp.t;
-	intro_mrk: Markup.t;
-	intro_src: source_t;
-	intro_doc: composition_t;
-	intro_out: output_t;
-	body_mrk: Markup.t;
-	body_src: source_t;
-	body_doc: manuscript_t;
-	body_out: output_t >
-
-type changed_t =
-	< sid: Id.t;
-	author: User.handle_t;
-	title: string;
 	intro_mrk: Markup.t;
 	intro_src: source_t;
 	intro_doc: composition_t;
@@ -118,43 +92,11 @@ let make_full sid author title timestamp num_comments intro_out body_out =
 	end
 
 
-let make_editable sid author title timestamp num_comments intro_mrk intro_src intro_out body_mrk body_src body_out =
-	object
-		method sid = sid
-		method author = author
-		method title = title
-		method timestamp = timestamp
-		method num_comments = num_comments
-		method intro_mrk = intro_mrk
-		method intro_src = intro_src
-		method intro_out = intro_out
-		method body_mrk = body_mrk
-		method body_src = body_src
-		method body_out = body_out
-	end
-
-
 let make_fresh author title intro_mrk intro_src intro_doc intro_out body_mrk body_src body_doc body_out =
 	object
 		method author = author
 		method title = title
 		method timestamp = Timestamp.soon ()
-		method intro_mrk = intro_mrk
-		method intro_src = intro_src
-		method intro_doc = intro_doc
-		method intro_out = intro_out
-		method body_mrk = body_mrk
-		method body_src = body_src
-		method body_doc = body_doc
-		method body_out = body_out
-	end
-
-
-let make_changed sid author title intro_mrk intro_src intro_doc intro_out body_mrk body_src body_doc body_out =
-	object
-		method sid = sid
-		method author = author
-		method title = title
 		method intro_mrk = intro_mrk
 		method intro_src = intro_src
 		method intro_doc = intro_doc
