@@ -101,11 +101,9 @@ BEGIN
 			RETURN _login;
 		ELSE
 			RAISE EXCEPTION 'invalid_password';
-			RETURN NULL;
 		END IF;
 	ELSE
 		RAISE EXCEPTION 'unknown_nick';
-		RETURN NULL;
 	END IF;
 END
 $$;
@@ -132,7 +130,6 @@ BEGIN
 		RETURN _login;
 	ELSE
 		RAISE EXCEPTION 'unknown_uid';
-		RETURN NULL;
 	END IF;
 END
 $$;
@@ -422,11 +419,9 @@ BEGIN
                         RETURN;
                 ELSE
                         RAISE EXCEPTION 'invalid_password';
-                        RETURN;
                 END IF;
         ELSE
                 RAISE EXCEPTION 'unknown_uid';
-                RETURN;
         END IF;
 END
 $$;
