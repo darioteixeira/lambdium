@@ -103,13 +103,7 @@ let output_user_menu maybe_login sp =
 		in match maybe_login with
 			| Some login	-> personal_fragment login
 			| None		-> public_fragment ()
-	and varying_fragment =
-		let personal_fragment user = []
-		and public_fragment () = []
-		in match maybe_login with
-			| Some login	-> personal_fragment login
-			| None		-> public_fragment ()
-	in Lwt.return ("user_menu", [pcdata "User Menu"], session_fragment @ varying_fragment)
+	in Lwt.return ("user_menu", [pcdata "User Menu"], session_fragment)
 
 
 let output_header _ _ =
