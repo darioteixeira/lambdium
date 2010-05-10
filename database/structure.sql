@@ -42,8 +42,7 @@ CREATE TABLE users
 	user_id			user_id_t UNIQUE NOT NULL,
 	user_nick		text UNIQUE NOT NULL,
 	user_fullname		text NOT NULL,
-	user_password_salt	text NOT NULL,
-	user_password_hash	text NOT NULL,
+	user_password		text NOT NULL,
 	user_timezone_id	timezone_id_t REFERENCES timezones (timezone_id) NULL,
 	PRIMARY KEY (user_id)
 	);

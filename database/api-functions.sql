@@ -81,7 +81,6 @@ $$
 DECLARE
 	_target_nick            ALIAS FOR $1;
 	_target_password        ALIAS FOR $2;
-	_target_password_hash   text;
 	_actual_user            users%ROWTYPE;
 	_login			login_t;
 	_timezone		timezones%ROWTYPE;
@@ -93,8 +92,7 @@ BEGIN
 
 	IF FOUND
 	THEN
-		_target_password_hash := crypt (_target_password, _actual_user.user_password_salt);
-		IF _target_password_hash = _actual_user.user_password_hash
+		IF _actual_user.user_password = crypt (_target_password, _actual_user.user_password)
 		THEN
 			SELECT INTO _timezone * FROM timezones WHERE timezone_id = _actual_user.user_timezone_id;
 			_login := (_actual_user.user_id, _actual_user.user_nick, _timezone.timezone_name);
@@ -245,30 +243,28 @@ RETURNS user_id_t
 LANGUAGE plpgsql AS
 $$
 DECLARE
-        _user_nick              ALIAS FOR $1;
-        _user_fullname          ALIAS FOR $2;
-        _user_password          ALIAS FOR $3;
-        _user_timezone_id       ALIAS FOR $4;
-        _user_password_salt     text;
-        _user_password_hash     text;
+        _user_nick		ALIAS FOR $1;
+        _user_fullname		ALIAS FOR $2;
+        _user_password_clear	ALIAS FOR $3;
+        _user_timezone_id	ALIAS FOR $4;
+        _user_password_salt	text;
+        _user_password_hash	text;
 
 BEGIN
         _user_password_salt := gen_salt ('bf');
-        _user_password_hash := crypt (_user_password, _user_password_salt);
+        _user_password_hash := crypt (_user_password_clear, _user_password_salt);
 
         INSERT  INTO users
                         (
                         user_nick,
                         user_fullname,
-                        user_password_salt,
-                        user_password_hash,
+                        user_password,
                         user_timezone_id
                         )
                 VALUES
                         (
                         _user_nick,
                         _user_fullname,
-                        _user_password_salt,
                         _user_password_hash,
                         _user_timezone_id
                         );
@@ -400,21 +396,19 @@ DECLARE
         _old_password_hash      text;
 
 BEGIN
-        SELECT	INTO _actual_user *
+	SELECT	INTO _actual_user *
 		FROM users
 		WHERE user_id = _user_id;
 
-        IF FOUND
-        THEN
-                _old_password_hash := crypt (_old_password, _actual_user.user_password_salt);
-
-                IF _old_password_hash = _actual_user.user_password_hash
-                THEN
+	IF FOUND
+	THEN
+		IF _actual_user.user_password = crypt (_old_password, _actual_user.user_password)
+		THEN
                         _new_password_salt := gen_salt ('bf');
                         _new_password_hash := crypt (_new_password, _new_password_salt);
 
                         UPDATE  users
-                                SET (user_password_salt, user_password_hash) = (_new_password_salt, _new_password_hash)
+                                SET user_password = _new_password_hash
                                 WHERE user_id = _user_id;
                         RETURN;
                 ELSE
