@@ -135,7 +135,7 @@ Ajaxer.executeRequest = function (protocol, url, data, successHandler, errorHand
 
 	request.onreadystatechange = function ()
 		{
-		if (request.readyState == 4)
+		if (request.readyState === 4)
 			{
 			if (timer) {clearTimeout (timer);}
 
@@ -146,7 +146,7 @@ Ajaxer.executeRequest = function (protocol, url, data, successHandler, errorHand
 			var handler = errorHandler;
 
 			try	{
-				if (request.status == 200) {handler = successHandler;}
+				if (request.status === 200) {handler = successHandler;}
 				}
 			catch (e) {}
 

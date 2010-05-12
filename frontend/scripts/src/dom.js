@@ -56,7 +56,7 @@ Dom.getElementsByClassName = function (parentElem, tagName, className)
 Dom.getAncestor = function (elem, topElem, condition)
 
 	{
-	while ((elem != topElem) && !condition (elem))
+	while ((elem !== topElem) && !condition (elem))
 		{
 		elem = elem.parentNode;
 		}
@@ -89,7 +89,7 @@ Dom.getAncestorByTagName = function (elem, topElem, tagName)
 Dom.getAncestorByClassName = function (elem, topElem, className)
 
 	{
-	var condition = function (elem) {return ClassName.isMatch (elem, className);};
+	var condition = function (elem) {return className.isMatch (elem, className);};
 
 	return Dom.getAncestor (elem, topElem, condition);
 	};

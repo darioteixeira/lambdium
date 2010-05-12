@@ -7,7 +7,7 @@
  * Binds.
  */
 
-Function.prototype.bind = function ()
+Function.prototype.bind = function (object)
 
 	{
 	var method = this;

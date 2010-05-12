@@ -1,20 +1,16 @@
 SOURCES=jslint-options.js array.js bind.js evt.js dom.js obj.js node.js ajaxer.js previewer.js main.js
 TARGET=../main.js
-MIDDLE=../middle.js
 
 all: $(TARGET)
 
 lint: $(TARGET)
-	java -jar ~/software/rhino1_6R7/js.jar ~/software/jslint/jslint.js $<
+	java -jar ~/software/rhino1_7R2/js.jar ~/software/jslint/jslint.js $<
 
-comp: $(MIDDLE)
-	java -jar ~/software/yuicompressor-2.2.4/build/yuicompressor-2.2.4.jar --warn -o $(TARGET) $<
+comp: $(TARGET)
+	mv $(TARGET) tmp.js
+	java -jar ~/software/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar --charset utf-8 --warn tmp.js -o $(TARGET)
+	rm tmp.js
 
-$(TARGET): $(MIDDLE)
-	sed -e "s/^const/var/" -i $<
-	cp $< $@
-	unix2dos $@
-	
-$(MIDDLE): $(SOURCES) Makefile
+$(TARGET): $(SOURCES) Makefile
 	cat $(SOURCES) > $@
 

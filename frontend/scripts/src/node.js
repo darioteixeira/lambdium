@@ -12,7 +12,7 @@ Node.prototype.getNextSibling = function ()
 
 	{
 	var candidate = this.nextSibling;
-	while (candidate && (candidate.nodeType != Node.ELEMENT_NODE))
+	while (candidate && (candidate.nodeType !== Node.ELEMENT_NODE))
 		{
 		candidate = candidate.nextSibling;
 		}
@@ -29,7 +29,7 @@ Node.prototype.getFirstChild = function ()
 
 	{
 	var candidate = this.firstChild;
-	while (candidate && (candidate.nodeType != Node.ELEMENT_NODE))
+	while (candidate && (candidate.nodeType !== Node.ELEMENT_NODE))
 		{
 		candidate = candidate.nextSibling;
 		}
@@ -46,7 +46,7 @@ Node.prototype.getLastChild = function ()
 
 	{
 	var candidate = this.lastChild;
-	while (candidate && (candidate.nodeType != Node.ELEMENT_NODE))
+	while (candidate && (candidate.nodeType !== Node.ELEMENT_NODE))
 		{
 		candidate = candidate.previousSibling;
 		}

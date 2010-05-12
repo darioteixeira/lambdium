@@ -1,4 +1,5 @@
-/*jslint passfail: true, forin: true, evil: true */
+/*jslint browser:true, white:false, onevar:false, passfail:true, forin:true, evil:true, plusplus:false */
+/*global window:false, Node:false, ActiveXObject:false */
 /********************************************************************************/
 /* array.js									*/
 /* Various functions to handle arrays.						*/
@@ -54,7 +55,7 @@ Array.toArray = function (pseudoArray)
  * Binds.
  */
 
-Function.prototype.bind = function ()
+Function.prototype.bind = function (object)
 
 	{
 	var method = this;
@@ -317,7 +318,7 @@ Dom.getElementsByClassName = function (parentElem, tagName, className)
 Dom.getAncestor = function (elem, topElem, condition)
 
 	{
-	while ((elem != topElem) && !condition (elem))
+	while ((elem !== topElem) && !condition (elem))
 		{
 		elem = elem.parentNode;
 		}
@@ -350,7 +351,7 @@ Dom.getAncestorByTagName = function (elem, topElem, tagName)
 Dom.getAncestorByClassName = function (elem, topElem, className)
 
 	{
-	var condition = function (elem) {return ClassName.isMatch (elem, className);};
+	var condition = function (elem) {return className.isMatch (elem, className);};
 
 	return Dom.getAncestor (elem, topElem, condition);
 	};
@@ -415,7 +416,7 @@ Node.prototype.getNextSibling = function ()
 
 	{
 	var candidate = this.nextSibling;
-	while (candidate && (candidate.nodeType != Node.ELEMENT_NODE))
+	while (candidate && (candidate.nodeType !== Node.ELEMENT_NODE))
 		{
 		candidate = candidate.nextSibling;
 		}
@@ -432,7 +433,7 @@ Node.prototype.getFirstChild = function ()
 
 	{
 	var candidate = this.firstChild;
-	while (candidate && (candidate.nodeType != Node.ELEMENT_NODE))
+	while (candidate && (candidate.nodeType !== Node.ELEMENT_NODE))
 		{
 		candidate = candidate.nextSibling;
 		}
@@ -449,7 +450,7 @@ Node.prototype.getLastChild = function ()
 
 	{
 	var candidate = this.lastChild;
-	while (candidate && (candidate.nodeType != Node.ELEMENT_NODE))
+	while (candidate && (candidate.nodeType !== Node.ELEMENT_NODE))
 		{
 		candidate = candidate.previousSibling;
 		}
@@ -604,7 +605,7 @@ Ajaxer.executeRequest = function (protocol, url, data, successHandler, errorHand
 
 	request.onreadystatechange = function ()
 		{
-		if (request.readyState == 4)
+		if (request.readyState === 4)
 			{
 			if (timer) {clearTimeout (timer);}
 
@@ -615,7 +616,7 @@ Ajaxer.executeRequest = function (protocol, url, data, successHandler, errorHand
 			var handler = errorHandler;
 
 			try	{
-				if (request.status == 200) {handler = successHandler;}
+				if (request.status === 200) {handler = successHandler;}
 				}
 			catch (e) {}
 
