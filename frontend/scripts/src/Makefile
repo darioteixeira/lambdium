@@ -8,7 +8,7 @@ lint: $(TARGET)
 
 comp: $(TARGET)
 	mv $(TARGET) tmp.js
-	java -jar ~/software/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar --charset utf-8 --warn tmp.js -o $(TARGET)
+	java -jar ~/software/yuicompressor-2.4.2/build/yuicompressor-2.4.2.jar --charset UTF-8 tmp.js -o $(TARGET)
 	rm tmp.js
 
 $(TARGET): $(SOURCES) Makefile

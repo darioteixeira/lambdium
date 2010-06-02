@@ -1,6 +1,9 @@
 /********************************************************************************/
-/* previewer.js									*/
-/* Story and comment previews via Ajax.						*/
+/*	Previewer.js
+	Copyright (c) 2010 Dario Teixeira (dario.teixeira@yahoo.com)
+	This software is distributed under the terms of the GNU GPL version 2.
+	See LICENSE file for full license text.
+*/
 /********************************************************************************/
 
 /********************************************************************************/
@@ -11,9 +14,7 @@
  * Object (sort of) constructor.
  * Creates the "Preview" button and attaches an onclick handler to it.
  */
-
 function Previewer (form)
-
 	{
 	this.form = form;
 	this.submitBinding = this.submitHandler.bindAsEventListener (this);
@@ -24,15 +25,13 @@ function Previewer (form)
 /*
  * Object (sort of) destructor.
  */
-
 Previewer.prototype.finalise = function () {};
+
 
 /*
  * Submit handler.
  */
-
 Previewer.prototype.submitHandler = function (evt)
-
 	{
 	var target = Evt.getExplicitTarget (evt);
 
@@ -56,16 +55,14 @@ Previewer.prototype.submitHandler = function (evt)
 
 
 Previewer.prototype.successHandler = function (request)
-
 	{
-	var response = eval ('(' + request.responseText + ')');
+	var response = JSON.parse (request);
 	var container = this.getContainer ();
 	container.innerHTML = response.content;
 	};
 
 
 Previewer.prototype.errorHandler = function (request)
-
 	{
 	var container = this.getContainer ();
 	container.innerHTML = "<h1 class=\"error_msg\">Could not get preview!</h1>";
@@ -73,7 +70,6 @@ Previewer.prototype.errorHandler = function (request)
 
 
 Previewer.prototype.getContainer = function ()
-
 	{
 	var parentNode = this.form.parentNode;
 	var container = parentNode.getLastChild ();
@@ -102,9 +98,7 @@ Previewer.prototype.getContainer = function ()
 /*
  * Top-level setup function.
  */
-
 Previewer.setup = function ()
-
 	{
 	// Find out all forms that have "previewable" in their class name.
 	// For each one create a new Previewer object, which takes care of the rest.
@@ -117,12 +111,11 @@ Previewer.setup = function ()
 		}
 	};
 
+
 /*
  * Top-level finalise function.
  */
-
 Previewer.finalise = function ()
-
 	{
 	};
 

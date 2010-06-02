@@ -1,22 +1,23 @@
 /********************************************************************************/
-/* dom.js									*/
-/* This module takes care of all DOM-related activities.			*/
+/*	Dom.js
+	Copyright (c) 2010 Dario Teixeira (dario.teixeira@yahoo.com)
+	This software is distributed under the terms of the GNU GPL version 2.
+	See LICENSE file for full license text.
+*/
 /********************************************************************************/
 
 /*
  * Create the object to hold this module's namespace.
  */
-
 var Dom = {};
+
 
 /*
  * Returns all elements descendent from the parent element
  * which match a given tag, and have a certain attribute
  * with a given value.
  */
-
 Dom.getElementsByAttr = function (parentElem, tagName, attrName, value)
-
 	{
 	var candidateElems = parentElem.getElementsByTagName (tagName);
 	var matchingElems = [];
@@ -34,13 +35,12 @@ Dom.getElementsByAttr = function (parentElem, tagName, attrName, value)
 	return matchingElems;
 	};
 
+
 /*
  * Returns all elements descendent from the parent element
  * which match a given tag and class name.
  */
-
 Dom.getElementsByClassName = function (parentElem, tagName, className)
-
 	{
 	return Dom.getElementsByAttr (parentElem, tagName, "className", className);
 	};
@@ -52,9 +52,7 @@ Dom.getElementsByClassName = function (parentElem, tagName, className)
  * (which can be set to 'document', for example).
  * If no matching ancestor is found, returns top ancestor.
  */
-
 Dom.getAncestor = function (elem, topElem, condition)
-
 	{
 	while ((elem !== topElem) && !condition (elem))
 		{
@@ -64,20 +62,20 @@ Dom.getAncestor = function (elem, topElem, condition)
 	return elem;
 	};
 
+
 /*
  * Returns the ancestor with a given tag.
  * The search must be delimited by a given top ancestor
  * (which can be set to 'document', for example).
  * If no matching ancestor is found, returns top ancestor.
  */
-
 Dom.getAncestorByTagName = function (elem, topElem, tagName)
-
 	{
 	var condition = function (elem) {return elem.nodeName === tagName;};
 
 	return Dom.getAncestor (elem, topElem, condition);
 	};
+
 
 /*
  * Returns the ancestor prefixed with the given class name.
@@ -85,9 +83,7 @@ Dom.getAncestorByTagName = function (elem, topElem, tagName)
  * (which can be set to 'document', for example).
  * If no matching ancestor is found, returns top ancestor.
  */
-
 Dom.getAncestorByClassName = function (elem, topElem, className)
-
 	{
 	var condition = function (elem) {return className.isMatch (elem, className);};
 
