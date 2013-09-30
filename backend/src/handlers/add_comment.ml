@@ -24,15 +24,24 @@ let rec step1_handler sp () (sid, (title, (body_mrk, body_src))) =
 		let body_out = Document.output_of_composition ~sp ~path:[] body_doc in
 		let author = Login.to_user login in
 		let comment = Comment.make_fresh sid author title body_mrk body_src body_doc body_out in
+		let path_maker cid = [!Config.comment_dir; Comment.Id.to_string cid] in
+		let output_maker cid =
+			let path = path_maker cid
+			in Document.serialise_output (Document.output_of_composition ~sp ~path comment#body_doc) in
+		Database.add_comment ~output_maker comment >>= fun cid ->
+		Status.success ~sp [pcdata "Comment has been added!"] [];
+		Show_comment.handler sp cid ()
+
+
 		let step2_service = Eliom_predefmod.Xhtml.register_new_post_coservice_for_session
 			~sp
 			~fallback: !!Services.add_comment_fallback
 			~post_params: (Forms.Previewable.param ** Params.add_comment)
-			(step2_handler comment) in
+			(step2_handler ~comment) in
 		Forms.Previewable.make_form
 			~service: step2_service
 			~sp
-			~content: (Comment_io.form_for_incipient ~sid ~comment:(comment :> Comment.incipient_t))
+			~content: (Comment_io.form_for_incipient ~comment:(comment :> Comment.incipient_t))
 			() >>= fun form ->
 		Lwt.return [Comment_io.output_fresh (Some login) sp comment; form]
 	in Page.login_enforced_handler
@@ -42,7 +51,7 @@ let rec step1_handler sp () (sid, (title, (body_mrk, body_src))) =
 		()
 
 
-and step2_handler comment sp () (action, (sid, (title, body))) =
+and step2_handler ~comment sp () (action, (sid, (title, body))) =
 	match action with
 		| `Preview ->
 			step1_handler sp () (sid, (title, body))
